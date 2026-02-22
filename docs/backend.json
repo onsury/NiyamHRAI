@@ -1,0 +1,668 @@
+{
+  "entities": {
+    "Organization": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Organization",
+      "type": "object",
+      "description": "Represents a single organization within the NiyamAI platform, serving as the root for all organizational data.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Organization entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the organization."
+        },
+        "industry": {
+          "type": "string",
+          "description": "The industry sector the organization operates within."
+        },
+        "employeeCount": {
+          "type": "number",
+          "description": "The total number of employees in the organization."
+        },
+        "tier": {
+          "type": "string",
+          "description": "The subscription tier or plan level of the organization (e.g., 'Starter', 'Growth', 'Enterprise')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the organization record was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "industry",
+        "employeeCount",
+        "tier",
+        "createdAt"
+      ]
+    },
+    "FounderDNA": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FounderDNA",
+      "type": "object",
+      "description": "Captures the founder's core behavioral persona, vision, and strategic principles, forming the benchmark for employee alignment.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the FounderDNA entity."
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to the Organization this FounderDNA belongs to. (Relationship: Organization 1:1 FounderDNA)"
+        },
+        "philosophy": {
+          "type": "string",
+          "description": "The founder's core philosophy, vision, or manifesto statement that guides the organization."
+        },
+        "signatureTraits": {
+          "type": "array",
+          "description": "A list of key behavioral traits identified as core to the founder's persona, each with a specific score and description.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "negativeConstraints": {
+          "type": "array",
+          "description": "A list of behaviors, actions, or principles the organization should explicitly avoid or never compromise on.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "riskAppetite": {
+          "type": "number",
+          "description": "A score (0-100) representing the founder's general appetite for organizational risk."
+        },
+        "innovationBias": {
+          "type": "number",
+          "description": "A score (0-100) representing the founder's bias and emphasis towards innovation."
+        },
+        "diagnosticComplete": {
+          "type": "boolean",
+          "description": "Indicates if the founder diagnostic process, including AI probing and review, has been fully completed."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of the last update to the FounderDNA record.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "philosophy",
+        "signatureTraits",
+        "negativeConstraints",
+        "riskAppetite",
+        "innovationBias",
+        "diagnosticComplete",
+        "updatedAt"
+      ]
+    },
+    "CompetencyFrameworkCluster": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CompetencyFrameworkCluster",
+      "type": "object",
+      "description": "Defines a cluster within the 67-trait behavioral framework, detailing the traits and their general benchmarks/weights.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CompetencyFrameworkCluster entity (e.g., 'strategic-thinking')."
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to the Organization this competency framework cluster belongs to. (Relationship: Organization 1:N CompetencyFrameworkCluster)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The descriptive name of the behavioral cluster (e.g., 'Strategic Thinking')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief explanation of what this behavioral cluster represents."
+        },
+        "traits": {
+          "type": "array",
+          "description": "A list of individual behavioral traits categorized under this cluster, including their general descriptions, founder benchmarks, and industry weights.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "name",
+        "description",
+        "traits"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents an individual user of the NiyamAI platform, including their profile information and organizational context.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to the Organization the user belongs to. (Relationship: Organization 1:N User)"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name."
+        },
+        "role": {
+          "type": "string",
+          "description": "The designated role of the user within the application (FOUNDER, EMPLOYEE, MANAGER, HR_ADMIN)."
+        },
+        "department": {
+          "type": "string",
+          "description": "The department or team the employee belongs to."
+        },
+        "level": {
+          "type": "string",
+          "description": "The seniority or experience level of the employee (TOP, SENIOR, MIDDLE, KEY, GENERAL)."
+        },
+        "managerId": {
+          "type": "string",
+          "description": "Reference to the unique identifier of the user's direct manager. (Relationship: User 1:N User (self-referencing))"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to the user's profile photograph or avatar.",
+          "format": "uri"
+        },
+        "onboarded": {
+          "type": "boolean",
+          "description": "A flag indicating if the user has completed their initial onboarding process."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created.",
+          "format": "date-time"
+        },
+        "lastActive": {
+          "type": "string",
+          "description": "Timestamp of the user's last active session in the application.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "email",
+        "displayName",
+        "role",
+        "onboarded",
+        "createdAt",
+        "lastActive"
+      ]
+    },
+    "EmployeeDNA": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EmployeeDNA",
+      "type": "object",
+      "description": "Represents an employee's current behavioral signature, including their mapped traits, synergy score, and areas of drift.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the EmployeeDNA entity. (Typically 'current' for a user's active DNA record)."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User this EmployeeDNA belongs to. (Relationship: User 1:1 EmployeeDNA)"
+        },
+        "selectedTraits": {
+          "type": "array",
+          "description": "A list of specific behavioral traits mapped to the employee, along with their current scores, founder benchmarks, and descriptions.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "synergyScore": {
+          "type": "number",
+          "description": "A quantitative score (0-100) representing the employee's alignment with the founder's CorePersonaDNA."
+        },
+        "alignmentSummary": {
+          "type": "string",
+          "description": "An AI-generated summary providing an overview of the employee's current alignment status."
+        },
+        "driftAreas": {
+          "type": "array",
+          "description": "A list of behavioral areas or traits where the employee's DNA shows significant deviation or 'drift' from the founder's benchmark.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "traitCount": {
+          "type": "number",
+          "description": "The number of traits currently mapped for this employee, dynamically determined by their seniority level."
+        },
+        "version": {
+          "type": "number",
+          "description": "A version number tracking updates and iterations of the employee's DNA profile."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of the last update to the EmployeeDNA record.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "selectedTraits",
+        "synergyScore",
+        "alignmentSummary",
+        "driftAreas",
+        "traitCount",
+        "version",
+        "updatedAt"
+      ]
+    },
+    "DNAHistorySnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DNAHistorySnapshot",
+      "type": "object",
+      "description": "Captures a historical snapshot of an employee's Persona DNA at a specific point in time, enabling tracking of changes and progress.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DNAHistorySnapshot entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User whose DNA snapshot this is. (Relationship: User 1:N DNAHistorySnapshot)"
+        },
+        "dnaSnapshot": {
+          "type": "string",
+          "description": "A complete copy of the EmployeeDNA document's relevant fields at the time this snapshot was taken. (Relationship: Embedded EmployeeDNA fields)"
+        },
+        "synergyScore": {
+          "type": "number",
+          "description": "The synergy score recorded at the time of this snapshot."
+        },
+        "trigger": {
+          "type": "string",
+          "description": "The event or action that prompted the creation of this DNA snapshot (e.g., 'onboarding', 'check-in', 'honing-session', 'manual-update')."
+        },
+        "delta": {
+          "type": "number",
+          "description": "The change in synergy score compared to the immediately preceding DNA snapshot."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp when this DNA snapshot was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "dnaSnapshot",
+        "synergyScore",
+        "trigger",
+        "timestamp"
+      ]
+    },
+    "CheckIn": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CheckIn",
+      "type": "object",
+      "description": "Records an employee's periodic check-in, including their reflections and AI-generated mentorship insights.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CheckIn entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who performed this check-in. (Relationship: User 1:N CheckIn)"
+        },
+        "reflection": {
+          "type": "string",
+          "description": "The employee's free-text reflection or thoughts for the check-in period."
+        },
+        "aiMentorship": {
+          "type": "string",
+          "description": "AI-generated personalized mentorship feedback and guidance based on the reflection and the employee's DNA."
+        },
+        "alignmentScore": {
+          "type": "number",
+          "description": "A score (0-100) indicating the employee's behavioral alignment with founder DNA based on this specific check-in."
+        },
+        "burnoutFlag": {
+          "type": "boolean",
+          "description": "A flag indicating if AI analysis detected potential burnout risk based on the reflection content."
+        },
+        "sentiment": {
+          "type": "string",
+          "description": "AI-analyzed sentiment of the employee's reflection (e.g., 'positive', 'neutral', 'negative')."
+        },
+        "cadenceType": {
+          "type": "string",
+          "description": "The configured cadence type for this check-in (e.g., 'weekly', 'fortnightly', 'monthly')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this check-in record was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "reflection",
+        "aiMentorship",
+        "alignmentScore",
+        "burnoutFlag",
+        "sentiment",
+        "cadenceType",
+        "createdAt"
+      ]
+    },
+    "HoningSession": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "HoningSession",
+      "type": "object",
+      "description": "Stores details and outcomes of an employee's personalized neural honing lab simulation session.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the HoningSession entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who participated in this honing session. (Relationship: User 1:N HoningSession)"
+        },
+        "traitName": {
+          "type": "string",
+          "description": "The name of the specific behavioral trait that was the focus of this honing session."
+        },
+        "scenario": {
+          "type": "string",
+          "description": "Details of the AI-generated scenario presented to the employee for the session."
+        },
+        "userResponse": {
+          "type": "string",
+          "description": "The employee's free-text response or action taken in the simulated scenario."
+        },
+        "evaluation": {
+          "type": "string",
+          "description": "AI-generated evaluation and feedback on the employee's response within the scenario."
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Indicates if the honing session has been fully completed and evaluated."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this honing session record was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "traitName",
+        "scenario",
+        "userResponse",
+        "evaluation",
+        "completed",
+        "createdAt"
+      ]
+    },
+    "OrgAnalytics": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrgAnalytics",
+      "type": "object",
+      "description": "Aggregates and stores organization-wide neural insights, metrics, and AI-driven strategic recommendations for HR administrators.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OrgAnalytics entity."
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to the Organization this analytics data belongs to. (Relationship: Organization 1:1 OrgAnalytics)"
+        },
+        "avgEngagementScore": {
+          "type": "number",
+          "description": "The calculated average engagement score across all employees in the organization (0-100)."
+        },
+        "burnoutRiskLevel": {
+          "type": "string",
+          "description": "The overall burnout risk assessment for the organization (e.g., 'Low', 'Medium', 'High')."
+        },
+        "topSkills": {
+          "type": "array",
+          "description": "A list of the most prevalent and impactful skills identified across the organization.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "strategicRecommendations": {
+          "type": "array",
+          "description": "AI-generated strategic recommendations derived from organizational data analysis.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "teamHealthSummaries": {
+          "type": "array",
+          "description": "Summaries of health and alignment status for individual teams within the organization.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "citations": {
+          "type": "array",
+          "description": "Citations or references from external HR sources used by AI for grounding insights and benchmarks.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of the last update to the organizational analytics data.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "avgEngagementScore",
+        "burnoutRiskLevel",
+        "topSkills",
+        "strategicRecommendations",
+        "teamHealthSummaries",
+        "citations",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/organizations/{orgId}",
+        "definition": {
+          "entityName": "Organization",
+          "schema": {
+            "$ref": "#/backend/entities/Organization"
+          },
+          "description": "Root collection for all organizational data. Access is controlled by `request.auth.uid`'s `organizationId` and `role`. Only the FOUNDER of the organization can write to the top-level document's core fields.",
+          "params": [
+            {
+              "name": "orgId",
+              "description": "The unique identifier for the organization."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{orgId}/founderDNA/current",
+        "definition": {
+          "entityName": "FounderDNA",
+          "schema": {
+            "$ref": "#/backend/entities/FounderDNA"
+          },
+          "description": "Stores the founder's core persona DNA for a specific organization. This is a single document per organization. Only the FOUNDER of this organization can write; all authenticated users within the organization can read. Includes denormalized 'organizationId' implicitly via path.",
+          "params": [
+            {
+              "name": "orgId",
+              "description": "The unique identifier for the organization."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{orgId}/competencyFramework/{clusterId}",
+        "definition": {
+          "entityName": "CompetencyFrameworkCluster",
+          "schema": {
+            "$ref": "#/backend/entities/CompetencyFrameworkCluster"
+          },
+          "description": "Defines the 67-trait behavioral framework, categorized into 8 clusters, specific to an organization. These documents are read-only for all authenticated users within the organization. Writes are typically managed by Cloud Functions or the FOUNDER role. Includes denormalized 'organizationId' implicitly via path.",
+          "params": [
+            {
+              "name": "orgId",
+              "description": "The unique identifier for the organization."
+            },
+            {
+              "name": "clusterId",
+              "description": "The unique identifier for a competency framework cluster (e.g., 'strategic-thinking')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{orgId}/orgAnalytics/current",
+        "definition": {
+          "entityName": "OrgAnalytics",
+          "schema": {
+            "$ref": "#/backend/entities/OrgAnalytics"
+          },
+          "description": "Stores aggregated, AI-generated organizational analytics and strategic recommendations. This is a single document per organization. Only HR_ADMIN and FOUNDER of this organization can read. All writes are handled via Cloud Functions. Includes denormalized 'organizationId' implicitly via path.",
+          "params": [
+            {
+              "name": "orgId",
+              "description": "The unique identifier for the organization."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profiles, including their `organizationId`, `role`, and `managerId`. This document is central for authorization: owners can read/write their own, managers can read their direct reports, and HR_ADMIN/FOUNDER can read all users within their `organizationId`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user (matching Firebase Auth UID)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/employeeDNA/current",
+        "definition": {
+          "entityName": "EmployeeDNA",
+          "schema": {
+            "$ref": "#/backend/entities/EmployeeDNA"
+          },
+          "description": "Represents an employee's current behavioral signature. This is a single document per user. Owned by the user, with most fields AI-generated and written via Cloud Functions. Includes denormalized 'organizationId' and 'managerId' (of the owning user) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user who owns this DNA profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/dnaHistory/{snapshotId}",
+        "definition": {
+          "entityName": "DNAHistorySnapshot",
+          "schema": {
+            "$ref": "#/backend/entities/DNAHistorySnapshot"
+          },
+          "description": "Captures historical snapshots of an employee's DNA for tracking progress. Owned by the user. Writes are exclusively via Cloud Functions. Includes denormalized 'organizationId' and 'managerId' (of the owning user) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user whose DNA snapshot this is."
+            },
+            {
+              "name": "snapshotId",
+              "description": "The unique identifier for a specific DNA history snapshot."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/checkIns/{checkInId}",
+        "definition": {
+          "entityName": "CheckIn",
+          "schema": {
+            "$ref": "#/backend/entities/CheckIn"
+          },
+          "description": "Records an employee's periodic reflections and AI-generated mentorship. Owned by the user for write access (reflection field). Managers, HR_ADMIN, and FOUNDER have read access based on `organizationId` and `managerId` relationships. Includes denormalized 'organizationId' and 'managerId' (of the owning user) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user who performed this check-in."
+            },
+            {
+              "name": "checkInId",
+              "description": "The unique identifier for a specific check-in record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/honingSessions/{sessionId}",
+        "definition": {
+          "entityName": "HoningSession",
+          "schema": {
+            "$ref": "#/backend/entities/HoningSession"
+          },
+          "description": "Stores details and outcomes of employee's neural honing lab simulations. Owned by the user for write access (userResponse field). Managers, HR_ADMIN, and FOUNDER have read access. Writes of AI-generated fields are via Cloud Functions. Includes denormalized 'organizationId' and 'managerId' (of the owning user) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user who participated in this honing session."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier for a specific honing session record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed with a strong emphasis on Authorization Independence, Structural Segregation, and clear Access Modeling, directly addressing the core design principles and strategy mandates. \n\n**Authorization Independence via Denormalization (Mandate A):**\nTo strictly avoid hierarchical authorization dependencies (i.e., `get()` calls on parent documents within security rules for subcollections), key authorization context is denormalized. Each user-specific subcollection document (`employeeDNA`, `dnaHistory`, `checkIns`, `honingSessions`) will include the `organizationId` and the `managerId` of the user who owns that document, alongside the `userId` inherent in its path. This ensures that a security rule evaluating access to, for example, `/users/{userId}/checkIns/{checkInId}` can directly check `request.auth.uid` against `checkInId.userId` (for owner), `checkInId.managerId` (for manager), and `checkInId.organizationId` (for HR/Founder) without needing to perform a `get()` operation on the `/users/{userId}` parent document. While the schema provided does not explicitly list `organizationId` or `managerId` within these subcollection entities, the *implementation* (via Cloud Functions on creation/update) will ensure these fields are present in the stored Firestore documents to enable robust security rules.\n\n**Structural Segregation (Mandate B):**\nEach collection and subcollection (`organizations`, `users`, `competencyFramework`, `founderDNA`, `orgAnalytics`, `employeeDNA`, `dnaHistory`, `checkIns`, `honingSessions`) is designed to have a homogeneous security posture. For instance, all documents within `organizations/{orgId}/competencyFramework/{clusterId}` share the same read-only access rules for members of the `orgId`. Similarly, all documents in `users/{userId}/checkIns/{checkInId}` have consistent access requirements (owner write, specific roles read).\n\n**QAPs (Rules are not Filters):**\nThis denormalization strategy, combined with structural segregation, is crucial for enabling secure and efficient `list` operations (QAPs). \n\n1.  **For User-Owned Data (e.g., `checkIns`):** An employee can list their own check-ins (`/users/{request.auth.uid}/checkIns`). A manager can list *their direct reports'* check-ins by performing a query like `db.collection('users').where('managerId', '==', request.auth.uid)` to get the `userId`s, and then for each `userId`, query `db.collection('users').doc(userId).collection('checkIns')`. Crucially, with `managerId` denormalized into the `checkIn` documents, a manager could potentially query `db.collectionGroup('checkIns').where('managerId', '==', request.auth.uid)` (though collection group queries have performance considerations for very large datasets). The security rules for the `checkIns` collection can then directly evaluate `resource.data.managerId == request.auth.uid`, making `list` operations secure without filtering results *after* they're fetched from the database.\n2.  **For Organizational Data (e.g., `founderDNA`, `competencyFramework`):** Access is primarily determined by the `organizationId` of the authenticated user, which is readily available in their own `users/{userId}` document. Rules will check if `request.auth.uid` belongs to the `orgId` in question (e.g., `get(/users/$(request.auth.uid)).data.organizationId == orgId`), allowing for secure `list` and `get` operations for all authorized users within that organization.\n\n**DBAC (No Custom Claims):** User roles (`FOUNDER`, `EMPLOYEE`, `MANAGER`, `HR_ADMIN`) and their `organizationId` are explicitly stored in the `/users/{userId}` document, serving as the central source for role-based access control. All security rules will rely on `request.auth.uid` and fetch the user's role and `organizationId` from their respective `/users/{userId}` document. For subcollections, the denormalized `organizationId` and `managerId` fields further reduce the need for `get()` calls, directly supporting `request.auth.uid` based authorization."
+  }
+}

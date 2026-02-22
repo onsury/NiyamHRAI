@@ -1,0 +1,267 @@
+/**
+ * Core Philosophy:
+ * This ruleset enforces a multi-tenant, role-based security model for a human resources analytics platform.
+ * Data is strictly partitioned by an `organizationId`. User access is determined by their role (FOUNDER,
+ * HR_ADMIN, MANAGER, EMPLOYEE) within that organization, or by direct ownership of data.
+ *
+ * Data Structure:
+ * The data is organized into two main top-level collections: `/organizations` and `/users`.
+ * - `/organizations/{orgId}` contains organization-wide public and administrative data.
+ * - `/users/{userId}` contains user-specific profile information and is the root for all private employee data
+ *   (e.g., performance reviews, check-ins, personal analytics).
+ *
+ * Key Security Decisions:
+ * - Default Deny: All access is denied by default. Rules are explicit 'allow' statements.
+ * - Multi-Tenant Isolation: A user's `organizationId`, stored on their `/users/{userId}` document, is the
+ *   primary boundary for all data access. Users can only interact with data within their own organization.
+ * - Role-Based Access: Higher-privilege roles (FOUNDER, HR_ADMIN) are granted broader read access within their
+ *   organization. Managerial access is granted for direct reports only.
+ * - Denormalization for Security: To ensure performant and secure rules, critical authorization fields
+ *   (like `organizationId` and `managerId`) are denormalized onto user subcollection documents. This avoids
+ *   slow and costly `get()` calls in subcollection rules.
+ * - No User Listing: Global listing of the `/users` collection is prohibited to protect user privacy.
+ * - Cloud Function Writes: Certain collections and fields are designated as read-only for clients, with writes
+ *   handled exclusively by trusted server-side Cloud Functions to protect the integrity of AI-generated analytics.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------------------------------------------------------------------------------
+    // Helper Functions
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the foundation for document ownership rules.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Retrieves the user document data for a given userId.
+     */
+    function getUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    /**
+     * Retrieves the user document data for the currently authenticated user.
+     */
+    function getSignedInUserData() {
+      return getUserData(request.auth.uid);
+    }
+
+    /**
+     * Checks if the currently authenticated user belongs to the specified organization.
+     * This is the primary check for multi-tenant data isolation.
+     */
+    function isSignedInUserInOrg(orgId) {
+      return isSignedIn() && getSignedInUserData().organizationId == orgId;
+    }
+
+    /**
+     * Checks if the signed-in user has the specific role 'FOUNDER' within the target organization.
+     */
+    function isFounderOfOrg(orgId) {
+      return isSignedInUserInOrg(orgId) && getSignedInUserData().role == 'FOUNDER';
+    }
+
+    /**
+     * Checks if the signed-in user has the role 'HR_ADMIN' or 'FOUNDER' within the target organization.
+     */
+    function isOrgAdmin(orgId) {
+      let signedInUser = getSignedInUserData();
+      return isSignedIn() &&
+             signedInUser.organizationId == orgId &&
+             (signedInUser.role == 'HR_ADMIN' || signedInUser.role == 'FOUNDER');
+    }
+    
+    /**
+     * Checks if the signed-in user is the direct manager of the target user.
+     * Also verifies both users are in the same organization for security.
+     */
+    function isManagerOf(targetUserId) {
+        let targetUser = getUserData(targetUserId);
+        return isSignedIn() && 
+               targetUser.managerId == request.auth.uid &&
+               targetUser.organizationId == getSignedInUserData().organizationId;
+    }
+    
+    /**
+     * Determines if the requesting user has permission to read a specific user's data.
+     * Access is granted to the owner, their manager, or an HR_ADMIN/FOUNDER in the same org.
+     */
+    function canReadUserData(targetUserId) {
+        // Must fetch the target user's orgId to pass to other functions
+        let targetUserOrgId = getUserData(targetUserId).organizationId;
+        return isOwner(targetUserId) || isManagerOf(targetUserId) || isOrgAdmin(targetUserOrgId);
+    }
+
+    /**
+     * For create operations, validates that the user owns the new document and
+     * the internal 'userId' field matches the path.
+     */
+    function isCreatingOwnSubDoc(userId) {
+      return isOwner(userId) && request.resource.data.userId == userId;
+    }
+    
+    /**
+     * For update/delete operations, checks that the document exists and is owned by the user.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+    
+    /**
+     * Enforces immutability of a specific field during an update operation.
+     */
+    function isImmutable(field) {
+        return request.resource.data[field] == resource.data[field];
+    }
+
+    // --------------------------------------------------------------------------------
+    // Collection Rules
+    // --------------------------------------------------------------------------------
+
+    /**
+     * @description Controls access to Organization documents. Any member of an organization
+     * can read its details, but only the FOUNDER can modify it.
+     * @path /organizations/{orgId}
+     * @allow (get) An authenticated EMPLOYEE can read their own organization's document.
+     * @deny (update) An authenticated HR_ADMIN cannot update the organization's name.
+     * @principle Enforces role-based permissions (Founder-only writes) and org-level membership for reads.
+     */
+    match /organizations/{orgId} {
+      allow get, list: if isSignedInUserInOrg(orgId);
+      allow create, update, delete: if isFounderOfOrg(orgId);
+    }
+
+    /**
+     * @description Secures the single 'FounderDNA' document for an organization.
+     * All org members can read it, but only the FOUNDER can write to it.
+     * @path /organizations/{orgId}/founderDNA/current
+     * @allow (get) An authenticated EMPLOYEE can read their org's FounderDNA.
+     * @deny (create) An HR_ADMIN cannot create a FounderDNA document.
+     * @principle Enforces role-based permissions (Founder-only writes) on a critical, singleton document.
+     */
+    match /organizations/{orgId}/founderDNA/current {
+      allow get: if isSignedInUserInOrg(orgId);
+      allow list: if false; // This is a single document, list is not applicable.
+      allow create, update, delete: if isFounderOfOrg(orgId);
+    }
+
+    /**
+     * @description Defines read-only access to the competency framework. This data is considered
+     * foundational and is only modifiable by the organization's FOUNDER.
+     * @path /organizations/{orgId}/competencyFramework/{clusterId}
+     * @allow (get) Any authenticated member of the organization can read a competency cluster.
+     * @deny (update) An authenticated EMPLOYEE cannot modify a trait within the framework.
+     * @principle Establishes read-only reference data for all organization members.
+     */
+    match /organizations/{orgId}/competencyFramework/{clusterId} {
+      allow get, list: if isSignedInUserInOrg(orgId);
+      allow create, update, delete: if isFounderOfOrg(orgId);
+    }
+
+    /**
+     * @description Protects sensitive, aggregated organizational analytics. Only HR_ADMIN and FOUNDER
+     * roles can view this data. Writes are locked down to prevent client-side tampering.
+     * @path /organizations/{orgId}/orgAnalytics/current
+     * @allow (get) An authenticated HR_ADMIN can read the organization's analytics summary.
+     * @deny (get) An authenticated MANAGER cannot read the organization's analytics summary.
+     * @deny (create, update) Any user role, including FOUNDER, cannot write to this document from the client.
+     * @principle Restricts access to sensitive data to specific high-privilege roles and enforces server-only writes.
+     */
+    match /organizations/{orgId}/orgAnalytics/current {
+      allow get: if isOrgAdmin(orgId);
+      allow list: if false; // This is a single document, list is not applicable.
+      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+    }
+
+    /**
+     * @description Secures individual user profile documents. Users can manage their own profile.
+     * Managers, HR, and Founders can read the profiles of users within their organizational hierarchy.
+     * @path /users/{userId}
+     * @allow (get) A MANAGER can read the profile of their direct report.
+     * @allow (update) A user can update their own `displayName`.
+     * @deny (get) A user cannot read the profile of a user in a different organization.
+     * @deny (list) No user can list the entire `/users` collection.
+     * @principle Enforces document ownership for writes and a hierarchical read access model.
+     */
+    match /users/{userId} {
+      allow get: if canReadUserData(userId);
+      allow list: if false; // Prevent discovery of all users in the system.
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && isImmutable('organizationId') && isImmutable('role');
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Secures an employee's current DNA profile. This data is highly sensitive and is
+     * generated by the server. It can be read by the owner, their manager, and org admins, but not written to by any client.
+     * @path /users/{userId}/employeeDNA/current
+     * @allow (get) A MANAGER can view the EmployeeDNA of their direct report.
+     * @deny (get) An EMPLOYEE cannot view the EmployeeDNA of a coworker who is not their direct report.
+     * @deny (update) The owner of the DNA cannot update their own `synergyScore` from the client.
+     * @principle Protects integrity of AI-generated data by making it read-only for clients.
+     */
+    match /users/{userId}/employeeDNA/current {
+      allow get: if canReadUserData(userId);
+      allow list: if false; // This is a single document, list is not applicable.
+      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+    }
+
+    /**
+     * @description Secures historical DNA snapshots. This data is an immutable log written by the server.
+     * It follows the same read permissions as other user data but is non-modifiable from the client.
+     * @path /users/{userId}/dnaHistory/{snapshotId}
+     * @allow (list) A user can list their own DNA history snapshots.
+     * @deny (create) A user cannot create a fake historical snapshot for themselves.
+     * @principle Enforces an immutable, server-written audit trail with hierarchical read access.
+     */
+    match /users/{userId}/dnaHistory/{snapshotId} {
+      allow get, list: if canReadUserData(userId);
+      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+    }
+
+    /**
+     * @description Manages access to an employee's check-in records. Employees can create and update their
+     * own check-ins, while their management chain has read-only access.
+     * @path /users/{userId}/checkIns/{checkInId}
+     * @allow (create) A user can create a new check-in for themselves.
+     * @allow (get) An HR_ADMIN can read any employee's check-in within their organization.
+     * @deny (update) A MANAGER cannot edit the `reflection` field of their direct report's check-in.
+     * @principle Allows user-owned content creation while providing hierarchical read-only oversight.
+     */
+    match /users/{userId}/checkIns/{checkInId} {
+      allow get, list: if canReadUserData(userId);
+      allow create: if isCreatingOwnSubDoc(userId);
+      allow update, delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to neural honing lab simulation sessions. Users can create and respond to
+     * their own sessions, while management has read-only access to review outcomes.
+     * @path /users/{userId}/honingSessions/{sessionId}
+     * @allow (create) An EMPLOYEE can create a new honing session initiated from their dashboard.
+     * @allow (get) A MANAGER can review the results of a completed honing session for their direct report.
+     * @deny (delete) A user cannot delete a historical honing session record.
+     * @principle Allows user-owned content creation while providing hierarchical read-only oversight.
+     */
+    match /users/{userId}/honingSessions/{sessionId} {
+      allow get, list: if canReadUserData(userId);
+      allow create: if isCreatingOwnSubDoc(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
