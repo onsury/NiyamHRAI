@@ -216,8 +216,10 @@ service cloud.firestore {
      */
     match /users/{userId}/employeeDNA/current {
       allow get: if canReadUserData(userId);
-      allow list: if false; // This is a single document, list is not applicable.
-      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+      allow list: if false;
+      // MVP Rule: Allow owner to write directly. Move to Cloud Function for production.
+      allow create, update: if isOwner(userId);
+      allow delete: if false;
     }
 
     /**
@@ -230,7 +232,9 @@ service cloud.firestore {
      */
     match /users/{userId}/dnaHistory/{snapshotId} {
       allow get, list: if canReadUserData(userId);
-      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+      // MVP Rule: Allow owner to create snapshots. Move to Cloud Function for production.
+      allow create: if isCreatingOwnSubDoc(userId);
+      allow update, delete: if false;
     }
 
     /**
@@ -244,7 +248,9 @@ service cloud.firestore {
      */
     match /users/{userId}/checkIns/{checkInId} {
       allow get, list: if canReadUserData(userId);
-      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
+      // MVP Rule: Allow owner to create check-ins. AI mentorship fields should be written by a trusted source.
+      allow create: if isCreatingOwnSubDoc(userId);
+      allow update, delete: if false;
     }
 
     /**
