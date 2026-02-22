@@ -5,3 +5,16 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+# Defines a location for a Cloud Functions server to which traffic can be routed.
+# This is required for a Cloud Function integration. The value of `id` can be 
+# anything and is used to identify the backend in the App Hosting configuration.
+backends:
+  - id: functions
+    region: us-central1
+# Routes requests to the specified backend based on the path. In this case, any
+# traffic that is not matched by a static file will be sent to the Cloud Functions
+# server.
+rewrites:
+  - source: /.*
+    backend:
+      backendId: functions

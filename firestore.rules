@@ -244,8 +244,7 @@ service cloud.firestore {
      */
     match /users/{userId}/checkIns/{checkInId} {
       allow get, list: if canReadUserData(userId);
-      allow create: if isCreatingOwnSubDoc(userId);
-      allow update, delete: if isExistingOwner(userId);
+      allow create, update, delete: if false; // Writes are handled exclusively by Cloud Functions.
     }
 
     /**
