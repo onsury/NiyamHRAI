@@ -1,40 +1,22 @@
-import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
-import { cn } from "@/lib/utils";
-import { FirebaseClientProvider } from "@/firebase/client-provider";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-});
+import type { Metadata } from 'next';
+import { AuthProvider } from '@/lib/auth-context';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "NiyamAI - Neural Alignment Engine",
-  description:
-    "Niyam is the first Neural Alignment Engine for enterprises. We synchronize employee behavioral signatures with the founder's strategic vision.",
+  title: 'NiyamAI — Neural Alignment Engine',
+  description: 'Founder-centric AI for employee growth.',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="!scroll-smooth">
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          inter.variable,
-          spaceGrotesk.variable
-        )}
-      >
-        <FirebaseClientProvider>
-          {children}
-          <Toaster />
-        </FirebaseClientProvider>
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,400;1,9..40,700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-sans antialiased bg-white text-slate-900">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
