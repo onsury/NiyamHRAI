@@ -25,7 +25,7 @@ export default function FounderSetupPage() {
       await updateUser(niyamUser.uid, { onboarded: true });
       await refreshUser();
       router.push('/dashboard');
-    } catch (err) { console.error('Founder setup error:', err); }
+    } catch (err: any) { console.error(err); alert('Error: ' + err.message); }
     finally { setLoading(false); }
   };
 
@@ -62,7 +62,7 @@ export default function FounderSetupPage() {
                 <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Organization.</h3><p className="text-slate-500 text-lg">We calibrate the 67-trait framework to your industry.</p></div>
                 <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organization Name</label>
-                  <input type="text" value={formData.orgName} onChange={e=>setFormData({...formData,orgName:e.target.value})} placeholder="e.g. CETEX Petrochemicals" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xl placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
+                  <input type="text" value={formData.orgName} onChange={e=>setFormData({...formData,orgName:e.target.value})} placeholder="e.g. SmartDNA" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xl placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
                 </div>
                 <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Industry</label>
@@ -78,7 +78,7 @@ export default function FounderSetupPage() {
             {step===2 && (
               <div className="space-y-8 animate-slide-in-right">
                 <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Philosophy.</h3><p className="text-slate-500 text-lg">How do you think about building your organization?</p></div>
-                <textarea value={formData.philosophy} onChange={e=>setFormData({...formData,philosophy:e.target.value})} placeholder="I believe in first principles thinking. Every decision must trace back to customer value..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
+                <textarea value={formData.philosophy} onChange={e=>setFormData({...formData,philosophy:e.target.value})} placeholder="I believe in first principles thinking..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
               </div>
             )}
 
@@ -92,7 +92,7 @@ export default function FounderSetupPage() {
             {step===4 && (
               <div className="space-y-8 animate-slide-in-right">
                 <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Non-Negotiables.</h3><p className="text-slate-500 text-lg">What behaviors are unacceptable?</p></div>
-                <textarea value={formData.nonNegotiables} onChange={e=>setFormData({...formData,nonNegotiables:e.target.value})} placeholder="Dishonesty, passive-aggressive communication, blame-shifting..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
+                <textarea value={formData.nonNegotiables} onChange={e=>setFormData({...formData,nonNegotiables:e.target.value})} placeholder="Dishonesty, passive-aggressive communication..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
               </div>
             )}
 

@@ -9,7 +9,7 @@
  * - SubmitCheckInOutput - The return type for the submitCheckIn function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const FounderDNASchema = z.object({
@@ -103,15 +103,18 @@ Based on the employee's new reflection, you must analyze it in the context of al
 Your entire output must be ONLY the JSON object, conforming strictly to this schema.`;
 
     try {
+      const apiKey = getApiKey('claude');
+      if (!apiKey) throw new Error('Claude API key not found.');
+
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.CLAUDE_API_KEY!,
+          "x-api-key": apiKey,
           "anthropic-version": "2023-06-01"
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-3-sonnet-20240229",
           max_tokens: 2048,
           system: systemPrompt,
           messages: [{ role: "user", content: `My reflection is: "${reflection}"` }],

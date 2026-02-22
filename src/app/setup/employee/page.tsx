@@ -16,18 +16,13 @@ export default function EmployeeOnboardingPage() {
     if (!niyamUser) return;
     setLoading(true);
     try {
-      const basicDna = {
-        selectedTraits: [],
-        synergyScore: 50,
-        alignmentSummary: 'Initial baseline. Complete weekly check-ins to refine your DNA mapping.',
-        driftAreas: ['Awaiting first assessment'],
-      };
+      const basicDna = { selectedTraits: [], synergyScore: 50, alignmentSummary: 'Initial baseline. Complete weekly check-ins to refine.', driftAreas: ['Awaiting first assessment'] };
       await saveEmployeeDNA(niyamUser.uid, basicDna);
       await addDNASnapshot(niyamUser.uid, { userId: niyamUser.uid, dnaSnapshot: basicDna, synergyScore: 50, trigger: 'onboarding', delta: 0, timestamp: null });
       await updateUser(niyamUser.uid, { onboarded: true, level: formData.level });
       await refreshUser();
       router.push('/dashboard');
-    } catch (err) { console.error('Onboarding error:', err); }
+    } catch (err: any) { console.error(err); alert('Error: ' + err.message); }
     finally { setLoading(false); }
   };
 
@@ -39,7 +34,6 @@ export default function EmployeeOnboardingPage() {
           <div className="py-20 flex flex-col items-center text-center">
             <div className="w-20 h-20 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8" />
             <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Neural Sequencing...</h3>
-            <p className="text-slate-500 mt-4 text-lg">Aligning your traits with the Founder DNA benchmark.</p>
           </div>
         ) : (
           <>
@@ -53,7 +47,7 @@ export default function EmployeeOnboardingPage() {
 
             {step===1 && (
               <div className="space-y-8 animate-fade-in-up">
-                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Define Your Vector.</h3><p className="text-slate-500 text-lg">Every org level has a unique neural blueprint.</p></div>
+                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Define Your Vector.</h3></div>
                 <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Professional Identity</label>
                   <input type="text" value={formData.role} onChange={e=>setFormData({...formData,role:e.target.value})} placeholder="e.g. Senior Product Manager" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xl placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
@@ -62,7 +56,7 @@ export default function EmployeeOnboardingPage() {
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organizational Level</label>
                   <div className="grid grid-cols-3 gap-3">
                     {Object.values(OrgLevel).map(lvl=>(
-                      <button key={lvl} onClick={()=>setFormData({...formData,level:lvl})} className={`py-4 rounded-2xl border-2 font-bold text-xs uppercase tracking-widest transition-all ${formData.level===lvl?'bg-slate-900 border-slate-900 text-white shadow-xl':'bg-white border-slate-100 text-slate-400 hover:border-indigo-200'}`}>{lvl}</button>
+                      <button key={lvl} onClick={()=>setFormData({...formData,level:lvl})} className={`py-4 rounded-2xl border-2 font-bold text-xs uppercase tracking-widest transition-all ${formData.level===lvl?'bg-slate-900 border-slate-900 text-white shadow-xl':'bg-white border-slate-100 text-slate-400'}`}>{lvl}</button>
                     ))}
                   </div>
                 </div>
@@ -79,7 +73,7 @@ export default function EmployeeOnboardingPage() {
             {step===3 && (
               <div className="space-y-8 animate-slide-in-right">
                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Growth Aspirations.</h3>
-                <textarea value={formData.goals} onChange={e=>setFormData({...formData,goals:e.target.value})} placeholder="I want to develop stronger strategic thinking, improve delegation..." className="w-full h-48 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
+                <textarea value={formData.goals} onChange={e=>setFormData({...formData,goals:e.target.value})} placeholder="I want to develop stronger strategic thinking..." className="w-full h-48 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
               </div>
             )}
 

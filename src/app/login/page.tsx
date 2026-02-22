@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UserRole } from '@/types';
+import { getFirebaseAuthErrorMessage } from '@/firebase/errors';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,12 +18,16 @@ export default function LoginPage() {
 
   const handleSubmit = async () => {
     if (!email || !password) return;
+    if (mode === 'signup' && role === UserRole.FOUNDER && (!orgName || orgName.length < 4)) {
+      setError('Organization name must be at least 4 characters long.');
+      return;
+    }
     setLoading(true); setError('');
     try {
       if (mode === 'login') await signIn(email, password);
       else await signUp(email, password, role, role === UserRole.FOUNDER ? orgName : undefined);
       router.push('/dashboard');
-    } catch (err: any) { setError(err.message || 'Authentication failed.'); }
+    } catch (err: any) { setError(getFirebaseAuthErrorMessage(err)); }
     finally { setLoading(false); }
   };
 
@@ -77,7 +82,7 @@ export default function LoginPage() {
         {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-bold animate-fade-in">{error}</div>}
 
         <button onClick={handleSubmit} disabled={loading||!email||!password} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3">
-          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : mode==='login' ? 'Authenticate' : 'Create Neural Signature'}
+          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : mode==='login' ? 'Sign In' : 'Create Neural Signature'}
         </button>
       </div>
     </div>

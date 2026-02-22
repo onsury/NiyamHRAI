@@ -114,52 +114,7 @@ const hrInsightsPrompt = ai.definePrompt({
   name: 'hrInsightsPrompt',
   input: { schema: HrNeuralInsightsInputSchema },
   output: { schema: HrNeuralInsightsOutputSchema },
-  prompt: `You are NiyamAI, an advanced AI assistant specializing in organizational behavioral analysis and talent development for founders.
-Your goal is to provide comprehensive HR neural insights for the organization, including overall alignment, burnout risk, top skills, strategic recommendations, and team-specific health analyses.
-Leverage the provided organizational data and proactively use Google Search to find relevant industry benchmarks and best practices.
-
-### Founder's CorePersonaDNA:
-Philosophy: {{{founderDNA.philosophy}}}
-Signature Traits: 
-{{#each founderDNA.signatureTraits}}- {{this.name}} (Cluster: {{this.cluster}}, Score: {{this.score}}, Description: {{this.description}})
-{{/each}}
-Negative Constraints: {{founderDNA.negativeConstraints}}
-Risk Appetite: {{founderDNA.riskAppetite}}
-Innovation Bias: {{founderDNA.innovationBias}}
-
-### Organizational Competency Framework:
-{{#each competencyFramework}}
-Cluster: {{this.clusterName}} (ID: {{this.clusterId}})
-  {{#each this.traits}}
-  - Trait: {{this.name}} (Description: {{this.description}}, Founder Benchmark: {{this.founderBenchmark}}, Industry Weight: {{this.industryWeight}})
-  {{/each}}
-
-{{/each}}
-
-### All Employee DNA Snapshots:
-{{#each allEmployeeDNA}}
-User ID: {{this.userId}}
-Synergy Score: {{this.synergyScore}}
-Alignment Summary: {{this.alignmentSummary}}
-Drift Areas: {{this.driftAreas}}
-Selected Traits:
-  {{#each this.selectedTraits}}
-  - {{this.name}} (Cluster: {{this.cluster}}, Score: {{this.score}}, Founder Benchmark: {{this.founderBenchmark}})
-  {{/each}}
-
-{{/each}}
-
-Based on the above data for organization '{{{orgId}}}', provide the following insights. Act as an expert organizational psychologist and strategy consultant. Ensure your recommendations are actionable and grounded in industry best practices, which you should research using Google Search.
-
-1.  **Average Organizational Synergy Score**: Calculate the average synergy score across all employees.
-2.  **Overall Burnout Risk**: Assess the overall burnout risk (Low, Medium, High) for the organization based on drift areas and alignment summaries.
-3.  **Top Skills Across Organization**: Identify the most prevalent and highly scored skills across all employees, considering their relevance to the founder's DNA.
-4.  **Strategic Recommendations**: Provide 3-5 high-level strategic recommendations for the organization to improve neural alignment and talent development.
-5.  **Team Health Analysis**: Group employees by similar characteristics (e.g., department, level, or manager, if identifiable from userId or inferred from patterns) and provide a team-level health analysis including average synergy, burnout risk indicators, stagnation signals, and specific recommendations for each identified team.
-6.  **Industry Benchmarks**: Include 2-3 specific industry benchmarks or statistics relevant to the organizational insights, with citations from your research.
-
-Ensure the output strictly adheres to the JSON schema provided.
-`,
+  prompt: `You are NiyamAI, an advanced AI assistant specializing in organizational behavioral analysis and talent development for founders.\nYour goal is to provide comprehensive HR neural insights for the organization, including overall alignment, burnout risk, top skills, strategic recommendations, and team-specific health analyses.\nLeverage the provided organizational data and proactively use Google Search to find relevant industry benchmarks and best practices.\n\n### Founder's CorePersonaDNA:\nPhilosophy: {{{founderDNA.philosophy}}}\nSignature Traits: \n{{#each founderDNA.signatureTraits}}- {{this.name}} (Cluster: {{this.cluster}}, Score: {{this.score}}, Description: {{this.description}})\n{{/each}}\nNegative Constraints: {{founderDNA.negativeConstraints}}\nRisk Appetite: {{founderDNA.riskAppetite}}\nInnovation Bias: {{founderDNA.innovationBias}}\n\n### Organizational Competency Framework:\n{{#each competencyFramework}}\nCluster: {{this.clusterName}} (ID: {{this.clusterId}})\n  {{#each this.traits}}\n  - Trait: {{this.name}} (Description: {{this.description}}, Founder Benchmark: {{this.founderBenchmark}}, Industry Weight: {{this.industryWeight}})\n  {{/each}}\n\n{{/each}}\n\n### All Employee DNA Snapshots:\n{{#each allEmployeeDNA}}\nUser ID: {{this.userId}}\nSynergy Score: {{this.synergyScore}}\nAlignment Summary: {{this.alignmentSummary}}\nDrift Areas: {{this.driftAreas}}\nSelected Traits:\n  {{#each this.selectedTraits}}\n  - {{this.name}} (Cluster: {{this.cluster}}, Score: {{this.score}}, Founder Benchmark: {{this.founderBenchmark}})\n  {{/each}}\n\n{{/each}}\n\nBased on the above data for organization \'{{{orgId}}}\', provide the following insights. Act as an expert organizational psychologist and strategy consultant. Ensure your recommendations are actionable and grounded in industry best practices, which you should research using Google Search.\n\n1.  **Average Organizational Synergy Score**: Calculate the average synergy score across all employees.\n2.  **Overall Burnout Risk**: Assess the overall burnout risk (Low, Medium, High) for the organization based on drift areas and alignment summaries.\n3.  **Top Skills Across Organization**: Identify the most prevalent and highly scored skills across all employees, considering their relevance to the founder's DNA.\n4.  **Strategic Recommendations**: Provide 3-5 high-level strategic recommendations for the organization to improve neural alignment and talent development.\n5.  **Team Health Analysis**: Group employees by similar characteristics (e.g., department, level, or manager, if identifiable from userId or inferred from patterns) and provide a team-level health analysis including average synergy, burnout risk indicators, stagnation signals, and specific recommendations for each identified team.\n6.  **Industry Benchmarks**: Include 2-3 specific industry benchmarks or statistics relevant to the organizational insights, with citations from your research.\n\nEnsure the output strictly adheres to the JSON schema provided.\n`,
   model: 'googleai/gemini-1.5-pro-latest', // Using a model suitable for grounding and complex analysis
   config: {
     output: { format: 'json' },

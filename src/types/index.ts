@@ -68,9 +68,9 @@ export interface NiyamUser {
   uid: string;
   email: string;
   displayName: string;
-  role: UserRole;
+  role: string;
   organizationId: string;
-  level: OrgLevel;
+  level: string;
   onboarded: boolean;
   managerId?: string;
   createdAt?: any;
