@@ -5,21 +5,34 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signOut as firebaseSignOut,
   User as FirebaseUser,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import { NiyamUser, UserRole, OrgLevel } from '@/types';
+
+export interface NiyamUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  role: string;
+  organizationId: string;
+  level: string;
+  onboarded: boolean;
+  managerId?: string;
+  createdAt?: any;
+}
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   niyamUser: NiyamUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, role: UserRole, orgName?: string) => Promise<void>;
+  signUp: (email: string, password: string, role: string, orgName?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -34,25 +47,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (userDoc.exists()) {
       return { uid: user.uid, ...userDoc.data() } as NiyamUser;
     }
-    // Profile missing — create a basic one so user isn't stuck
-    const profile: Omit<NiyamUser, 'uid'> = {
+    const profile = {
       email: user.email || '',
       displayName: user.email?.split('@')[0] || 'User',
-      role: UserRole.FOUNDER,
+      role: 'FOUNDER',
       organizationId: user.uid,
-      level: OrgLevel.TOP,
+      level: 'TOP',
       onboarded: false,
       createdAt: serverTimestamp(),
     };
-    // Also create the org doc
     await setDoc(doc(db, 'organizations', user.uid), {
-      name: 'My Organization',
-      industry: '',
-      founderId: user.uid,
-      createdAt: serverTimestamp(),
+      name: 'My Organization', industry: '', founderId: user.uid, createdAt: serverTimestamp(),
     });
     await setDoc(doc(db, 'users', user.uid), profile);
-    return { uid: user.uid, ...profile };
+    return { uid: user.uid, ...profile } as NiyamUser;
   };
 
   useEffect(() => {
@@ -75,49 +83,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        const profile = await fetchOrCreateProfile(cred.user);
-        setNiyamUser(profile);
-    } catch (err) {
-        throw err;
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (!cred.user.emailVerified) {
+      throw new Error('EMAIL_NOT_VERIFIED');
     }
+    const profile = await fetchOrCreateProfile(cred.user);
+    setNiyamUser(profile);
   };
 
-  const signUp = async (email: string, password: string, role: UserRole, orgName?: string) => {
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = cred.user.uid;
-        let organizationId = '';
+  const signUp = async (email: string, password: string, role: string, orgName?: string) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
+    let organizationId = '';
 
-        if (role === UserRole.FOUNDER && orgName) {
-        await setDoc(doc(db, 'organizations', uid), { name: orgName, industry: '', founderId: uid, createdAt: serverTimestamp() });
-        organizationId = uid;
-        }
-
-        const userProfile: Omit<NiyamUser, 'uid'> = {
-        email, displayName: email.split('@')[0], role, organizationId,
-        level: role === UserRole.FOUNDER ? OrgLevel.TOP : OrgLevel.MIDDLE,
-        onboarded: false, createdAt: serverTimestamp(),
-        };
-        await setDoc(doc(db, 'users', uid), userProfile);
-        setNiyamUser({ uid, ...userProfile });
-    } catch (err) {
-        throw err;
+    if (role === 'FOUNDER' && orgName) {
+      await setDoc(doc(db, 'organizations', uid), { name: orgName, industry: '', founderId: uid, createdAt: serverTimestamp() });
+      organizationId = uid;
     }
+
+    const userProfile = {
+      email, displayName: email.split('@')[0], role, organizationId,
+      level: role === 'FOUNDER' ? 'TOP' : 'MIDDLE',
+      onboarded: false, createdAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'users', uid), userProfile);
+    setNiyamUser({ uid, ...userProfile } as NiyamUser);
+
+    // Send verification email
+    await sendEmailVerification(cred.user);
   };
 
   const signOut = async () => { await firebaseSignOut(auth); setNiyamUser(null); };
 
+  const resendVerification = async () => {
+    if (firebaseUser && !firebaseUser.emailVerified) {
+      await sendEmailVerification(firebaseUser);
+    }
+  };
+
   const refreshUser = async () => {
     if (firebaseUser) {
+      await firebaseUser.reload();
+      setFirebaseUser({ ...firebaseUser });
       const profile = await fetchOrCreateProfile(firebaseUser);
       setNiyamUser(profile);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, niyamUser, loading, signIn, signUp, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ firebaseUser, niyamUser, loading, signIn, signUp, signOut, refreshUser, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );

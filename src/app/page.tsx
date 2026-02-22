@@ -1,100 +1,354 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useState } from 'react';
 
 export default function LandingPage() {
   const router = useRouter();
   const { niyamUser } = useAuth();
   const handleLaunch = () => router.push(niyamUser ? '/dashboard' : '/login');
+  const [billing, setBilling] = useState<'monthly'|'annual'>('annual');
 
   return (
-    <div className="bg-white text-slate-900 selection:bg-indigo-100 overflow-x-hidden">
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-100 px-6 lg:px-20 py-5 flex justify-between items-center">
+    <div className="bg-[#0a0a0f] text-white selection:bg-amber-500/30 overflow-x-hidden">
+
+      {/* === NAV === */}
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">N</div>
-          <span className="text-2xl font-black tracking-tighter">NIYAM</span>
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-amber-500/20">N</div>
+          <span className="text-xl font-black tracking-tight">NiyamAI</span>
         </div>
-        <div className="hidden lg:flex gap-12 items-center">
-          {['Problem', 'Engine', 'How It Works'].map(l => (
-            <button key={l} onClick={() => document.getElementById(l.toLowerCase().replace(/ /g, '-'))?.scrollIntoView({ behavior: 'smooth' })} className="text-[11px] font-black text-slate-400 hover:text-indigo-600 transition-all uppercase tracking-[0.2em]">{l}</button>
+        <div className="hidden lg:flex gap-10 items-center">
+          {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
+            <button key={l} onClick={() => document.getElementById(l.toLowerCase().replace(/ /g, '-'))?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-white/50 hover:text-white transition-all font-medium">{l}</button>
           ))}
-          <div className="h-6 w-px bg-slate-200 mx-2" />
-          <button onClick={handleLaunch} className="px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl active:scale-95">Launch Platform</button>
+          <button onClick={handleLaunch} className="px-6 py-2.5 bg-white text-black rounded-full font-bold text-sm hover:bg-amber-500 hover:text-black transition-all">Get Started Free</button>
         </div>
-        <button onClick={handleLaunch} className="lg:hidden px-5 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest">Launch</button>
+        <button onClick={handleLaunch} className="lg:hidden px-5 py-2.5 bg-white text-black rounded-full font-bold text-sm">Start Free</button>
       </nav>
 
-      <section className="relative pt-48 pb-32 px-6 lg:px-20 min-h-screen flex flex-col justify-center overflow-hidden">
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-50 rounded-full mb-12 border border-indigo-100 animate-fade-in-up">
-            <span className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
-            <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Powered by Claude + Gemini Intelligence</span>
+      {/* === HERO === */}
+      <section className="relative pt-40 pb-32 px-6 lg:px-16 min-h-screen flex flex-col justify-center">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-8">
+            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+            <span className="text-sm text-amber-500 font-semibold">Now in Early Access</span>
           </div>
-          <h1 className="text-6xl md:text-[120px] lg:text-[140px] font-black tracking-tighter leading-[0.85] mb-12 animate-fade-in-up animation-delay-100">BRIDGING THE<br /><span className="text-indigo-600 italic">NEURAL</span> DRIFT.</h1>
-          <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto leading-relaxed mb-16 font-medium animate-fade-in-up animation-delay-200">NiyamAI is the first <span className="text-slate-900 font-bold italic">Founder-Centric AI Mentor</span> for enterprises. We measure how far every employee&apos;s behavior has drifted from the founder&apos;s strategic DNA — and close the gap continuously.</p>
-          <button onClick={handleLaunch} className="px-14 py-7 bg-slate-900 text-white rounded-[32px] font-black text-xl hover:bg-indigo-600 transition-all shadow-2xl active:scale-95 animate-fade-in-up animation-delay-300">Initialize Platform</button>
-        </div>
-        <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-amber-400/10 rounded-full blur-[150px] translate-x-1/3 translate-y-1/4" />
-      </section>
 
-      <section id="problem" className="py-32 px-6 lg:px-20 bg-slate-50">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-6">The $8.8 Trillion Problem</p>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] mb-16">As organizations scale,<br /><span className="text-slate-400">founder intent dilutes.</span></h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-children">
-            {[{n:'01',t:'Behavioral Drift',d:'Employees lack continuous guidance aligned to founder thinking. The gap widens invisibly.'},{n:'02',t:'Generic HR Tools',d:'Traditional platforms track activity, not growth alignment with the founder vision.'},{n:'03',t:'Cognitive Disconnect',d:'Between the founder blueprint and each employee lies an unmeasured chasm.'}].map(i=>(
-              <div key={i.n} className="bg-white p-12 rounded-[40px] border border-slate-200 hover:border-indigo-200 hover:shadow-xl transition-all group">
-                <span className="text-6xl font-black text-slate-100 group-hover:text-indigo-100 transition-colors">{i.n}</span>
-                <h3 className="text-2xl font-black tracking-tighter mt-6 mb-4">{i.t}</h3>
-                <p className="text-slate-500 leading-relaxed">{i.d}</p>
+          <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black leading-[0.95] tracking-tight mb-8">
+            Your founder&apos;s vision.<br />
+            <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Every employee&apos;s compass.</span>
+          </h1>
+
+          <p className="text-xl md:text-2xl text-white/50 max-w-2xl leading-relaxed mb-12">
+            NiyamAI is the AI-powered alignment engine that maps your founder&apos;s thinking patterns and turns them into personalised growth paths for every employee — closing the invisible gap between vision and execution.
+          </p>
+
+          <div className="flex flex-wrap gap-4 mb-20">
+            <button onClick={handleLaunch} className="px-10 py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-lg hover:shadow-2xl hover:shadow-amber-500/30 transition-all active:scale-95">Start Free Trial</button>
+            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all">See How It Works</button>
+          </div>
+
+          {/* Hero Visual */}
+          <div className="relative">
+            <div className="bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10 rounded-3xl p-2 shadow-2xl">
+              <div className="bg-[#12121a] rounded-2xl overflow-hidden">
+                <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  <span className="ml-4 text-xs text-white/30 font-mono">app.niyamai.com/dashboard</span>
+                </div>
+                <div className="p-8 md:p-12">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/20 rounded-2xl p-8 text-center">
+                      <div className="text-6xl font-black text-amber-500 mb-2">87%</div>
+                      <div className="text-sm text-amber-500/70 font-bold uppercase tracking-widest">Org Synergy Score</div>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+                      <div className="text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Top Drift Areas</div>
+                      {['Strategic Thinking', 'Customer Empathy', 'Speed of Execution'].map((t, i) => (
+                        <div key={i} className="flex items-center gap-3 mb-3">
+                          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden"><div className={`h-full rounded-full ${i === 0 ? 'bg-red-500' : i === 1 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: i === 0 ? '72%' : i === 1 ? '45%' : '23%' }} /></div>
+                          <span className="text-xs text-white/50 whitespace-nowrap">{t}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+                      <div className="text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Team Alignment</div>
+                      {[{n:'Priya R.',s:92,c:'bg-emerald-500'},{n:'Arjun K.',s:78,c:'bg-amber-500'},{n:'Meera S.',s:61,c:'bg-orange-500'},{n:'Raj T.',s:44,c:'bg-red-500'}].map((e, i) => (
+                        <div key={i} className="flex items-center gap-3 mb-3">
+                          <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white/60">{e.n[0]}</div>
+                          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden"><div className={`h-full rounded-full ${e.c}`} style={{ width: `${e.s}%` }} /></div>
+                          <span className="text-xs text-white/50 font-bold">{e.s}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+            <div className="absolute -top-20 left-1/2 w-96 h-96 bg-amber-500/20 rounded-full blur-[120px] -translate-x-1/2 pointer-events-none" />
+            <div className="absolute -bottom-20 right-0 w-72 h-72 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
           </div>
+        </div>
+
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[150px]" />
         </div>
       </section>
 
-      <section id="engine" className="py-32 px-6 lg:px-20">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.3em] mb-6">The NiyamAI Engine</p>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] mb-16">Five intelligence functions.<br /><span className="text-slate-400">One aligned organization.</span></h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-            {[{i:'🧬',t:'Founder DNA Diagnostic',d:'Deep probe maps cognitive blueprint across 67 traits.',g:'Claude'},{i:'🔬',t:'Employee DNA Mapping',d:'Maps each employee against founder benchmark.',g:'Gemini Flash'},{i:'🧭',t:'Weekly AI Mentorship',d:'Claude holds both founder and employee DNA in context.',g:'Claude Sonnet'},{i:'⚡',t:'Neural Honing Lab',d:'Simulations evaluated against founder first principles.',g:'Claude + Gemini'},{i:'📊',t:'HR Neural Insights',d:'Org-wide drift analytics and burnout detection.',g:'Gemini Pro'}].map(f=>(
-              <div key={f.t} className="bg-slate-900 p-10 rounded-[32px] text-white border border-slate-800 hover:border-indigo-500/50 transition-all">
-                <div className="text-4xl mb-6">{f.i}</div>
-                <h3 className="text-xl font-black tracking-tight mb-3">{f.t}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">{f.d}</p>
-                <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] px-3 py-1 bg-amber-500/10 rounded-full">{f.g}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className="py-32 px-6 lg:px-20 bg-slate-900 text-white">
+      {/* === SOCIAL PROOF === */}
+      <section className="py-12 px-6 border-y border-white/5 bg-white/[0.02]">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] mb-20">Three layers of<br /><span className="text-indigo-400">organizational intelligence.</span></h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-children">
-            {[{s:'01',t:'CorePersonaDNA',d:'Map the founder cognitive signature across 67 traits.'},{s:'02',t:'FunctionPersonaDNA',d:'Calibrate the framework to each department and role level.'},{s:'03',t:'EmployeePersonaDNA',d:'Continuously measure, mentor, and close the drift.'}].map(s=>(
-              <div key={s.s} className="text-left"><span className="text-7xl font-black text-white/10">{s.s}</span><h3 className="text-2xl font-black tracking-tighter mt-4 mb-4 text-amber-500">{s.t}</h3><p className="text-slate-400 leading-relaxed">{s.d}</p></div>
+          <p className="text-sm text-white/30 font-medium uppercase tracking-widest mb-6">Built for founder-led organisations across</p>
+          <div className="flex flex-wrap justify-center gap-x-12 gap-y-4 text-white/20 font-bold text-lg">
+            {['Technology', 'Manufacturing', 'Consulting', 'Healthcare', 'Finance', 'Education'].map(i => (
+              <span key={i} className="hover:text-white/40 transition-colors">{i}</span>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-32 px-6 lg:px-20 bg-indigo-600 text-white text-center relative overflow-hidden">
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] mb-8">Ready to align your organization?</h2>
-          <button onClick={handleLaunch} className="px-14 py-7 bg-white text-indigo-600 rounded-[32px] font-black text-xl hover:bg-slate-50 transition-all shadow-2xl active:scale-95">Begin Diagnostic</button>
+      {/* === PROBLEM === */}
+      <section id="problem" className="py-32 px-6 lg:px-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-20">
+            <span className="text-sm font-bold text-red-400 uppercase tracking-widest">The Hidden Problem</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Your employees are drifting<br /><span className="text-white/30">from your vision. Every day.</span></h2>
+            <p className="text-xl text-white/40 mt-6 max-w-2xl mx-auto leading-relaxed">As organisations scale, the founder&apos;s strategic intent gets diluted across layers. By the time it reaches the frontline, it&apos;s unrecognisable. This invisible &ldquo;neural drift&rdquo; costs enterprises crores in misaligned effort.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { icon: '📉', stat: '73%', title: 'of employees can\'t articulate their company\'s strategy', desc: 'Harvard Business Review found that alignment breaks down within the first two management layers.' },
+              { icon: '💸', stat: '₹74L Cr', title: 'lost globally to disengaged workers', desc: 'Gallup estimates that disengagement — largely caused by misalignment — destroys more value than most recessions.' },
+              { icon: '🔄', stat: '6–18 mo', title: 'to recover from a misaligned hire', desc: 'When employees operate on different mental models than the founder, rework and attrition become inevitable.' },
+            ].map((item, i) => (
+              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-10 hover:border-amber-500/20 hover:bg-amber-500/[0.02] transition-all group">
+                <span className="text-4xl">{item.icon}</span>
+                <div className="text-4xl font-black text-white mt-6 mb-2">{item.stat}</div>
+                <h3 className="text-lg font-bold text-white/80 mb-3">{item.title}</h3>
+                <p className="text-white/40 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="py-12 px-6 bg-slate-900 text-slate-500 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-slate-900 font-black text-lg">N</div>
-          <span className="text-lg font-black text-white tracking-tighter">NIYAM</span>
+      {/* === HOW IT WORKS === */}
+      <section id="how-it-works" className="py-32 px-6 lg:px-16 bg-gradient-to-b from-transparent via-amber-500/[0.03] to-transparent">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-20">
+            <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">How It Works</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Three layers.<br /><span className="text-white/30">One aligned organisation.</span></h2>
+          </div>
+
+          <div className="space-y-8">
+            {[
+              { step: '01', title: 'Map the Founder\'s Neural DNA', desc: 'Through a deep diagnostic conversation, NiyamAI extracts the founder\'s decision-making patterns, values, risk appetite, and non-negotiables — creating a living cognitive blueprint across 67 behavioral traits.', visual: '🧬', color: 'from-amber-500/20 to-orange-500/10', border: 'border-amber-500/20' },
+              { step: '02', title: 'Benchmark Every Employee', desc: 'Each team member goes through their own diagnostic. NiyamAI maps their behavioral patterns against the founder\'s benchmark — identifying exact drift areas, hidden strengths, and growth opportunities.', visual: '🔬', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/20' },
+              { step: '03', title: 'Close the Gap Continuously', desc: 'Weekly AI-powered mentorship sessions, scenario simulations, and personalised growth paths keep every employee moving closer to the founder\'s vision — with real-time drift tracking and burnout detection.', visual: '🚀', color: 'from-emerald-500/20 to-green-500/10', border: 'border-emerald-500/20' },
+            ].map((item, i) => (
+              <div key={i} className={`bg-gradient-to-r ${item.color} border ${item.border} rounded-3xl p-10 md:p-14 flex flex-col md:flex-row gap-8 items-start hover:scale-[1.01] transition-all`}>
+                <div className="flex-shrink-0">
+                  <div className="text-6xl mb-4">{item.visual}</div>
+                  <span className="text-7xl font-black text-white/5">{item.step}</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4">{item.title}</h3>
+                  <p className="text-lg text-white/50 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <p className="text-xs">Built by SmartDNA Business Intelligence. Powered by Anthropic Claude &amp; Google Gemini.</p>
+      </section>
+
+      {/* === FEATURES === */}
+      <section id="features" className="py-32 px-6 lg:px-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest">Platform Features</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Everything you need to<br /><span className="text-white/30">align at scale.</span></h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: '🧬', title: 'Founder DNA Diagnostic', desc: 'A deep-probe conversation that maps the founder\'s cognitive blueprint across 67 behavioral traits — decision patterns, values, risk appetite, and non-negotiables.' },
+              { icon: '📊', title: 'Real-Time Drift Dashboard', desc: 'See exactly where every employee stands relative to the founder benchmark. Spot misalignment before it becomes a performance issue.' },
+              { icon: '🧭', title: 'AI Mentorship Engine', desc: 'Every employee gets a weekly AI mentor that understands both the founder\'s DNA and their own — providing personalised guidance that no generic HR tool can match.' },
+              { icon: '⚡', title: 'Neural Honing Lab', desc: 'Scenario-based simulations calibrated to the founder\'s first principles. Employees practice real decisions, get evaluated against the founder\'s thinking patterns.' },
+              { icon: '🔥', title: 'Burnout Detection', desc: 'AI monitors check-in patterns, sentiment shifts, and engagement drops — flagging potential burnout before it costs you a valuable team member.' },
+              { icon: '📈', title: 'Org-Wide Intelligence', desc: 'HR dashboards showing team synergy scores, critical drift alerts, top performers, stagnation signals, and strategic recommendations — all in real time.' },
+            ].map((f, i) => (
+              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-white/10 hover:bg-white/[0.05] transition-all group">
+                <span className="text-3xl block mb-5">{f.icon}</span>
+                <h3 className="text-xl font-black tracking-tight mb-3">{f.title}</h3>
+                <p className="text-white/40 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* === COMPARISON === */}
+      <section className="py-32 px-6 lg:px-16 bg-gradient-to-b from-transparent via-red-500/[0.02] to-transparent">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">Why NiyamAI</span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mt-4">This is not another HR tool.</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-red-500/5 border border-red-500/10 rounded-3xl p-10">
+              <h3 className="text-lg font-black text-red-400 uppercase tracking-widest mb-6">Traditional HR Platforms</h3>
+              <ul className="space-y-4">
+                {['Track attendance and activity', 'Generic engagement surveys', 'One-size-fits-all L&D content', 'Annual reviews nobody reads', 'Measure output, not alignment', 'No connection to founder\'s vision'].map((t, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/40"><span className="text-red-400 mt-0.5">✕</span>{t}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-10">
+              <h3 className="text-lg font-black text-emerald-400 uppercase tracking-widest mb-6">NiyamAI</h3>
+              <ul className="space-y-4">
+                {['Maps founder\'s cognitive DNA as benchmark', 'Personalised behavioral alignment scoring', 'AI mentorship tailored to each person', 'Weekly growth conversations with drift tracking', 'Measures strategic thinking alignment', 'Every insight tied to founder\'s principles'].map((t, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/70"><span className="text-emerald-400 mt-0.5">✓</span>{t}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* === PRICING === */}
+      <section id="pricing" className="py-32 px-6 lg:px-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">Pricing</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4">Simple, transparent pricing.</h2>
+            <p className="text-xl text-white/40 mt-4">Start free. Scale when you&apos;re ready.</p>
+
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <span className={`text-sm font-bold ${billing === 'monthly' ? 'text-white' : 'text-white/40'}`}>Monthly</span>
+              <button onClick={() => setBilling(billing === 'monthly' ? 'annual' : 'monthly')} className="w-14 h-8 bg-white/10 rounded-full relative transition-all">
+                <div className={`w-6 h-6 bg-amber-500 rounded-full absolute top-1 transition-all ${billing === 'annual' ? 'left-7' : 'left-1'}`} />
+              </button>
+              <span className={`text-sm font-bold ${billing === 'annual' ? 'text-white' : 'text-white/40'}`}>Annual</span>
+              {billing === 'annual' && <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">Save 20%</span>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Starter', desc: 'For small teams getting started with alignment.',
+                price: billing === 'monthly' ? '₹0' : '₹0', unit: 'Free forever',
+                features: ['Up to 5 employees', 'Founder DNA diagnostic', 'Basic drift dashboard', 'Weekly check-ins', 'Email support'],
+                cta: 'Get Started Free', highlight: false,
+              },
+              {
+                name: 'Growth', desc: 'For scaling teams that need deep alignment.',
+                price: billing === 'monthly' ? '₹1,499' : '₹1,199', unit: 'per employee / month',
+                features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Neural Honing Lab', 'Burnout detection', 'HR intelligence dashboard', 'Priority support'],
+                cta: 'Start Free Trial', highlight: true,
+              },
+              {
+                name: 'Enterprise', desc: 'For large organisations with custom needs.',
+                price: null, unit: 'Custom pricing',
+                features: ['Unlimited employees', 'Custom trait frameworks', 'API access', 'SSO & SCIM', 'Dedicated success manager', 'Custom integrations', 'SLA guarantee', 'On-premise option'],
+                cta: 'Contact Sales', highlight: false,
+              },
+            ].map((plan, i) => (
+              <div key={i} className={`rounded-3xl p-10 flex flex-col ${plan.highlight ? 'bg-gradient-to-b from-amber-500/10 to-orange-500/5 border-2 border-amber-500/30 relative' : 'bg-white/[0.03] border border-white/[0.06]'}`}>
+                {plan.highlight && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-500 text-black rounded-full text-xs font-black uppercase tracking-widest">Most Popular</div>}
+                <h3 className="text-2xl font-black mb-2">{plan.name}</h3>
+                <p className="text-white/40 text-sm mb-6">{plan.desc}</p>
+                <div className="mb-8">
+                  {plan.price !== null ? (
+                    <><span className="text-4xl font-black">{plan.price}</span><span className="text-white/40 text-sm ml-2">{plan.unit}</span></>
+                  ) : (
+                    <span className="text-3xl font-black text-white/60">{plan.unit}</span>
+                  )}
+                </div>
+                <ul className="space-y-3 mb-10 flex-1">
+                  {plan.features.map((f, j) => (
+                    <li key={j} className="flex items-center gap-3 text-sm text-white/60"><svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>{f}</li>
+                  ))}
+                </ul>
+                <button onClick={handleLaunch} className={`w-full py-4 rounded-full font-bold text-sm transition-all ${plan.highlight ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'}`}>{plan.cta}</button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-white/20 text-sm mt-8">All prices are exclusive of GST. 14-day free trial on all paid plans. No credit card required.</p>
+        </div>
+      </section>
+
+      {/* === QUOTE === */}
+      <section className="py-32 px-6 lg:px-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="text-6xl mb-8">💡</div>
+          <blockquote className="text-3xl md:text-4xl font-black tracking-tight leading-tight text-white/80 italic">
+            &ldquo;The biggest risk in scaling isn&apos;t losing customers — it&apos;s losing the thinking patterns that won them in the first place.&rdquo;
+          </blockquote>
+          <p className="text-white/30 mt-8 font-bold">— The NiyamAI Philosophy</p>
+        </div>
+      </section>
+
+      {/* === CTA === */}
+      <section className="py-32 px-6 lg:px-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden">
+            <div className="relative z-10">
+              <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight leading-tight mb-6">Ready to align your<br />organisation?</h2>
+              <p className="text-black/60 text-xl mb-10 max-w-lg mx-auto">Start with the Founder DNA Diagnostic. It takes 10 minutes. The insights last forever.</p>
+              <button onClick={handleLaunch} className="px-12 py-5 bg-black text-white rounded-full font-black text-lg hover:bg-black/80 transition-all active:scale-95 shadow-2xl">Start Your Free Diagnostic</button>
+            </div>
+            <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-60 h-60 bg-black/10 rounded-full -ml-10 -mb-10 blur-3xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* === FOOTER === */}
+      <footer className="py-16 px-6 lg:px-16 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
+                <span className="text-xl font-black">NiyamAI</span>
+              </div>
+              <p className="text-white/30 text-sm leading-relaxed">The AI-powered alignment engine for founder-led organisations.</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Product</h4>
+              <ul className="space-y-2 text-white/30 text-sm">
+                {['Founder Diagnostic', 'Employee Mapping', 'AI Mentorship', 'Honing Lab', 'HR Dashboard'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Company</h4>
+              <ul className="space-y-2 text-white/30 text-sm">
+                {['About', 'Blog', 'Careers', 'Contact', 'Press Kit'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Legal</h4>
+              <ul className="space-y-2 text-white/30 text-sm">
+                {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR', 'Security'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/20 text-sm">© 2026 NiyamAI by SmartDNA Business Intelligence. All rights reserved.</p>
+            <div className="flex gap-6 text-white/20">
+              {['Twitter', 'LinkedIn', 'Email'].map(s => (<span key={s} className="text-sm hover:text-white/40 transition-colors cursor-pointer">{s}</span>))}
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

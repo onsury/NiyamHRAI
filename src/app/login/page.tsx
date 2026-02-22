@@ -3,87 +3,108 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UserRole } from '@/types';
-import { getFirebaseAuthErrorMessage } from '@/firebase/errors';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'login'|'signup'>('login');
+  const { signIn, signUp, firebaseUser } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>(UserRole.EMPLOYEE);
+  const [role, setRole] = useState<string>('FOUNDER');
   const [orgName, setOrgName] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !password) return;
-    if (mode === 'signup' && role === UserRole.FOUNDER && (!orgName || orgName.length < 4)) {
-      setError('Organization name must be at least 4 characters long.');
-      return;
-    }
-    setLoading(true); setError('');
+    setError(''); setLoading(true);
     try {
-      if (mode === 'login') await signIn(email, password);
-      else await signUp(email, password, role, role === UserRole.FOUNDER ? orgName : undefined);
-      router.push('/dashboard');
-    } catch (err: any) { setError(getFirebaseAuthErrorMessage(err)); }
-    finally { setLoading(false); }
+      if (isSignUp) {
+        await signUp(email, password, role, orgName);
+        // After signup, redirect to verify email
+        router.push('/verify-email');
+      } else {
+        try {
+          await signIn(email, password);
+          router.push('/dashboard');
+        } catch (err: any) {
+          if (err.message === 'EMAIL_NOT_VERIFIED') {
+            router.push('/verify-email');
+            return;
+          }
+          throw err;
+        }
+      }
+    } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'auth/email-already-in-use') setError('This email is already registered. Please sign in.');
+      else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') setError('Invalid email or password.');
+      else if (code === 'auth/weak-password') setError('Password must be at least 6 characters.');
+      else if (code === 'auth/invalid-email') setError('Please enter a valid email address.');
+      else if (err.message === 'EMAIL_NOT_VERIFIED') { /* handled above */ }
+      else setError(err.message || 'An unexpected error occurred.');
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
-      <button onClick={() => router.push('/')} className="absolute top-8 left-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-black text-[10px] uppercase tracking-[0.2em] z-10">
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>Back
-      </button>
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3" />
 
-      <div className="max-w-lg w-full bg-white rounded-[40px] shadow-2xl p-12 md:p-16 relative z-10 animate-fade-in-up">
-        <div className="flex items-center gap-3 mb-12">
-          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl">N</div>
-          <div><h1 className="text-2xl font-black tracking-tighter">NIYAM</h1><p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Neural Cloud</p></div>
+      <div className="max-w-md w-full bg-white/[0.03] border border-white/[0.06] rounded-[40px] shadow-2xl p-10 md:p-12 relative z-10">
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-amber-500/20">N</div>
+          <div>
+            <h1 className="text-2xl font-black text-white tracking-tight">NIYAM</h1>
+            <p className="text-xs font-bold text-amber-500 tracking-widest">NEURAL CLOUD</p>
+          </div>
         </div>
 
-        <div className="flex gap-2 mb-10 bg-slate-50 rounded-2xl p-1.5">
-          {(['login','signup'] as const).map(m=>(
-            <button key={m} onClick={()=>{setMode(m);setError('');}} className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode===m?'bg-slate-900 text-white shadow-lg':'text-slate-400 hover:text-slate-900'}`}>{m==='login'?'Sign In':'Create Account'}</button>
-          ))}
+        <div className="flex bg-white/5 rounded-full p-1 mb-8">
+          <button onClick={() => setIsSignUp(false)} className={`flex-1 py-3 rounded-full font-black text-sm uppercase tracking-widest transition-all ${!isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Sign In</button>
+          <button onClick={() => setIsSignUp(true)} className={`flex-1 py-3 rounded-full font-black text-sm uppercase tracking-widest transition-all ${isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Create Account</button>
         </div>
 
-        {mode === 'signup' && (
-          <div className="mb-8 animate-fade-in-up">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Your Role</label>
-            <div className="grid grid-cols-2 gap-3">
-              {[{v:UserRole.FOUNDER,l:'Founder'},{v:UserRole.HR_ADMIN,l:'HR Admin'},{v:UserRole.MANAGER,l:'Manager'},{v:UserRole.EMPLOYEE,l:'Employee'}].map(r=>(
-                <button key={r.v} onClick={()=>setRole(r.v)} className={`py-4 px-4 rounded-2xl border-2 text-left transition-all ${role===r.v?'bg-slate-900 border-slate-900 text-white shadow-xl':'bg-white border-slate-100 text-slate-400 hover:border-indigo-200'}`}>
-                  <p className="text-xs font-black uppercase">{r.l}</p>
-                </button>
-              ))}
+        {isSignUp && (
+          <>
+            <div className="mb-6">
+              <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 block">Your Role</label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.values(UserRole).map(r => (
+                  <button key={r} onClick={() => setRole(r)} className={`py-3 rounded-xl border-2 text-xs font-bold uppercase tracking-widest transition-all ${role === r ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'}`}>{r.replace('_', ' ')}</button>
+                ))}
+              </div>
             </div>
-          </div>
+            {role === 'FOUNDER' && (
+              <div className="mb-6">
+                <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 block">Organisation Name</label>
+                <input type="text" value={orgName} onChange={e => setOrgName(e.target.value)} placeholder="e.g. SmartDNA" className="w-full p-4 bg-white/5 border-2 border-white/10 rounded-2xl text-white font-bold placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none" />
+              </div>
+            )}
+          </>
         )}
 
-        {mode === 'signup' && role === UserRole.FOUNDER && (
-          <div className="mb-6 animate-fade-in-up">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Organization Name</label>
-            <input type="text" value={orgName} onChange={e=>setOrgName(e.target.value)} placeholder="e.g. Acme Corp" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 block">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="founder@company.com" className="w-full p-4 bg-white/5 border-2 border-white/10 rounded-2xl text-white font-bold placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none" />
           </div>
+          <div>
+            <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3 block">Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" className="w-full p-4 bg-white/5 border-2 border-white/10 rounded-2xl text-white font-bold placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none" />
+          </div>
+        </div>
+
+        {error && (
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-bold mb-6">{error}</div>
         )}
 
-        <div className="mb-5">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Email</label>
-          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@company.com" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
-        </div>
-        <div className="mb-8">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Password</label>
-          <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
-        </div>
-
-        {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-bold animate-fade-in">{error}</div>}
-
-        <button onClick={handleSubmit} disabled={loading||!email||!password} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3">
-          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : mode==='login' ? 'Sign In' : 'Create Neural Signature'}
+        <button onClick={handleSubmit} disabled={loading || !email || !password || (isSignUp && role === 'FOUNDER' && !orgName)} className="w-full py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-sm uppercase tracking-widest hover:shadow-xl hover:shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3">
+          {loading ? <><div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</> : isSignUp ? 'Create Neural Signature' : 'Sign In'}
         </button>
+
+        {isSignUp && (
+          <p className="text-center text-white/20 text-xs mt-6">A verification email will be sent to confirm your identity.</p>
+        )}
       </div>
     </div>
   );
