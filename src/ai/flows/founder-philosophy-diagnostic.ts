@@ -11,9 +11,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-// Ensure the @genkit-ai/anthropic plugin is installed and configured in src/ai/genkit.ts
-// for the 'anthropic/claude-sonnet-3.5-20240620' model to be available.
-// The project description specifies 'claude-sonnet-4-20250514', using the closest available Genkit model.
 
 const TraitSchema = z.object({
   name: z.string().describe('The name of the trait.'),
@@ -54,16 +51,16 @@ export async function founderPhilosophyDiagnostic(
   return founderPhilosophyDiagnosticFlow(input);
 }
 
-const diagnosticPrompt = ai.definePrompt({
-  name: 'founderPhilosophyDiagnosticPrompt',
-  input: { schema: FounderPhilosophyDiagnosticInputSchema },
-  output: { schema: FounderPhilosophyDiagnosticOutputSchema },
-  // Using Anthropic Claude Sonnet for deep reasoning, as specified in the project description.
-  // Note: This requires the @genkit-ai/anthropic plugin to be installed and configured in src/ai/genkit.ts
-  // The specified model 'claude-sonnet-4-20250514' is not directly available in Genkit's Anthropic plugin currently,
-  // so 'claude-sonnet-3.5-20240620' (a current Sonnet version) is used as the closest alternative.
-  model: 'anthropic/claude-sonnet-3.5-20240620',
-  prompt: `You are NiyamAI, an expert in organizational psychology, behavioral science, and founder philosophy.
+const founderPhilosophyDiagnosticFlow = ai.defineFlow(
+  {
+    name: 'founderPhilosophyDiagnosticFlow',
+    inputSchema: FounderPhilosophyDiagnosticInputSchema,
+    outputSchema: FounderPhilosophyDiagnosticOutputSchema,
+  },
+  async (input) => {
+    const { founderManifesto } = input;
+
+    const systemPrompt = `You are NiyamAI, an expert in organizational psychology, behavioral science, and founder philosophy.
 Your primary task is to conduct an AI diagnostic probe to deeply understand a founder's core philosophy and map it to a structured behavioral framework.
 The founder has provided their manifesto. Based on this manifesto, you will synthesize the findings as if you have already conducted a series of 10-15 probing questions about decision-making, risk, conflict handling, innovation, integrity, and cultural expectations.
 
@@ -77,23 +74,49 @@ Analyze the founder's manifesto provided below, and from this analysis and your 
 4.  **Risk Appetite**: Assign a single integer score between 0 and 100, where 0 represents extreme risk-aversion and 100 represents a highly risk-tolerant approach.
 5.  **Innovation Bias**: Assign a single integer score between 0 and 100, where 0 indicates a highly traditional mindset and 100 indicates an extremely innovative and disruptive inclination.
 
-Output your findings as a JSON object, strictly adhering to the provided output schema. Ensure all fields are populated according to their descriptions.
+Output your findings as a JSON object, strictly adhering to the output schema. Your response must be only the JSON object. The schema is as follows:
+${JSON.stringify(FounderPhilosophyDiagnosticOutputSchema.shape, null, 2)}`;
 
-Founder's Manifesto:
-{{{founderManifesto}}}`,
-});
+    const userMessage = `Founder's Manifesto:\n${founderManifesto}`;
 
-const founderPhilosophyDiagnosticFlow = ai.defineFlow(
-  {
-    name: 'founderPhilosophyDiagnosticFlow',
-    inputSchema: FounderPhilosophyDiagnosticInputSchema,
-    outputSchema: FounderPhilosophyDiagnosticOutputSchema,
-  },
-  async (input) => {
-    const { output } = await diagnosticPrompt(input);
-    if (!output) {
-      throw new Error('Founder DNA diagnostic failed: no output received from the AI model.');
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.CLAUDE_API_KEY!,
+          "anthropic-version": "2023-06-01"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userMessage }],
+          temperature: 0.2,
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      const claudeOutput = data.content[0].text;
+
+      const parsedOutput: FounderPhilosophyDiagnosticOutput = JSON.parse(claudeOutput);
+
+      const validationResult = FounderPhilosophyDiagnosticOutputSchema.safeParse(parsedOutput);
+      if (!validationResult.success) {
+        console.error('Claude output parsing error:', validationResult.error);
+        throw new Error('Claude response did not match expected schema.');
+      }
+
+      return validationResult.data;
+
+    } catch (error) {
+      console.error('Error calling Claude API:', error);
+      throw new Error('Failed to run founder philosophy diagnostic with Claude AI.');
     }
-    return output;
   }
 );
