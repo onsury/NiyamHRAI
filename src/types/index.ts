@@ -25,6 +25,7 @@ export interface NiyamUser {
 }
 
 export interface Organization {
+  id: string;
   name: string;
   industry: string;
   founderId: string;
@@ -36,39 +37,49 @@ export interface TraitScore {
   cluster: string;
   score: number;
   description?: string;
+  founderBenchmark: number;
 }
 
 export interface FounderDNA {
   philosophy: string;
   signatureTraits: TraitScore[];
   negativeConstraints: string[];
-  riskAppetite: number;
-  innovationBias: number;
-  diagnosticComplete: boolean;
-  voiceCaptures?: Record<string, string>;
-  rawAnswers?: Record<string, number>;
+  riskAppetite?: number;
+  innovationBias?: number;
+  diagnosticComplete?: boolean;
+  updatedAt?: any;
 }
 
 export interface EmployeeDNA {
-  traits: TraitScore[];
+  selectedTraits: TraitScore[];
   synergyScore: number;
+  alignmentSummary: string;
   driftAreas: string[];
-  strengths: string[];
-  lastUpdated?: any;
+  userId: string;
+  version: number;
+  updatedAt: any;
 }
 
 export interface CheckIn {
+  id: string;
   reflection: string;
-  timestamp: any;
-  aiResponse?: string;
-  synergyDelta?: number;
+  aiMentorship: string;
+  alignmentScore: number;
+  burnoutFlag: boolean;
+  sentiment: string;
+  driftUpdate: string;
+  nextFocusArea: string;
+  createdAt: any;
 }
 
 export interface DNASnapshot {
-  traits: TraitScore[];
+  id: string;
+  userId: string;
+  dnaSnapshot: Partial<EmployeeDNA>;
   synergyScore: number;
-  timestamp: any;
   trigger: string;
+  delta: number;
+  timestamp: any;
 }
 
 export interface HoningScenario {
@@ -79,10 +90,10 @@ export interface HoningScenario {
 }
 
 export interface HoningSession {
+  traitName: string;
   scenario: string;
   response: string;
-  evaluation: string;
-  traitTargeted: string;
-  scoreChange?: number;
-  timestamp: any;
+  feedback: string;
+  synergyDelta: number;
+  traitGain: number;
 }
