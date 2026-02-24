@@ -228,7 +228,6 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">Pricing</span>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4">Simple, transparent pricing.</h2>
-            <p className="text-xl text-white/40 mt-4">Start free. Scale when you&apos;re ready.</p>
 
             <div className="flex items-center justify-center gap-4 mt-8">
               <span className={`text-sm font-bold ${billing === 'monthly' ? 'text-white' : 'text-white/40'}`}>Monthly</span>
@@ -243,10 +242,21 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                name: 'Starter', desc: 'For small teams getting started with alignment.',
-                price: billing === 'monthly' ? '₹0' : '₹0', unit: 'Free forever',
-                features: ['Up to 5 employees', 'Founder DNA diagnostic', 'Basic drift dashboard', 'Weekly check-ins', 'Email support'],
-                cta: 'Get Started Free', highlight: false,
+                name: 'Starter', 
+                desc: 'Up to 10 employees',
+                price: billing === 'monthly' ? '₹499' : '₹399', 
+                unit: 'per employee / month',
+                features: [
+                  'CorePersonaDNA Founder Diagnostic',
+                  'Employee DNA Mapping',
+                  'Weekly AI Mentorship',
+                  'Neural Honing Lab',
+                  'Synergy Dashboard',
+                  'Monthly Reports',
+                  'Email Support'
+                ],
+                cta: 'Start Free Trial', 
+                highlight: false,
               },
               {
                 name: 'Growth', desc: 'For scaling teams that need deep alignment.',
@@ -278,11 +288,10 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <button onClick={handleLaunch} className={`w-full py-4 rounded-full font-bold text-sm transition-all ${plan.highlight ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'}`}>{plan.cta}</button>
+                <p className="text-center text-white/30 text-xs mt-4">30-day free trial, no credit card required</p>
               </div>
             ))}
           </div>
-
-          <p className="text-center text-white/20 text-sm mt-8">All prices are exclusive of GST. 14-day free trial on all paid plans. No credit card required.</p>
         </div>
       </section>
 
