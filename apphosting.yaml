@@ -18,5 +18,3 @@ env:
     value: p209880248926
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: 1:209880248926:web:1e422746debc353c24bacf
-  - variable: CLAUDE_API_KEY
-    secret: CLAUDE_API_KEY
