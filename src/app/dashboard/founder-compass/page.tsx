@@ -1,40 +1,133 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { getFounderDNA, getOrganization } from '@/lib/firestore-service';
-import type { FounderDNA, Organization } from '@/types';
+import { getFounderDNA } from '@/lib/firestore-service';
+
+const CLUSTER_LABELS: Record<string, { name: string; icon: string; color: string }> = {
+  decision: { name: 'Decision Architecture', icon: '🧠', color: 'bg-amber-500' },
+  people: { name: 'People Philosophy', icon: '🤝', color: 'bg-blue-500' },
+  risk: { name: 'Risk & Innovation', icon: '⚡', color: 'bg-emerald-500' },
+  execution: { name: 'Execution DNA', icon: '🎯', color: 'bg-red-500' },
+  culture: { name: 'Culture Code', icon: '🏛️', color: 'bg-violet-500' },
+  growth: { name: 'Growth Orientation', icon: '📈', color: 'bg-cyan-500' },
+};
 
 export default function FounderCompassPage() {
   const { niyamUser } = useAuth();
-  const [founderDna, setFounderDna] = useState<FounderDNA|null>(null);
-  const [org, setOrg] = useState<Organization|null>(null);
+  const [dna, setDna] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!niyamUser) return;
-    const load = async () => { try { const orgId=niyamUser.organizationId; if(orgId){const[d,o]=await Promise.all([getFounderDNA(orgId),getOrganization(orgId)]); setFounderDna(d);setOrg(o);} } catch(e){console.error(e);} finally{setLoading(false);} }; load();
+    const load = async () => {
+      try {
+        const orgId = niyamUser.organizationId || niyamUser.uid;
+        const data = await getFounderDNA(orgId);
+        setDna(data);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
+    };
+    load();
   }, [niyamUser]);
 
-  if (loading) return <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" /></div>;
-  if (!founderDna) return <div className="flex flex-col items-center justify-center py-32 text-center animate-fade-in-up"><h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase mb-4">Founder DNA Not Mapped</h3><p className="text-slate-500 text-lg">The founder needs to complete the diagnostic first.</p></div>;
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+    </div>
+  );
 
-  const clusters: Record<string, typeof founderDna.signatureTraits> = {};
-  founderDna.signatureTraits.forEach(t=>{if(!clusters[t.cluster])clusters[t.cluster]=[];clusters[t.cluster].push(t);});
+  if (!dna || !dna.diagnosticComplete) return (
+    <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+      <span className="text-5xl sm:text-6xl mb-4">🧬</span>
+      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">Founder DNA Not Mapped</h2>
+      <p className="text-slate-500 text-sm sm:text-base">The founder needs to complete the CorePersonaDNA diagnostic first.</p>
+    </div>
+  );
+
+  // Group traits by cluster
+  const clusters: Record<string, any[]> = {};
+  (dna.signatureTraits || []).forEach((t: any) => {
+    if (!clusters[t.cluster]) clusters[t.cluster] = [];
+    clusters[t.cluster].push(t);
+  });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
-      <div><h2 className="text-3xl font-black tracking-tighter">Founder Compass</h2><p className="text-slate-500 mt-1">{org?.name?`${org.name}'s`:'Your organization\'s'} cognitive benchmark.</p></div>
-
-      <div className="bg-slate-900 p-10 rounded-[32px] text-white relative overflow-hidden shadow-2xl border border-slate-800">
-        <div className="relative z-10"><p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] mb-4">Founder&apos;s Philosophy</p><p className="text-xl leading-relaxed italic text-slate-200 max-w-3xl">&ldquo;{founderDna.philosophy}&rdquo;</p></div>
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -mr-40 -mt-40" />
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Founder Compass</h1>
+        <p className="text-slate-500 text-sm sm:text-base mt-1">The organisational DNA benchmark. Every decision aligns to this.</p>
       </div>
 
-      {founderDna.negativeConstraints&&founderDna.negativeConstraints.length>0 && (
-        <div className="bg-red-50 p-8 rounded-[24px] border border-red-200"><p className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] mb-4">Non-Negotiables</p><div className="flex flex-wrap gap-3">{founderDna.negativeConstraints.map((nc,i)=>(<span key={i} className="px-4 py-2 bg-white text-red-700 rounded-full text-sm font-bold border border-red-200">✕ {nc}</span>))}</div></div>
+      {/* Philosophy / Voice Captures */}
+      {dna.philosophy && (
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white mb-6 sm:mb-8">
+          <p className="text-[10px] sm:text-xs font-bold text-amber-500 uppercase tracking-widest mb-3">Founder&apos;s Voice</p>
+          <div className="space-y-3">
+            {dna.philosophy.split('\n\n').filter(Boolean).map((p: string, i: number) => (
+              <p key={i} className="text-sm sm:text-base text-white/80 italic leading-relaxed">{p}</p>
+            ))}
+          </div>
+        </div>
       )}
 
-      {Object.entries(clusters).map(([cluster,traits])=>(<div key={cluster}><h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-4">{cluster}</h3><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{traits.map((t,i)=>(<div key={i} className="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm hover:shadow-lg transition-all"><h4 className="text-base font-black tracking-tight mb-2">{t.name}</h4><p className="text-sm text-slate-500 mb-4 leading-relaxed line-clamp-2">{t.description}</p><div className="flex items-center gap-3"><div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-slate-900" style={{width:`${t.score}%`}} /></div><span className="text-xs font-black text-slate-900">{t.score}</span></div></div>))}</div></div>))}
+      {/* Trait Clusters */}
+      <div className="space-y-4 sm:space-y-6">
+        {Object.entries(clusters).map(([clusterId, traits]) => {
+          const cluster = CLUSTER_LABELS[clusterId] || { name: clusterId, icon: '📊', color: 'bg-slate-500' };
+          const avgScore = Math.round(traits.reduce((s, t) => s + t.score, 0) / traits.length);
+
+          return (
+            <div key={clusterId} className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl sm:text-2xl">{cluster.icon}</span>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900">{cluster.name}</h3>
+                </div>
+                <span className={`px-3 py-1 ${cluster.color} text-white rounded-full text-xs font-black`}>{avgScore}%</span>
+              </div>
+              <div className="space-y-3">
+                {traits.map((t, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs sm:text-sm font-semibold text-slate-600">{t.name}</span>
+                      <span className="text-xs font-bold text-slate-400">{t.score}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${cluster.color} transition-all`} style={{ width: `${t.score}%` }} />
+                    </div>
+                    {t.description && <p className="text-[10px] sm:text-xs text-slate-400 mt-1 italic">{t.description}</p>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Voice capture for this cluster */}
+              {dna.voiceCaptures?.[clusterId] && (
+                <div className="mt-4 p-3 sm:p-4 bg-amber-50 rounded-xl border border-amber-100">
+                  <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Founder&apos;s Words</p>
+                  <p className="text-xs sm:text-sm text-amber-900 italic">&ldquo;{dna.voiceCaptures[clusterId]}&rdquo;</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Non-Negotiables */}
+      {dna.negativeConstraints?.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 mt-6 sm:mt-8">
+          <h3 className="text-base sm:text-lg font-black text-red-800 mb-4 flex items-center gap-2">
+            <span>🚫</span> Non-Negotiables
+          </h3>
+          <ul className="space-y-2">
+            {dna.negativeConstraints.map((c: string, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-red-700">
+                <span className="text-red-500 mt-0.5 font-bold">✕</span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

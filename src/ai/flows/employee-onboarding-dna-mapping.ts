@@ -1,3 +1,4 @@
+/*
 'use server';
 /**
  * @fileOverview This file implements the Genkit flow for generating an employee's initial Persona DNA during onboarding.
@@ -6,7 +7,7 @@
  * - EmployeeOnboardingDnaMappingInput - The input type for the onboardEmployeeDnaMapping function.
  * - EmployeeOnboardingDnaMappingOutput - The return type for the onboardEmployeeDnaMapping function.
  */
-
+/*
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
@@ -168,3 +169,4 @@ export async function onboardEmployeeDnaMapping(
 ): Promise<EmployeeOnboardingDnaMappingOutput> {
   return onboardEmployeeDnaMappingFlow(input);
 }
+*/

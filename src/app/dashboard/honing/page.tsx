@@ -1,142 +1,193 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { getEmployeeDNA, getFounderDNA, saveHoningSession, saveEmployeeDNA } from '@/lib/firestore-service';
-import type { EmployeeDNA, FounderDNA } from '@/types';
+import { getFounderDNA, saveHoningSession, getHoningSessions } from '@/lib/firestore-service';
+
+const TRAITS = ['Decision Architecture', 'People Philosophy', 'Risk & Innovation', 'Execution DNA', 'Culture Code', 'Growth Orientation'];
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
 
 export default function HoningLabPage() {
   const { niyamUser } = useAuth();
-  const [employeeDna, setEmployeeDna] = useState<EmployeeDNA|null>(null);
-  const [founderDna, setFounderDna] = useState<FounderDNA|null>(null);
-  const [selectedTrait, setSelectedTrait] = useState<string|null>(null);
+  const [phase, setPhase] = useState<'select'|'scenario'|'evaluate'|'result'>('select');
+  const [selectedTrait, setSelectedTrait] = useState('');
+  const [difficulty, setDifficulty] = useState('medium');
   const [scenario, setScenario] = useState<any>(null);
-  const [response, setResponse] = useState('');
-  const [result, setResult] = useState<any>(null);
-  const [loadingScenario, setLoadingScenario] = useState(false);
-  const [evaluating, setEvaluating] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [userResponse, setUserResponse] = useState('');
+  const [evaluation, setEvaluation] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
     if (!niyamUser) return;
-    const load = async () => {
-      try {
-        const [d,f] = await Promise.all([getEmployeeDNA(niyamUser.uid), getFounderDNA(niyamUser.organizationId)]);
-        setEmployeeDna(d); setFounderDna(f);
-      } catch(e){ console.error(e); }
-      finally{ setPageLoading(false); }
-    }; load();
+    getHoningSessions(niyamUser.uid, 5).then(setHistory).catch(console.error);
   }, [niyamUser]);
 
-  const startHoning = async (traitName: string) => {
-    setSelectedTrait(traitName); setLoadingScenario(true); setResult(null); setResponse('');
+  const generateScenario = async () => {
+    setLoading(true);
     try {
+      const orgId = niyamUser?.organizationId || niyamUser?.uid || '';
+      const founderDNA = await getFounderDNA(orgId).catch(() => null);
+
       const res = await fetch('/api/honing/scenario', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ traitName, employeeLevel: niyamUser?.level, founderPhilosophy: founderDna?.philosophy })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trait: selectedTrait, difficulty, founderDNA }),
       });
-      if (res.ok) { setScenario(await res.json()); }
-      else {
-        setScenario({
-          scenario: `A key team member avoids accountability. The founder values "${traitName}". How do you handle this?`,
-          challenge: `Apply ${traitName} principles without damaging trust.`,
-          founderTip: 'Direct, empathetic confrontation — never passive avoidance.'
-        });
-      }
-    } catch(e) {
-      setScenario({
-        scenario: `A critical resource decision needs your input. The founder values "${traitName}". Your team is divided.`,
-        challenge: `Demonstrate ${traitName} in your approach.`,
-        founderTip: 'Think from first principles.'
-      });
-    }
-    finally { setLoadingScenario(false); }
+      const data = await res.json();
+      setScenario(data);
+      setPhase('scenario');
+    } catch (err) {
+      console.error(err);
+      setScenario({ scenario: 'A key client threatens to leave unless you match a competitor\'s price. Your team says the competitor is unsustainable. What do you do?', trait: selectedTrait, difficulty, options: ['Match price', 'Hold firm on value', 'Offer alternatives', 'Let them go'] });
+      setPhase('scenario');
+    } finally { setLoading(false); }
   };
 
-  const handleEvaluate = async () => {
-    if (!selectedTrait || !employeeDna || !founderDna) return;
-    setEvaluating(true);
+  const submitResponse = async () => {
+    if (!userResponse.trim()) return;
+    setLoading(true);
     try {
-      let evalResult;
-      try {
-        const res = await fetch('/api/honing/evaluate', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ response, traitName: selectedTrait, scenario: scenario?.scenario, founderDna, employeeDna })
-        });
-        if (res.ok) evalResult = await res.json();
-      } catch(e) { console.error('AI eval failed:', e); }
+      const orgId = niyamUser?.organizationId || niyamUser?.uid || '';
+      const founderDNA = await getFounderDNA(orgId).catch(() => null);
 
-      if (!evalResult) {
-        evalResult = { feedback: `Your response shows awareness of ${selectedTrait}. Continue developing this trait.`, synergyDelta: Math.floor(Math.random()*3)+1, traitGain: Math.floor(Math.random()*5)+1 };
-      }
-      setResult(evalResult);
+      const res = await fetch('/api/honing/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: scenario?.scenario, response: userResponse, trait: selectedTrait, founderDNA }),
+      });
+      const data = await res.json();
+      setEvaluation(data);
+      setPhase('result');
+
+      // Save session
       if (niyamUser) {
-        await saveHoningSession(niyamUser.uid, { traitName: selectedTrait, scenario: scenario?.scenario, response, feedback: evalResult.feedback, synergyDelta: evalResult.synergyDelta, traitGain: evalResult.traitGain });
-        const updatedTraits = employeeDna.selectedTraits.map(t => t.name===selectedTrait ? {...t, score: Math.min(100, t.score + evalResult.traitGain)} : t);
-        const updatedDna = {...employeeDna, selectedTraits: updatedTraits, synergyScore: Math.min(100, employeeDna.synergyScore + evalResult.synergyDelta)};
-        await saveEmployeeDNA(niyamUser.uid, updatedDna); setEmployeeDna(updatedDna);
+        await saveHoningSession(niyamUser.uid, {
+          scenario: scenario?.scenario,
+          response: userResponse,
+          evaluation: data.evaluation,
+          traitTargeted: selectedTrait,
+          alignmentScore: data.alignmentScore,
+        });
+        const sessions = await getHoningSessions(niyamUser.uid, 5);
+        setHistory(sessions);
       }
-    } catch(e){ console.error(e); }
-    finally { setEvaluating(false); }
+    } catch (err) {
+      console.error(err);
+      setEvaluation({ evaluation: 'Your response has been saved.', alignmentScore: 50, founderWouldSay: '', improvementTip: 'Keep practicing.' });
+      setPhase('result');
+    } finally { setLoading(false); }
   };
 
-  if (pageLoading) return <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin" /></div>;
-
-  if (!selectedTrait) return (
-    <div className="max-w-4xl mx-auto animate-fade-in-up">
-      <div className="bg-slate-900 p-12 xl:p-16 rounded-[40px] text-white shadow-2xl relative overflow-hidden text-center mb-10 border border-slate-800">
-        <div className="relative z-10">
-          <div className="w-16 h-16 bg-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl"><svg className="w-8 h-8 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
-          <h3 className="text-4xl xl:text-5xl font-black tracking-tighter mb-4 uppercase">Neural Honing Lab</h3>
-          <p className="text-slate-400 text-lg max-w-lg mx-auto">Bridge behavioral drift through founder-calibrated simulations.</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {employeeDna?.selectedTraits.map((t,i) => (
-          <button key={i} onClick={() => startHoning(t.name)} className="p-8 bg-white rounded-[32px] border border-slate-200 hover:border-indigo-500 hover:shadow-2xl transition-all text-left">
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-2 block">{t.cluster}</span>
-            <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase mb-4">{t.name}</h4>
-            <div className="flex items-center gap-4"><div className="flex-1 bg-slate-50 h-2 rounded-full overflow-hidden"><div className="h-full bg-slate-900" style={{width:`${t.score}%`}} /></div><span className="text-xs font-black">{t.score}%</span></div>
-          </button>
-        ))}
-        {(!employeeDna || employeeDna.selectedTraits.length===0) && <div className="col-span-2 text-center py-20 bg-white border-4 border-dashed border-slate-100 rounded-[40px] text-slate-300 font-black uppercase text-sm">Complete onboarding to unlock traits</div>}
-      </div>
-    </div>
-  );
+  const reset = () => { setPhase('select'); setScenario(null); setUserResponse(''); setEvaluation(null); };
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in-up">
-      <div className="bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden border border-slate-800">
-        {loadingScenario ? (
-          <div className="flex flex-col items-center justify-center p-20 text-white"><div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4" /><p className="text-amber-500 font-bold uppercase text-xs">Calibrating {selectedTrait}...</p></div>
-        ) : !result ? (
-          <div className="p-10 xl:p-12">
-            <div className="flex justify-between items-start mb-10">
-              <div><span className="text-[10px] font-bold text-amber-500 uppercase">Neural Trait Honing</span><h3 className="text-2xl font-black text-white mt-1">Bridging: {selectedTrait}</h3></div>
-              <button onClick={()=>{setSelectedTrait(null);setScenario(null);}} className="text-slate-500 hover:text-white"><svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="p-8 bg-white/5 rounded-[24px] border border-white/10"><h4 className="text-xs font-bold text-indigo-400 uppercase mb-4">Challenge</h4><p className="text-slate-300 leading-relaxed text-lg">{scenario?.scenario}</p><div className="mt-6 p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20"><p className="text-amber-500 font-bold text-sm">{scenario?.challenge}</p></div></div>
-              <div className="flex flex-col"><h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Your Response</h4>
-                <textarea value={response} onChange={e=>setResponse(e.target.value)} className="flex-1 min-h-[250px] p-6 bg-slate-800 border-2 border-slate-700 rounded-[24px] text-white focus:border-amber-500 text-lg resize-none" placeholder="How would the founder approach this?" />
-                <button onClick={handleEvaluate} disabled={response.length<20||evaluating} className="mt-4 py-5 bg-amber-500 text-slate-900 rounded-2xl font-black text-sm uppercase hover:bg-amber-400 disabled:opacity-40 flex items-center justify-center gap-3">{evaluating?<><div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"/>Evaluating...</>:'Execute Neural Shift'}</button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="p-10 xl:p-12 text-white">
-            <h3 className="text-2xl font-black tracking-tighter mb-6">Evaluation Complete</h3>
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/10 text-center"><p className="text-[9px] font-black text-amber-500 uppercase mb-2">Synergy Delta</p><p className={`text-3xl font-black ${result.synergyDelta>=0?'text-emerald-400':'text-red-400'}`}>{result.synergyDelta>=0?'+':''}{result.synergyDelta}</p></div>
-              <div className="p-6 bg-white/5 rounded-2xl border border-white/10 text-center"><p className="text-[9px] font-black text-indigo-400 uppercase mb-2">Trait Gain</p><p className="text-3xl font-black text-indigo-400">+{result.traitGain}</p></div>
-            </div>
-            <div className="p-6 bg-white/5 rounded-[20px] border border-white/10 mb-8"><p className="text-slate-300 leading-relaxed">{result.feedback}</p></div>
-            <div className="flex gap-4">
-              <button onClick={()=>startHoning(selectedTrait!)} className="flex-1 py-4 bg-amber-500 text-slate-900 rounded-2xl font-black text-sm uppercase hover:bg-amber-400">Try Again</button>
-              <button onClick={()=>{setSelectedTrait(null);setScenario(null);setResult(null);}} className="flex-1 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-sm uppercase hover:bg-white/10">Choose Another</button>
-            </div>
-          </div>
-        )}
+    <div className="max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-white text-center mb-6 sm:mb-8">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-4">⚡</div>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Neural Honing Lab</h1>
+        <p className="text-white/50 text-sm sm:text-base mt-2">Bridge behavioral drift through founder-calibrated simulations.</p>
       </div>
+
+      {/* Select Phase */}
+      {phase === 'select' && (
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
+          <h2 className="text-base sm:text-lg font-black text-slate-900 mb-4">Select a Trait to Hone</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-6">
+            {TRAITS.map(t => (
+              <button key={t} onClick={() => setSelectedTrait(t)} className={`py-3 sm:py-4 px-4 rounded-xl sm:rounded-2xl border-2 text-left text-xs sm:text-sm font-bold transition-all ${selectedTrait === t ? 'bg-amber-500 border-amber-500 text-black' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-amber-300'}`}>{t}</button>
+            ))}
+          </div>
+
+          <h3 className="text-sm font-bold text-slate-500 mb-2">Difficulty</h3>
+          <div className="flex gap-2 mb-6">
+            {DIFFICULTIES.map(d => (
+              <button key={d} onClick={() => setDifficulty(d)} className={`px-4 sm:px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${difficulty === d ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{d}</button>
+            ))}
+          </div>
+
+          <button onClick={generateScenario} disabled={!selectedTrait || loading} className="w-full py-3.5 sm:py-4 bg-amber-500 text-black rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest disabled:opacity-30 hover:bg-amber-400 transition-all flex items-center justify-center gap-2">
+            {loading ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Generating...</> : 'Generate Scenario'}
+          </button>
+        </div>
+      )}
+
+      {/* Scenario Phase */}
+      {phase === 'scenario' && scenario && (
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] sm:text-xs font-black uppercase">{scenario.trait}</span>
+            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] sm:text-xs font-bold uppercase">{scenario.difficulty}</span>
+          </div>
+
+          <p className="text-sm sm:text-base text-slate-800 font-medium leading-relaxed mb-6">{scenario.scenario}</p>
+
+          {scenario.options?.length > 0 && (
+            <div className="space-y-2 mb-6">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Quick Options (or write your own below)</p>
+              {scenario.options.map((opt: string, i: number) => (
+                <button key={i} onClick={() => setUserResponse(opt)} className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 text-xs sm:text-sm transition-all ${userResponse === opt ? 'bg-amber-50 border-amber-300 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-amber-200'}`}>{opt}</button>
+              ))}
+            </div>
+          )}
+
+          <textarea value={userResponse} onChange={e => setUserResponse(e.target.value)} className="w-full h-28 sm:h-36 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-300 focus:border-amber-500 transition-all outline-none resize-none" placeholder="Or describe your approach in your own words..." />
+
+          <div className="flex gap-3 mt-4">
+            <button onClick={reset} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">← Back</button>
+            <button onClick={submitResponse} disabled={!userResponse.trim() || loading} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-2">
+              {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Evaluating...</> : 'Submit Response'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Result Phase */}
+      {phase === 'result' && evaluation && (
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Evaluation</h2>
+              <span className={`text-2xl sm:text-3xl font-black ${evaluation.alignmentScore >= 70 ? 'text-emerald-500' : evaluation.alignmentScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{evaluation.alignmentScore}%</span>
+            </div>
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">{evaluation.evaluation}</p>
+
+            {evaluation.founderWouldSay && (
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-4">
+                <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Founder Would Say</p>
+                <p className="text-xs sm:text-sm text-amber-900 italic">&ldquo;{evaluation.founderWouldSay}&rdquo;</p>
+              </div>
+            )}
+
+            {evaluation.improvementTip && (
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                <p className="text-[10px] sm:text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Improvement Tip</p>
+                <p className="text-xs sm:text-sm text-indigo-800">{evaluation.improvementTip}</p>
+              </div>
+            )}
+          </div>
+
+          <button onClick={reset} className="w-full py-3.5 sm:py-4 bg-amber-500 text-black rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-amber-400 transition-all">Try Another Scenario</button>
+        </div>
+      )}
+
+      {/* Session History */}
+      {history.length > 0 && (
+        <div className="mt-6 sm:mt-8">
+          <h2 className="text-base sm:text-lg font-black text-slate-900 mb-4">Recent Sessions</h2>
+          <div className="space-y-3">
+            {history.map((h, i) => (
+              <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-bold text-slate-700">{h.traitTargeted}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">{h.timestamp?.toDate?.()?.toLocaleDateString?.() || 'Recent'}</p>
+                </div>
+                <span className={`text-lg font-black ${(h.alignmentScore || 0) >= 70 ? 'text-emerald-500' : (h.alignmentScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{h.alignmentScore || '—'}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

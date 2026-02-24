@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { getOrgEmployees, getEmployeeDNA, getOrgAnalytics } from '@/lib/firestore-service';
+import { getOrgUsers, getEmployeeDNA } from '@/lib/firestore-service';
 import type { NiyamUser, EmployeeDNA } from '@/types';
 
 interface EmpDNA extends NiyamUser { dna?: EmployeeDNA|null; }
@@ -15,8 +15,8 @@ export default function HRInsightsPage() {
     if (!niyamUser) return;
     const load = async () => {
       try {
-        const emps = await getOrgEmployees(niyamUser.organizationId);
-        const empsWithDna: EmpDNA[] = await Promise.all(emps.slice(0,20).map(async e=>({...e, dna: await getEmployeeDNA(e.uid)})));
+        const emps = await getOrgUsers(niyamUser.organizationId);
+        const empsWithDna: any[] = await Promise.all(emps.slice(0,20).map(async e=>({...e, dna: await getEmployeeDNA(e.uid)})));
         setEmployees(empsWithDna);
       } catch(e){console.error(e);}
       finally{setLoading(false);}
