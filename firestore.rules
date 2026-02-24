@@ -2,131 +2,113 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // === HELPER FUNCTIONS ===
-    
-    // Check if the requesting user is authenticated
+    // === Helper Functions ===
     function isSignedIn() {
       return request.auth != null;
     }
-    
-    // Check if the requesting user owns this document
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
-    // Get the requesting user's profile
+
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
-    
-    // Check if user belongs to a specific org
+
     function belongsToOrg(orgId) {
       return isSignedIn() && getUserData().organizationId == orgId;
     }
-    
-    // Check if user is the founder of a specific org
+
     function isFounderOfOrg(orgId) {
-      return isSignedIn() && belongsToOrg(orgId) && getUserData().role == 'FOUNDER';
-    }
-    
-    // Check if user is HR Admin or Founder of a specific org
-    function isAdminOfOrg(orgId) {
-      return isSignedIn() && belongsToOrg(orgId) && (getUserData().role == 'FOUNDER' || getUserData().role == 'HR_ADMIN');
+      return isSignedIn() && getUserData().organizationId == orgId && getUserData().role == 'FOUNDER';
     }
 
-    // =====================================================
-    // USERS COLLECTION
-    // =====================================================
+    function isAdminOfOrg(orgId) {
+      return isSignedIn() && getUserData().organizationId == orgId && (getUserData().role == 'FOUNDER' || getUserData().role == 'HR_ADMIN');
+    }
+
+    // === Users Collection ===
     match /users/{userId} {
-      // Users can read their own profile
-      // Founders/HR can read profiles of users in their org
-      allow read: if isOwner(userId) 
-                  || isAdminOfOrg(resource.data.organizationId);
-      
-      // Users can create their own profile during signup
+      // Read: own profile OR admin of their org
+      allow read: if isOwner(userId) || (isSignedIn() && isAdminOfOrg(resource.data.organizationId));
+
+      // Create: only during signup (own UID)
       allow create: if isOwner(userId);
-      
-      // Users can update their own profile
-      // But CANNOT change their role or organizationId (admin-only fields)
-      allow update: if isOwner(userId) 
-                    && (!request.resource.data.diff(resource.data).affectedKeys()
-                        .hasAny(['role']));
-      
-      // Only the user themselves can delete their profile
+
+      // Update: own profile, but CANNOT change role
+      allow update: if isOwner(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+
+      // Delete: own profile only
       allow delete: if isOwner(userId);
 
-      // --- Employee DNA subcollection ---
+      // === Employee DNA ===
       match /employeeDNA/{docId} {
-        // Employee can read/write their own DNA
-        // Founder/HR can read employee DNA in their org
-        allow read: if isOwner(userId) 
-                    || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId) || isAdminOfOrg(resource.data.organizationId || 'none');
         allow write: if isOwner(userId);
       }
 
-      // --- DNA History subcollection ---
+      // === DNA History (Immutable — no updates/deletes) ===
       match /dnaHistory/{docId} {
-        allow read: if isOwner(userId) 
-                    || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
         allow create: if isOwner(userId);
-        allow update, delete: if false; // History is immutable
+        allow update, delete: if false;
       }
 
-      // --- Check-ins subcollection ---
+      // === Check-ins ===
       match /checkIns/{docId} {
-        allow read: if isOwner(userId) 
-                    || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
         allow create: if isOwner(userId);
-        allow update, delete: if false; // Check-ins are immutable
+        allow update, delete: if false;
       }
 
-      // --- Honing Sessions subcollection ---
+      // === Honing Sessions ===
       match /honingSessions/{docId} {
-        allow read: if isOwner(userId) 
-                    || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
         allow create: if isOwner(userId);
-        allow update, delete: if false; // Sessions are immutable
+        allow update, delete: if false;
+      }
+
+      // === Reports ===
+      match /reports/{docId} {
+        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
+        allow create: if isOwner(userId);
+        allow update, delete: if false;
       }
     }
 
-    // =====================================================
-    // ORGANIZATIONS COLLECTION
-    // =====================================================
+    // === Organizations Collection ===
     match /organizations/{orgId} {
-      // Anyone in the org can read org details
       allow read: if belongsToOrg(orgId);
-      
-      // Only founder can create their org (during signup)
       allow create: if isSignedIn() && request.auth.uid == orgId;
-      
-      // Only founder/HR can update org details
       allow update: if isAdminOfOrg(orgId);
-      
-      // Only founder can delete org
       allow delete: if isFounderOfOrg(orgId);
 
-      // --- Founder DNA subcollection ---
+      // Founder DNA
       match /founderDNA/{docId} {
-        // Anyone in the org can read founder DNA (it's the benchmark)
         allow read: if belongsToOrg(orgId);
-        
-        // Only the founder can write their DNA
         allow write: if isFounderOfOrg(orgId);
       }
 
-      // --- Competency Framework subcollection ---
+      // Competency Framework
       match /competencyFramework/{docId} {
-        // Anyone in the org can read the framework
         allow read: if belongsToOrg(orgId);
-        
-        // Only founder/HR can modify the framework
         allow write: if isAdminOfOrg(orgId);
+      }
+
+      // Org Analytics
+      match /orgAnalytics/{docId} {
+        allow read: if isAdminOfOrg(orgId);
+        allow write: if false; // server-only
+      }
+
+      // Settings (White-label, billing)
+      match /settings/{docId} {
+        allow read: if belongsToOrg(orgId);
+        allow write: if isFounderOfOrg(orgId);
       }
     }
 
-    // =====================================================
-    // CATCH-ALL: Deny everything else
-    // =====================================================
+    // Deny everything else
     match /{document=**} {
       allow read, write: if false;
     }

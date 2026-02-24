@@ -1,57 +1,188 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getOrgUsers, getEmployeeDNA } from '@/lib/firestore-service';
-import type { NiyamUser, EmployeeDNA } from '@/types';
 
-interface EmpDNA extends NiyamUser { dna?: EmployeeDNA|null; }
+interface EmployeeRow {
+  uid: string;
+  displayName: string;
+  email: string;
+  role: string;
+  level: string;
+  synergyScore: number;
+  driftAreas: string[];
+  strengths: string[];
+  onboarded: boolean;
+}
 
-export default function HRInsightsPage() {
+export default function HRDashboardPage() {
   const { niyamUser } = useAuth();
-  const [employees, setEmployees] = useState<EmpDNA[]>([]);
+  const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [report, setReport] = useState<any>(null);
 
   useEffect(() => {
     if (!niyamUser) return;
     const load = async () => {
       try {
-        const emps = await getOrgUsers(niyamUser.organizationId);
-        const empsWithDna: any[] = await Promise.all(emps.slice(0,20).map(async e=>({...e, dna: await getEmployeeDNA(e.uid)})));
-        setEmployees(empsWithDna);
-      } catch(e){console.error(e);}
-      finally{setLoading(false);}
-    }; load();
+        const orgId = niyamUser.organizationId || niyamUser.uid;
+        const users = await getOrgUsers(orgId);
+
+        const enriched = await Promise.all(
+          users.map(async (u: any) => {
+            const dna = await getEmployeeDNA(u.uid).catch(() => null);
+            return {
+              uid: u.uid,
+              displayName: u.displayName || u.email?.split('@')[0] || 'User',
+              email: u.email || '',
+              role: u.role || 'EMPLOYEE',
+              level: u.level || 'MIDDLE',
+              synergyScore: dna?.synergyScore || 50,
+              driftAreas: dna?.driftAreas || [],
+              strengths: dna?.strengths || [],
+              onboarded: u.onboarded || false,
+            };
+          })
+        );
+
+        setEmployees(enriched);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
+    };
+    load();
   }, [niyamUser]);
 
-  if (loading) return <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" /></div>;
+  const generateReport = async () => {
+    setGenerating(true);
+    try {
+      const avgSynergy = employees.length > 0 ? Math.round(employees.reduce((s, e) => s + e.synergyScore, 0) / employees.length) : 50;
+      const criticalDrift = employees.filter(e => e.synergyScore < 40).length;
+      const topPerformer = employees.sort((a, b) => b.synergyScore - a.synergyScore)[0];
 
-  const onboarded = employees.filter(e=>e.onboarded&&e.dna);
-  const avgSynergy = onboarded.length ? Math.round(onboarded.reduce((s,e)=>s+(e.dna?.synergyScore||0),0)/onboarded.length) : 0;
-  const critical = onboarded.filter(e=>(e.dna?.synergyScore||0)<50);
-  const stars = onboarded.filter(e=>(e.dna?.synergyScore||0)>=80);
+      const res = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType: 'founder_quarterly',
+          data: {
+            orgSize: employees.length,
+            overallSynergy: avgSynergy,
+            departments: [...new Set(employees.map(e => e.level))],
+            hiringGaps: employees.flatMap(e => e.driftAreas).slice(0, 5),
+            culturalTrend: avgSynergy >= 60 ? 'Positive' : 'Needs Attention',
+            topPerformer: topPerformer?.displayName || 'N/A',
+            atRisk: employees.filter(e => e.synergyScore < 40).map(e => e.displayName).join(', ') || 'None',
+          },
+        }),
+      });
+      const data = await res.json();
+      setReport(data);
+    } catch (err) { console.error(err); }
+    finally { setGenerating(false); }
+  };
+
+  const avgSynergy = employees.length > 0 ? Math.round(employees.reduce((s, e) => s + e.synergyScore, 0) / employees.length) : 0;
+  const criticalDrift = employees.filter(e => e.synergyScore < 40).length;
+  const onboarded = employees.filter(e => e.onboarded).length;
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up">
-      <div><h2 className="text-3xl font-black tracking-tighter">Org Neural Insights</h2><p className="text-slate-500 mt-1">Organization-wide drift analytics.</p></div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[{l:'Employees',v:employees.length,c:'bg-slate-900 text-white'},{l:'Avg Synergy',v:`${avgSynergy}%`,c:'bg-amber-500 text-slate-900'},{l:'Critical Drift',v:critical.length,c:'bg-red-500 text-white'},{l:'Stars',v:stars.length,c:'bg-emerald-500 text-white'}].map((k,i)=>(<div key={i} className={`${k.c} p-6 rounded-[20px] shadow-lg`}><p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">{k.l}</p><p className="text-3xl font-black">{k.v}</p></div>))}
+    <div className="max-w-5xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Org Neural Insights</h1>
+          <p className="text-slate-500 text-sm mt-1">Organisation-wide alignment analytics.</p>
+        </div>
+        <button onClick={generateReport} disabled={generating} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 flex items-center gap-2 self-start">
+          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating...</> : '📊 Generate Report'}
+        </button>
       </div>
 
-      <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center"><h3 className="text-lg font-black tracking-tighter">Employee Grid</h3><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{onboarded.length} mapped / {employees.length} total</span></div>
-        <div className="divide-y divide-slate-50">
-          {employees.length===0 ? <div className="p-12 text-center text-slate-400 font-bold">No employees yet.</div> :
-          employees.map((e,i)=>(<div key={i} className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-all"><div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-black text-sm shrink-0">{(e.displayName||'U')[0].toUpperCase()}</div><div className="flex-1 min-w-0"><p className="text-sm font-bold text-slate-900 truncate">{e.displayName}</p><p className="text-xs text-slate-400 truncate">{e.email}</p></div><div className="text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Level</p><p className="text-xs font-bold text-slate-600">{e.level}</p></div><div className="text-center w-20">{e.dna?<><div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1"><div className={`h-full rounded-full ${(e.dna.synergyScore)>=75?'bg-emerald-500':(e.dna.synergyScore)>=50?'bg-amber-500':'bg-red-500'}`} style={{width:`${e.dna.synergyScore}%`}} /></div><p className="text-xs font-black text-slate-900">{e.dna.synergyScore}%</p></>:<span className="text-[9px] font-bold text-slate-300 uppercase">Not mapped</span>}</div><div>{e.dna&&e.dna.synergyScore<50&&<span className="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded-full">⚠ Drift</span>}{e.dna&&e.dna.synergyScore>=80&&<span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-full">★ Star</span>}</div></div>))}
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900">{employees.length}</div>
+          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Total Team</div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-amber-500">{avgSynergy}%</div>
+          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Avg Synergy</div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-red-500">{criticalDrift}</div>
+          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Critical Drift</div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-500">{onboarded}</div>
+          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Onboarded</div>
         </div>
       </div>
 
-      {critical.length>0 && (
-        <div className="bg-red-50 p-8 rounded-[24px] border border-red-200">
-          <h3 className="text-lg font-black text-red-900 tracking-tighter mb-4">⚠ Critical Drift Alerts</h3>
-          <div className="space-y-3">{critical.map((e,i)=>(<div key={i} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-red-100"><div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600 font-black text-sm">{(e.displayName||'U')[0]}</div><div className="flex-1"><p className="text-sm font-bold text-slate-900">{e.displayName}</p><p className="text-xs text-red-600">Synergy: {e.dna?.synergyScore}% • Drift: {e.dna?.driftAreas?.join(', ')}</p></div></div>))}</div>
+      {/* AI Report */}
+      {report && (
+        <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-black mb-2">{report.title}</h2>
+          <p className="text-white/70 text-sm mb-4">{report.summary}</p>
+          {(report.sections || []).map((s: any, i: number) => (
+            <div key={i} className="mb-4">
+              <h3 className="text-sm font-black text-amber-300 uppercase tracking-widest mb-1">{s.heading}</h3>
+              <p className="text-white/80 text-sm leading-relaxed">{s.content}</p>
+            </div>
+          ))}
+          {report.actionItem && (
+            <div className="mt-4 p-4 bg-white/10 rounded-xl">
+              <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">#1 Action Item</p>
+              <p className="text-sm font-bold text-white">{report.actionItem}</p>
+            </div>
+          )}
         </div>
       )}
+
+      {/* Employee Grid */}
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-100">
+          <h2 className="text-base sm:text-lg font-black text-slate-900">Employee Grid</h2>
+        </div>
+
+        {employees.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-sm">No employees yet. Invite team members to join your organisation.</div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {employees.map(emp => (
+              <div key={emp.uid} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:bg-slate-50 transition-all">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold text-slate-900">{emp.displayName}</p>
+                    <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold uppercase">{emp.role}</span>
+                    <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold uppercase">{emp.level}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 truncate">{emp.email}</p>
+                  {emp.driftAreas.length > 0 && (
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      {emp.driftAreas.slice(0, 3).map((d, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 bg-red-50 text-red-500 rounded-full font-bold">{d}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className={`text-xl font-black ${emp.synergyScore >= 70 ? 'text-emerald-500' : emp.synergyScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{emp.synergyScore}%</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Synergy</div>
+                  </div>
+                  <div className={`w-3 h-3 rounded-full ${emp.onboarded ? 'bg-emerald-500' : 'bg-amber-400'}`} title={emp.onboarded ? 'Onboarded' : 'Pending'} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,87 +2,140 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { saveEmployeeDNA, addDNASnapshot, updateUser } from '@/lib/firestore-service';
-import { OrgLevel } from '@/types';
+import { saveEmployeeDNA, addDNASnapshot, updateUser, getFounderDNA } from '@/lib/firestore-service';
 
-export default function EmployeeOnboardingPage() {
+const SKILLS = ['Leadership', 'Communication', 'Technical', 'Strategy', 'Creativity', 'Analytics', 'Teamwork', 'Problem Solving', 'Time Management', 'Customer Focus'];
+const LEVELS = [
+  { id: 'SENIOR', label: 'Senior / Head' },
+  { id: 'MIDDLE', label: 'Manager / Lead' },
+  { id: 'JUNIOR', label: 'Executive / Analyst' },
+];
+
+export default function EmployeeSetupPage() {
   const router = useRouter();
-  const { niyamUser, refreshUser } = useAuth();
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ role:'', level:OrgLevel.MIDDLE, skills:'', goals:'' });
+  const { niyamUser } = useAuth();
+  const [step, setStep] = useState(0);
+  const [level, setLevel] = useState('MIDDLE');
+  const [skills, setSkills] = useState<string[]>([]);
+  const [experience, setExperience] = useState('');
+  const [goals, setGoals] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const toggleSkill = (s: string) => {
+    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : prev.length < 5 ? [...prev, s] : prev);
+  };
 
   const handleComplete = async () => {
     if (!niyamUser) return;
-    setLoading(true);
+    setSubmitting(true);
+
     try {
-      const basicDna = { selectedTraits: [], synergyScore: 50, alignmentSummary: 'Initial baseline. Complete weekly check-ins to refine.', driftAreas: ['Awaiting first assessment'] };
-      await saveEmployeeDNA(niyamUser.uid, basicDna);
-      await addDNASnapshot(niyamUser.uid, { userId: niyamUser.uid, dnaSnapshot: basicDna, synergyScore: 50, trigger: 'onboarding', delta: 0, timestamp: null });
-      await updateUser(niyamUser.uid, { onboarded: true, level: formData.level });
-      await refreshUser();
+      const orgId = niyamUser.organizationId;
+      const founderDNA = orgId ? await getFounderDNA(orgId).catch(() => null) : null;
+
+      // Call AI DNA mapping
+      const res = await fetch('/api/employee-dna', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeData: { role: niyamUser.role, level, skills, experience, goals },
+          founderDNA,
+        }),
+      });
+
+      const dna = await res.json();
+
+      // Save DNA profile
+      await saveEmployeeDNA(niyamUser.uid, dna);
+
+      // Save initial snapshot to history
+      await addDNASnapshot(niyamUser.uid, {
+        traits: dna.traits || [],
+        synergyScore: dna.synergyScore || 50,
+        trigger: 'onboarding',
+      });
+
+      // Mark user as onboarded
+      await updateUser(niyamUser.uid, { onboarded: true, level });
+
       router.push('/dashboard');
-    } catch (err: any) { console.error(err); alert('Error: ' + err.message); }
-    finally { setLoading(false); }
+    } catch (err) {
+      console.error('Onboarding error:', err);
+      // Fallback: mark onboarded even if AI fails
+      try {
+        await saveEmployeeDNA(niyamUser.uid, {
+          traits: [], synergyScore: 50, driftAreas: ['Initial assessment'], strengths: ['Onboarded'],
+        });
+        await updateUser(niyamUser.uid, { onboarded: true, level });
+        router.push('/dashboard');
+      } catch (e) { console.error(e); }
+    } finally { setSubmitting(false); }
   };
 
+  const steps = [
+    // Step 0: Level
+    <div key="level" className="space-y-4">
+      <h2 className="text-xl sm:text-2xl font-black text-white">Your Level</h2>
+      <p className="text-white/40 text-sm">This helps calibrate your DNA baseline.</p>
+      <div className="space-y-3 mt-6">
+        {LEVELS.map(l => (
+          <button key={l.id} onClick={() => setLevel(l.id)} className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all ${level === l.id ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'}`}>
+            <span className="font-black text-sm sm:text-base">{l.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>,
+    // Step 1: Skills
+    <div key="skills" className="space-y-4">
+      <h2 className="text-xl sm:text-2xl font-black text-white">Core Skills</h2>
+      <p className="text-white/40 text-sm">Select up to 5 that define you.</p>
+      <div className="grid grid-cols-2 gap-2 mt-6">
+        {SKILLS.map(s => (
+          <button key={s} onClick={() => toggleSkill(s)} className={`py-3 px-4 rounded-xl border-2 text-xs sm:text-sm font-bold transition-all ${skills.includes(s) ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 text-white/50 hover:border-white/20'}`}>{s}</button>
+        ))}
+      </div>
+      <p className="text-white/20 text-xs mt-2">{skills.length}/5 selected</p>
+    </div>,
+    // Step 2: Experience + Goals
+    <div key="exp" className="space-y-4">
+      <h2 className="text-xl sm:text-2xl font-black text-white">Your Background</h2>
+      <div>
+        <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-2 block">Experience Summary</label>
+        <textarea value={experience} onChange={e => setExperience(e.target.value)} className="w-full h-28 p-4 bg-white/5 border-2 border-white/10 rounded-xl text-white text-sm placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none resize-none" placeholder="Brief summary of your professional experience..." />
+      </div>
+      <div>
+        <label className="text-xs font-bold text-white/30 uppercase tracking-widest mb-2 block">Growth Goals</label>
+        <textarea value={goals} onChange={e => setGoals(e.target.value)} className="w-full h-28 p-4 bg-white/5 border-2 border-white/10 rounded-xl text-white text-sm placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none resize-none" placeholder="What do you want to grow into at this organisation?" />
+      </div>
+    </div>,
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] translate-x-1/3 translate-y-1/4" />
-      <div className="max-w-2xl w-full bg-white rounded-[40px] shadow-2xl p-12 md:p-16 relative z-10">
-        {loading ? (
-          <div className="py-20 flex flex-col items-center text-center">
-            <div className="w-20 h-20 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8" />
-            <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Neural Sequencing...</h3>
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 sm:p-6">
+      <div className="max-w-lg w-full">
+        {/* Progress */}
+        <div className="flex gap-2 mb-8">
+          {steps.map((_, i) => (
+            <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? 'bg-amber-500' : 'bg-white/10'}`} />
+          ))}
+        </div>
+
+        <div className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-6 sm:p-8">
+          {steps[step]}
+
+          <div className="flex gap-3 mt-8">
+            {step > 0 && (
+              <button onClick={() => setStep(step - 1)} className="px-6 py-3 text-white/30 font-bold text-xs uppercase tracking-widest hover:text-white/50">Back</button>
+            )}
+            {step < steps.length - 1 ? (
+              <button onClick={() => setStep(step + 1)} className="flex-1 py-4 bg-amber-500 text-black rounded-full font-black text-xs uppercase tracking-widest hover:bg-amber-400 transition-all">Continue</button>
+            ) : (
+              <button onClick={handleComplete} disabled={submitting} className="flex-1 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-xs uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-2">
+                {submitting ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Mapping Your DNA...</> : 'Complete Setup'}
+              </button>
+            )}
           </div>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-12">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tighter">Employee DNA Mapping</h2>
-              </div>
-              <div className="flex gap-2">{[1,2,3].map(i=>(<div key={i} className={`w-8 h-1.5 rounded-full ${step>=i?'bg-indigo-600':'bg-slate-100'}`} />))}</div>
-            </div>
-
-            {step===1 && (
-              <div className="space-y-8 animate-fade-in-up">
-                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Define Your Vector.</h3></div>
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Professional Identity</label>
-                  <input type="text" value={formData.role} onChange={e=>setFormData({...formData,role:e.target.value})} placeholder="e.g. Senior Product Manager" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xl placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organizational Level</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {Object.values(OrgLevel).map(lvl=>(
-                      <button key={lvl} onClick={()=>setFormData({...formData,level:lvl})} className={`py-4 rounded-2xl border-2 font-bold text-xs uppercase tracking-widest transition-all ${formData.level===lvl?'bg-slate-900 border-slate-900 text-white shadow-xl':'bg-white border-slate-100 text-slate-400'}`}>{lvl}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step===2 && (
-              <div className="space-y-8 animate-slide-in-right">
-                <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Capabilities.</h3>
-                <textarea value={formData.skills} onChange={e=>setFormData({...formData,skills:e.target.value})} placeholder="Strategic Planning, Team Leadership, Data Analysis..." className="w-full h-48 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
-              </div>
-            )}
-
-            {step===3 && (
-              <div className="space-y-8 animate-slide-in-right">
-                <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Growth Aspirations.</h3>
-                <textarea value={formData.goals} onChange={e=>setFormData({...formData,goals:e.target.value})} placeholder="I want to develop stronger strategic thinking..." className="w-full h-48 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
-              </div>
-            )}
-
-            <div className="flex justify-between mt-12">
-              {step>1?<button onClick={()=>setStep(step-1)} className="px-8 py-4 text-slate-400 font-black text-sm uppercase tracking-widest hover:text-slate-900 transition-all">Back</button>:<div/>}
-              <button onClick={step<3?()=>setStep(step+1):handleComplete} disabled={step===1?!formData.role:step===2?!formData.skills:!formData.goals} className="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl disabled:opacity-30 active:scale-95">{step<3?'Continue':'Map My DNA'}</button>
-            </div>
-          </>
-        )}
+        </div>
       </div>
     </div>
   );

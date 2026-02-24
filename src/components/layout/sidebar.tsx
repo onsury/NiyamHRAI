@@ -22,6 +22,8 @@ export default function Sidebar() {
     { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
     { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
     { href: '/dashboard/hr', label: 'Org Neural Insights', icon: '📊' },
+    { href: '/dashboard/people-culture', label: 'People & Culture', icon: '🏛️' },
+    { href: '/dashboard/people-culture/policies', label: 'Policy Generator', icon: '📋' },
   ];
 
   const links = isFounder ? founderLinks : employeeLinks;
