@@ -15,20 +15,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!niyamUser?.onboarded) {
       router.push(niyamUser?.role === 'FOUNDER' ? '/setup/founder' : '/setup/employee');
     }
-  }, [firebaseUser, niyamUser, loading]);
+  }, [firebaseUser, niyamUser, loading, router]);
 
   if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#f8f8fa] flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
     </div>
   );
 
   if (!firebaseUser?.emailVerified || !niyamUser?.onboarded) return null;
 
   return (
-    <div className="min-h-screen bg-[#f8f8fa] flex">
+    <div className="min-h-screen bg-[#f8f8fa]">
       <Sidebar />
-      <main className="flex-1 p-8 lg:p-12 ml-0 lg:ml-[240px]">{children}</main>
+      <main className="p-4 pt-16 sm:p-6 sm:pt-6 lg:p-8 lg:pl-[272px] lg:pt-8 min-h-screen">
+        {children}
+      </main>
     </div>
   );
 }

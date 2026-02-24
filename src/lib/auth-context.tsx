@@ -108,8 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     await setDoc(doc(db, 'users', uid), userProfile);
     setNiyamUser({ uid, ...userProfile } as NiyamUser);
-
-    // Send verification email
     await sendEmailVerification(cred.user);
   };
 
