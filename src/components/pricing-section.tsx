@@ -6,7 +6,7 @@ const PLANS = [
   {
     name: 'Starter',
     tagline: 'For early-stage startups',
-    monthlyPrice: 1199,
+    monthlyPrice: 1249,
     annualPrice: 999,
     employees: 'Up to 10 employees',
     features: [
@@ -24,8 +24,8 @@ const PLANS = [
   {
     name: 'Growth',
     tagline: 'For scaling organisations',
-    monthlyPrice: 1899,
-    annualPrice: 1699,
+    monthlyPrice: 2499,
+    annualPrice: 1999,
     employees: 'Up to 100 employees',
     features: [
       'Everything in Starter',
@@ -43,8 +43,8 @@ const PLANS = [
   {
     name: 'Enterprise',
     tagline: 'For large organisations',
-    monthlyPrice: 2999,
-    annualPrice: 2799,
+    monthlyPrice: 3799,
+    annualPrice: 2999,
     employees: 'Unlimited employees',
     features: [
       'Everything in Growth',
