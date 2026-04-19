@@ -177,10 +177,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: '🧬', title: 'Founder DNA Diagnostic', desc: 'A deep-probe conversation that maps the founder\'s cognitive blueprint across 67 behavioral traits — decision patterns, values, risk appetite, and non-negotiables.' },
-              { icon: '📊', title: 'Real-Time Drift Dashboard', desc: 'See exactly where every employee stands relative to the founder benchmark. Spot misalignment before it becomes a performance issue.' },
+              { icon: '📈', title: 'Performance Timeline', desc: 'Daily, weekly, monthly, quarterly, half-yearly, and yearly views of every employee’s alignment trajectory — all in one dashboard. No more quarterly-review-week scramble.' },
               { icon: '🧭', title: 'AI Mentorship Engine', desc: 'Every employee gets a weekly AI mentor that understands both the founder\'s DNA and their own — providing personalised guidance that no generic HR tool can match.' },
               { icon: '⚡', title: 'Neural Honing Lab', desc: 'Scenario-based simulations calibrated to the founder\'s first principles. Employees practice real decisions, get evaluated against the founder\'s thinking patterns.' },
-              { icon: '🔥', title: 'Burnout Detection', desc: 'AI monitors check-in patterns, sentiment shifts, and engagement drops — flagging potential burnout before it costs you a valuable team member.' },
+              { icon: '⚖️', title: 'Three-Way Assessment', desc: 'AI synergy score, HR rating, and Manager rating — side by side. When the three disagree by more than 25 points, NiyamAI surfaces the variance. The disagreement itself is the signal worth acting on.' },
               { icon: '📈', title: 'Org-Wide Intelligence', desc: 'HR dashboards showing team synergy scores, critical drift alerts, top performers, stagnation signals, and strategic recommendations — all in real time.' },
             ].map((f, i) => (
               <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-white/10 hover:bg-white/[0.05] transition-all group">
@@ -261,7 +261,7 @@ export default function LandingPage() {
               {
                 name: 'Growth', desc: 'For scaling teams that need deep alignment.',
                 price: billing === 'monthly' ? '₹2,499' : '₹1,999', unit: 'per employee / month',
-                features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Neural Honing Lab', 'Burnout detection', 'HR intelligence dashboard', 'Priority support'],
+                features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Neural Honing Lab', 'HR intelligence dashboard', 'Priority support'],
                 cta: 'Start Free Trial', highlight: true,
               },
               {
