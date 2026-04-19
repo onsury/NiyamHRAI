@@ -43,7 +43,7 @@ const PLANS = [
   {
     name: 'Enterprise',
     tagline: 'For large organisations',
-    monthlyPrice: 3799,
+    monthlyPrice: 3749,
     annualPrice: 2999,
     employees: 'Unlimited employees',
     features: [
