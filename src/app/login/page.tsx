@@ -1,12 +1,13 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
 const ROLES = ['FOUNDER', 'EMPLOYEE', 'HR_ADMIN', 'MANAGER'];
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn, signUp, firebaseUser, niyamUser, loading } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -16,10 +17,49 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Invite state
+  const [inviteToken, setInviteToken] = useState<string>('');
+  const [invite, setInvite] = useState<{ orgName: string; role: string; invitedByName: string } | null>(null);
+  const [inviteError, setInviteError] = useState<string>('');
+  const [validating, setValidating] = useState(false);
+
+  // Read invite token from URL
+  useEffect(() => {
+    const token = searchParams?.get('invite');
+    if (!token) return;
+    setInviteToken(token);
+    setIsSignUp(true);
+    setValidating(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/invite/validate?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (!res.ok) {
+          setInviteError(
+            data.error === 'EXPIRED' ? 'This invite has expired.'
+              : data.error === 'ALREADY_USED' ? 'This invite has already been used.'
+              : data.error === 'NOT_FOUND' ? 'Invite not found.'
+              : 'Invite could not be loaded.'
+          );
+          return;
+        }
+        setInvite({ orgName: data.orgName, role: data.role, invitedByName: data.invitedByName });
+        setEmail(data.email);
+        setRole(data.role);
+      } catch (err: any) {
+        setInviteError('Could not validate invite. Please check the link.');
+      } finally { setValidating(false); }
+    })();
+  }, [searchParams]);
+
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && firebaseUser && firebaseUser.emailVerified && niyamUser) {
-      router.push(niyamUser.onboarded ? '/dashboard' : niyamUser.role === 'FOUNDER' ? '/setup/founder' : '/setup/employee');
+      router.push(
+        niyamUser.onboarded
+          ? '/dashboard'
+          : niyamUser.role === 'FOUNDER' ? '/setup/founder' : '/setup/employee'
+      );
     }
   }, [loading, firebaseUser, niyamUser, router]);
 
@@ -28,7 +68,10 @@ export default function LoginPage() {
     setError(''); setSubmitting(true);
     try {
       if (isSignUp) {
-        await signUp(email, password, role, orgName);
+        await signUp(email, password, role, {
+          orgName: role === 'FOUNDER' ? orgName : undefined,
+          inviteToken: inviteToken || undefined,
+        });
         router.push('/verify-email');
       } else {
         try {
@@ -49,9 +92,14 @@ export default function LoginPage() {
       else if (code === 'auth/weak-password') setError('Password must be at least 6 characters.');
       else if (code === 'auth/invalid-email') setError('Please enter a valid email address.');
       else if (code === 'auth/user-not-found') setError('No account found with this email.');
+      else if (err.message === 'INVITE_REQUIRED') setError('You need an invitation link to sign up with this role. Ask your admin to send one.');
+      else if (err.message === 'EMAIL_MISMATCH') setError('This invite is for a different email address.');
+      else if (err.message === 'EXPIRED' || err.message === 'ALREADY_USED') setError('This invitation is no longer valid.');
       else if (err.message !== 'EMAIL_NOT_VERIFIED') setError(err.message || 'An unexpected error occurred.');
     } finally { setSubmitting(false); }
   };
+
+  const inviteLocked = Boolean(invite);
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
@@ -59,7 +107,6 @@ export default function LoginPage() {
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3" />
 
       <div className="max-w-md w-full bg-white/[0.03] border border-white/[0.06] rounded-3xl sm:rounded-[40px] shadow-2xl p-6 sm:p-10 md:p-12 relative z-10">
-        {/* Logo */}
         <button onClick={() => router.push('/')} className="flex items-center gap-3 mb-8 sm:mb-10">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-black text-xl sm:text-2xl shadow-lg shadow-amber-500/20">N</div>
           <div>
@@ -68,14 +115,30 @@ export default function LoginPage() {
           </div>
         </button>
 
-        {/* Toggle */}
-        <div className="flex bg-white/5 rounded-full p-1 mb-6 sm:mb-8">
-          <button onClick={() => { setIsSignUp(false); setError(''); }} className={`flex-1 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-widest transition-all ${!isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Sign In</button>
-          <button onClick={() => { setIsSignUp(true); setError(''); }} className={`flex-1 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-widest transition-all ${isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Create Account</button>
-        </div>
+        {/* Invite banner */}
+        {validating && (
+          <div className="mb-5 p-4 bg-white/5 rounded-xl text-white/60 text-xs">Validating invitation…</div>
+        )}
+        {inviteError && (
+          <div className="mb-5 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm font-bold">{inviteError}</div>
+        )}
+        {invite && !inviteError && (
+          <div className="mb-5 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-1">Invited by {invite.invitedByName}</p>
+            <p className="text-sm text-white font-semibold">Join <span className="text-amber-400">{invite.orgName}</span> as <span className="text-amber-400">{invite.role.replace('_', ' ')}</span></p>
+          </div>
+        )}
+
+        {/* Sign in / Sign up toggle — hidden when invite forces signup */}
+        {!inviteLocked && (
+          <div className="flex bg-white/5 rounded-full p-1 mb-6 sm:mb-8">
+            <button onClick={() => { setIsSignUp(false); setError(''); }} className={`flex-1 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-widest transition-all ${!isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Sign In</button>
+            <button onClick={() => { setIsSignUp(true); setError(''); }} className={`flex-1 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-widest transition-all ${isSignUp ? 'bg-white text-black shadow-lg' : 'text-white/40'}`}>Create Account</button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          {isSignUp && (
+          {isSignUp && !inviteLocked && (
             <>
               <div className="mb-5">
                 <label className="text-[10px] sm:text-xs font-bold text-white/30 uppercase tracking-widest mb-2 block">Your Role</label>
@@ -84,6 +147,11 @@ export default function LoginPage() {
                     <button type="button" key={r} onClick={() => setRole(r)} className={`py-2.5 sm:py-3 rounded-xl border-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${role === r ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'}`}>{r.replace('_', ' ')}</button>
                   ))}
                 </div>
+                {role !== 'FOUNDER' && (
+                  <p className="mt-3 text-[11px] text-white/40 leading-relaxed">
+                    Non-founder signups require an invitation link from an admin. Ask your founder or HR admin to send you one.
+                  </p>
+                )}
               </div>
               {role === 'FOUNDER' && (
                 <div className="mb-5">
@@ -97,7 +165,15 @@ export default function LoginPage() {
           <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
             <div>
               <label className="text-[10px] sm:text-xs font-bold text-white/30 uppercase tracking-widest mb-2 block">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="founder@company.com" required className="w-full p-3 sm:p-4 bg-white/5 border-2 border-white/10 rounded-xl sm:rounded-2xl text-white font-bold text-sm sm:text-base placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none" />
+              <input
+                type="email"
+                value={email}
+                onChange={e => !inviteLocked && setEmail(e.target.value)}
+                placeholder="founder@company.com"
+                required
+                readOnly={inviteLocked}
+                className={`w-full p-3 sm:p-4 bg-white/5 border-2 border-white/10 rounded-xl sm:rounded-2xl text-white font-bold text-sm sm:text-base placeholder:text-white/15 focus:border-amber-500/50 transition-all outline-none ${inviteLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+              />
             </div>
             <div>
               <label className="text-[10px] sm:text-xs font-bold text-white/30 uppercase tracking-widest mb-2 block">Password</label>
@@ -109,8 +185,12 @@ export default function LoginPage() {
             <div className="p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-xl sm:rounded-2xl text-red-400 text-xs sm:text-sm font-bold mb-5 sm:mb-6">{error}</div>
           )}
 
-          <button type="submit" disabled={submitting || !email || !password || (isSignUp && role === 'FOUNDER' && !orgName)} className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-xs sm:text-sm uppercase tracking-widest hover:shadow-xl hover:shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3">
-            {submitting ? <><div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</> : isSignUp ? 'Create Account' : 'Sign In'}
+          <button
+            type="submit"
+            disabled={submitting || !email || !password || (isSignUp && role === 'FOUNDER' && !inviteLocked && !orgName) || Boolean(inviteError)}
+            className="w-full py-4 sm:py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-xs sm:text-sm uppercase tracking-widest hover:shadow-xl hover:shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-3"
+          >
+            {submitting ? <><div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</> : isSignUp ? (inviteLocked ? 'Accept invite' : 'Create Account') : 'Sign In'}
           </button>
         </form>
 
@@ -119,5 +199,13 @@ export default function LoginPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f]" />}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

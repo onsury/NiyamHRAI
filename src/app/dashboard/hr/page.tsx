@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getOrgUsers, getEmployeeDNA } from '@/lib/firestore-service';
+import { useRouter } from 'next/navigation';
 
 interface EmployeeRow {
   uid: string;
@@ -13,10 +14,13 @@ interface EmployeeRow {
   driftAreas: string[];
   strengths: string[];
   onboarded: boolean;
+  hrScore?: number;
+  mgrScore?: number;
 }
 
 export default function HRDashboardPage() {
   const { niyamUser } = useAuth();
+  const router = useRouter();
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -42,6 +46,8 @@ export default function HRDashboardPage() {
               driftAreas: dna?.driftAreas || [],
               strengths: dna?.strengths || [],
               onboarded: u.onboarded || false,
+              hrScore: u.hrRating?.score,
+              mgrScore: u.managerRating?.score,
             };
           })
         );
@@ -57,8 +63,7 @@ export default function HRDashboardPage() {
     setGenerating(true);
     try {
       const avgSynergy = employees.length > 0 ? Math.round(employees.reduce((s, e) => s + e.synergyScore, 0) / employees.length) : 50;
-      const criticalDrift = employees.filter(e => e.synergyScore < 40).length;
-      const topPerformer = employees.sort((a, b) => b.synergyScore - a.synergyScore)[0];
+      const topPerformer = [...employees].sort((a, b) => b.synergyScore - a.synergyScore)[0];
 
       const res = await fetch('/api/report', {
         method: 'POST',
@@ -86,6 +91,17 @@ export default function HRDashboardPage() {
   const criticalDrift = employees.filter(e => e.synergyScore < 40).length;
   const onboarded = employees.filter(e => e.onboarded).length;
 
+  // Variance alerts — where AI disagrees with HR or Manager by >25 points
+  const varianceAlerts = employees
+    .map(e => {
+      const vHR = e.hrScore != null ? Math.abs(e.synergyScore - e.hrScore) : null;
+      const vMgr = e.mgrScore != null ? Math.abs(e.synergyScore - e.mgrScore) : null;
+      const worst = Math.max(vHR || 0, vMgr || 0);
+      return { ...e, vHR, vMgr, worst };
+    })
+    .filter(e => (e.vHR != null && e.vHR > 25) || (e.vMgr != null && e.vMgr > 25))
+    .sort((a, b) => b.worst - a.worst);
+
   if (loading) return (
     <div className="flex items-center justify-center py-20">
       <div className="w-10 h-10 border-4 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
@@ -100,7 +116,7 @@ export default function HRDashboardPage() {
           <p className="text-slate-500 text-sm mt-1">Organisation-wide alignment analytics.</p>
         </div>
         <button onClick={generateReport} disabled={generating} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 flex items-center gap-2 self-start">
-          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating...</> : '📊 Generate Report'}
+          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating…</> : '📊 Generate Report'}
         </button>
       </div>
 
@@ -124,6 +140,37 @@ export default function HRDashboardPage() {
         </div>
       </div>
 
+      {/* Variance alerts — the three-way differentiator */}
+      {varianceAlerts.length > 0 && (
+        <div className="bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white mb-6 sm:mb-8 shadow-xl">
+          <div className="flex items-start justify-between mb-4 gap-4">
+            <div>
+              <p className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-widest mb-1">Three-way Variance Alert</p>
+              <h2 className="text-lg sm:text-xl font-black">{varianceAlerts.length} {varianceAlerts.length === 1 ? 'assessment disagrees' : 'assessments disagree'} — investigate</h2>
+              <p className="text-white/70 text-sm mt-1">AI synergy differs from HR rating or Manager rating by more than 25 points.</p>
+            </div>
+            <button onClick={() => router.push('/dashboard/team')} className="px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+              Team page →
+            </button>
+          </div>
+          <div className="space-y-2">
+            {varianceAlerts.slice(0, 5).map(e => (
+              <div key={e.uid} className="bg-white/10 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold">{e.displayName}</p>
+                  <p className="text-[11px] text-white/60">{e.role.replace('_', ' ')} · {e.level}</p>
+                </div>
+                <div className="flex gap-3 text-center">
+                  <Pill label="AI" value={e.synergyScore} />
+                  <Pill label="HR" value={e.hrScore} />
+                  <Pill label="Mgr" value={e.mgrScore} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* AI Report */}
       {report && (
         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white mb-6 sm:mb-8">
@@ -146,12 +193,15 @@ export default function HRDashboardPage() {
 
       {/* Employee Grid */}
       <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-100">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-base sm:text-lg font-black text-slate-900">Employee Grid</h2>
+          <button onClick={() => router.push('/dashboard/team')} className="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+            Manage team →
+          </button>
         </div>
 
         {employees.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 text-sm">No employees yet. Invite team members to join your organisation.</div>
+          <div className="p-8 text-center text-slate-400 text-sm">No employees yet. Invite team members from the Team page.</div>
         ) : (
           <div className="divide-y divide-slate-100">
             {employees.map(emp => (
@@ -174,7 +224,7 @@ export default function HRDashboardPage() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className={`text-xl font-black ${emp.synergyScore >= 70 ? 'text-emerald-500' : emp.synergyScore >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{emp.synergyScore}%</div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase">Synergy</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">AI Synergy</div>
                   </div>
                   <div className={`w-3 h-3 rounded-full ${emp.onboarded ? 'bg-emerald-500' : 'bg-amber-400'}`} title={emp.onboarded ? 'Onboarded' : 'Pending'} />
                 </div>
@@ -183,6 +233,15 @@ export default function HRDashboardPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function Pill({ label, value }: { label: string; value?: number }) {
+  return (
+    <div className="min-w-[48px]">
+      <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{label}</div>
+      <div className="text-base font-black">{value != null ? `${value}%` : '—'}</div>
     </div>
   );
 }

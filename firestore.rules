@@ -27,52 +27,82 @@ service cloud.firestore {
       return isSignedIn() && getUserData().organizationId == orgId && (getUserData().role == 'FOUNDER' || getUserData().role == 'HR_ADMIN');
     }
 
+    function isManagerOf(employeeUid) {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(employeeUid)).data.managerId == request.auth.uid;
+    }
+
     // === Users Collection ===
     match /users/{userId} {
-      // Read: own profile OR admin of their org
-      allow read: if isOwner(userId) || (isSignedIn() && isAdminOfOrg(resource.data.organizationId));
+      // Read: own profile, admin of same org, or manager of this user
+      allow read: if isOwner(userId)
+        || (isSignedIn() && isAdminOfOrg(resource.data.organizationId))
+        || (isSignedIn() && resource.data.managerId == request.auth.uid);
 
       // Create: only during signup (own UID)
       allow create: if isOwner(userId);
 
-      // Update: own profile, but CANNOT change role
-      allow update: if isOwner(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+      // Update: own profile, but CANNOT change role or organizationId
+      // OR admin updating non-role fields on an org member
+      allow update: if (isOwner(userId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'organizationId']))
+        || (isSignedIn() && isAdminOfOrg(resource.data.organizationId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        || (isSignedIn() && resource.data.managerId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['managerRating']));
 
-      // Delete: own profile only
-      allow delete: if isOwner(userId);
+      // Delete: own profile or admin
+      allow delete: if isOwner(userId) || (isSignedIn() && isAdminOfOrg(resource.data.organizationId));
 
       // === Employee DNA ===
       match /employeeDNA/{docId} {
-        allow read: if isOwner(userId) || isAdminOfOrg(resource.data.organizationId || 'none');
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
         allow write: if isOwner(userId);
       }
 
-      // === DNA History (Immutable — no updates/deletes) ===
+      // === DNA History (Immutable) ===
       match /dnaHistory/{docId} {
-        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
       }
 
       // === Check-ins ===
       match /checkIns/{docId} {
-        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
       }
 
       // === Honing Sessions ===
       match /honingSessions/{docId} {
-        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
       }
 
       // === Reports ===
       match /reports/{docId} {
-        allow read: if isOwner(userId) || isAdminOfOrg(getUserData().organizationId);
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
+      }
+
+      // === Rating History (server-written, immutable; read by owner, admins, manager) ===
+      match /ratingHistory/{docId} {
+        allow read: if isOwner(userId)
+          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || (isSignedIn() && isManagerOf(userId));
+        allow write: if false;
       }
     }
 
@@ -95,17 +125,25 @@ service cloud.firestore {
         allow write: if isAdminOfOrg(orgId);
       }
 
-      // Org Analytics
+      // Org Analytics (server-only write)
       match /orgAnalytics/{docId} {
         allow read: if isAdminOfOrg(orgId);
-        allow write: if false; // server-only
+        allow write: if false;
       }
 
-      // Settings (White-label, billing)
+      // Settings (white-label, billing)
       match /settings/{docId} {
         allow read: if belongsToOrg(orgId);
         allow write: if isFounderOfOrg(orgId);
       }
+    }
+
+    // === Invites (server-managed via Admin SDK; clients can only list their own sent invites) ===
+    match /invites/{token} {
+      // Admins can list invites for their org (used on the team page)
+      allow read: if isSignedIn() && isAdminOfOrg(resource.data.organizationId);
+      // Creation, acceptance, and deletion all go through the server (Admin SDK bypasses rules)
+      allow write: if false;
     }
 
     // Deny everything else

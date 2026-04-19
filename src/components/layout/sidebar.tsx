@@ -8,7 +8,10 @@ export default function Sidebar() {
   const router = useRouter();
   const { niyamUser, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isFounder = niyamUser?.role === 'FOUNDER' || niyamUser?.role === 'HR_ADMIN';
+
+  const role = niyamUser?.role;
+  const isFounderOrHR = role === 'FOUNDER' || role === 'HR_ADMIN';
+  const isManager = role === 'MANAGER';
 
   const employeeLinks = [
     { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
@@ -16,17 +19,30 @@ export default function Sidebar() {
     { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
     { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
     { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
+    { href: '/dashboard/performance', label: 'My Timeline', icon: '📈' },
+  ];
+
+  const managerLinks = [
+    { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
+    { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
+    { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
+    { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
+    { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
+    { href: '/dashboard/manager/team', label: 'My Team', icon: '👥' },
+    { href: '/dashboard/performance', label: 'Timeline', icon: '📈' },
   ];
 
   const founderLinks = [
     { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
     { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
     { href: '/dashboard/hr', label: 'Org Neural Insights', icon: '📊' },
+    { href: '/dashboard/team', label: 'Team Members', icon: '👥' },
+    { href: '/dashboard/performance', label: 'Performance Timeline', icon: '📈' },
     { href: '/dashboard/people-culture', label: 'People & Culture', icon: '🏛️' },
     { href: '/dashboard/people-culture/policies', label: 'Policy Generator', icon: '📋' },
   ];
 
-  const links = isFounder ? founderLinks : employeeLinks;
+  const links = isFounderOrHR ? founderLinks : isManager ? managerLinks : employeeLinks;
 
   const navigate = (href: string) => {
     router.push(href);
@@ -44,14 +60,13 @@ export default function Sidebar() {
               <p className="text-[9px] sm:text-[10px] font-bold text-amber-600 tracking-widest">NEURAL CLOUD · V1.0</p>
             </div>
           </div>
-          {/* Close button — mobile only */}
           <button onClick={() => setMobileOpen(false)} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       </div>
 
-      <nav className="flex-1 p-3 sm:p-4 space-y-1">
+      <nav className="flex-1 p-3 sm:p-4 space-y-1 overflow-y-auto">
         {links.map(link => {
           const active = pathname === link.href;
           return (
@@ -76,22 +91,18 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile hamburger button */}
       <button onClick={() => setMobileOpen(true)} className="lg:hidden fixed top-4 left-4 z-50 w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-all">
         <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
       </button>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Mobile sidebar */}
       <aside className={`lg:hidden fixed left-0 top-0 h-full w-[280px] bg-white border-r border-slate-200 flex flex-col z-50 transform transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {sidebarContent}
       </aside>
 
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-[240px] bg-white border-r border-slate-200 flex-col z-40">
         {sidebarContent}
       </aside>
