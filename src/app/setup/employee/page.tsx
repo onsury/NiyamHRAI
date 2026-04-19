@@ -13,7 +13,7 @@ const LEVELS = [
 
 export default function EmployeeSetupPage() {
   const router = useRouter();
-  const { niyamUser } = useAuth();
+  const { niyamUser, refreshUser } = useAuth();
   const [step, setStep] = useState(0);
   const [level, setLevel] = useState('MIDDLE');
   const [skills, setSkills] = useState<string[]>([]);
@@ -58,6 +58,9 @@ export default function EmployeeSetupPage() {
       // Mark user as onboarded
       await updateUser(niyamUser.uid, { onboarded: true, level });
 
+      // Re-fetch profile so auth-context has onboarded:true before navigation
+      await refreshUser();
+
       router.push('/dashboard');
     } catch (err) {
       console.error('Onboarding error:', err);
@@ -67,6 +70,7 @@ export default function EmployeeSetupPage() {
           traits: [], synergyScore: 50, driftAreas: ['Initial assessment'], strengths: ['Onboarded'],
         });
         await updateUser(niyamUser.uid, { onboarded: true, level });
+        await refreshUser();
         router.push('/dashboard');
       } catch (e) { console.error(e); }
     } finally { setSubmitting(false); }
