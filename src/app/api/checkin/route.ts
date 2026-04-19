@@ -45,7 +45,7 @@ Strengths: ${(employeeDNA.strengths || []).join(', ')}
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
+        max_tokens: 2000,
         system: `You are NiyamAI, a founder-aligned AI mentor. Your job is to help employees grow closer to the founder's thinking patterns. Be warm but direct. Use the founder's own language and principles when giving advice. Always provide actionable, specific guidance.
 
 ${founderContext}
@@ -68,12 +68,23 @@ Respond in this JSON format:
     const data = await response.json();
     const text = data.content?.[0]?.text || '';
 
+    // Robust JSON extraction: find first { and matching last }
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    const jsonSlice = (firstBrace !== -1 && lastBrace > firstBrace)
+      ? text.substring(firstBrace, lastBrace + 1)
+      : text;
+
     try {
-      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const parsed = JSON.parse(jsonSlice);
       return NextResponse.json(parsed);
-    } catch {
+    } catch (parseErr) {
+      console.error('Checkin JSON parse failed, returning Claude text as mentorship:', parseErr);
+      // If parse fails but Claude returned prose, use that prose as the mentorship message
       return NextResponse.json({
-        mentorship: text || 'Your reflection has been noted. Keep connecting your decisions to the founder\'s vision.',
+        mentorship: text && text.length > 40
+          ? text.replace(/```json|```/g, '').trim()
+          : 'Your reflection has been noted. Keep connecting your decisions to the founder\'s vision.',
         synergyDelta: 1,
         driftAreas: ['Alignment Pending'],
         strengths: ['Consistency'],
