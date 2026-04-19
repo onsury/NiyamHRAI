@@ -244,7 +244,7 @@ export default function LandingPage() {
               {
                 name: 'Starter', 
                 desc: 'Up to 10 employees',
-                price: billing === 'monthly' ? '₹499' : '₹399', 
+                price: billing === 'monthly' ? '₹1,249' : '₹999', 
                 unit: 'per employee / month',
                 features: [
                   'CorePersonaDNA Founder Diagnostic',
@@ -260,7 +260,7 @@ export default function LandingPage() {
               },
               {
                 name: 'Growth', desc: 'For scaling teams that need deep alignment.',
-                price: billing === 'monthly' ? '₹1,499' : '₹1,199', unit: 'per employee / month',
+                price: billing === 'monthly' ? '₹2,499' : '₹1,999', unit: 'per employee / month',
                 features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Neural Honing Lab', 'Burnout detection', 'HR intelligence dashboard', 'Priority support'],
                 cta: 'Start Free Trial', highlight: true,
               },
