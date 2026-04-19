@@ -6,8 +6,8 @@ const PLANS = [
   {
     name: 'Starter',
     tagline: 'For early-stage startups',
-    monthlyPrice: 499,
-    annualPrice: 399,
+    monthlyPrice: 1199,
+    annualPrice: 999,
     employees: 'Up to 10 employees',
     features: [
       'CorePersonaDNA Founder Diagnostic',
@@ -24,8 +24,8 @@ const PLANS = [
   {
     name: 'Growth',
     tagline: 'For scaling organisations',
-    monthlyPrice: 1499,
-    annualPrice: 1199,
+    monthlyPrice: 1899,
+    annualPrice: 1699,
     employees: 'Up to 100 employees',
     features: [
       'Everything in Starter',
@@ -43,8 +43,8 @@ const PLANS = [
   {
     name: 'Enterprise',
     tagline: 'For large organisations',
-    monthlyPrice: 999,
-    annualPrice: 799,
+    monthlyPrice: 2999,
+    annualPrice: 2799,
     employees: 'Unlimited employees',
     features: [
       'Everything in Growth',
