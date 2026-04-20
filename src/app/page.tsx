@@ -335,26 +335,34 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Product</h4>
               <ul className="space-y-2 text-white/30 text-sm">
-                {['Founder Diagnostic', 'Employee Mapping', 'AI Mentorship', 'Honing Lab', 'HR Dashboard'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+                <li><a href="#problem" className="hover:text-white/60 transition-colors">Founder Diagnostic</a></li>
+                <li><a href="#how-it-works" className="hover:text-white/60 transition-colors">Employee Mapping</a></li>
+                <li><a href="#features" className="hover:text-white/60 transition-colors">AI Mentorship</a></li>
+                <li><a href="#features" className="hover:text-white/60 transition-colors">Honing Lab</a></li>
+                <li><a href="#pricing" className="hover:text-white/60 transition-colors">Pricing</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Company</h4>
               <ul className="space-y-2 text-white/30 text-sm">
-                {['About', 'Blog', 'Careers', 'Contact', 'Press Kit'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+                <li><a href="/about" className="hover:text-white/60 transition-colors">About</a></li>
+                <li><a href="/contact" className="hover:text-white/60 transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Legal</h4>
               <ul className="space-y-2 text-white/30 text-sm">
-                {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR', 'Security'].map(l => (<li key={l} className="hover:text-white/60 transition-colors cursor-pointer">{l}</li>))}
+                <li><a href="/privacy" className="hover:text-white/60 transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-white/60 transition-colors">Terms of Service</a></li>
+                <li><a href="/security" className="hover:text-white/60 transition-colors">Security</a></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/20 text-sm">© 2026 NiyamAI by SmartDNA Business Intelligence. All rights reserved.</p>
             <div className="flex gap-6 text-white/20">
-              {['Twitter', 'LinkedIn', 'Email'].map(s => (<span key={s} className="text-sm hover:text-white/40 transition-colors cursor-pointer">{s}</span>))}
+              <a href="https://www.linkedin.com/in/onsury" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white/40 transition-colors">LinkedIn</a>
+              <a href="mailto:onsury@gmail.com" className="text-sm hover:text-white/40 transition-colors">Email</a>
             </div>
           </div>
         </div>
