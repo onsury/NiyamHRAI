@@ -13,14 +13,13 @@ export default function LandingPage() {
     <div className="bg-[#0a0a0f] text-white selection:bg-amber-500/30 overflow-x-hidden">
 
       {/* === NAV === */}
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
-      <div className="flex items-center gap-3">
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-3 flex justify-between items-center">
+      <div className="flex items-center">
           <img 
             src="/niyamhr-logo.png" 
-            alt="NiyamHR logo" 
-            className="h-12 md:h-14 w-auto object-contain"
+            alt="NiyamHR — AI that powers people" 
+            className="h-16 md:h-20 w-auto object-contain"
           />
-          <span className="text-xl font-black tracking-tight">NiyamHR</span>
         </div>
         <div className="hidden lg:flex gap-10 items-center">
           {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
@@ -330,13 +329,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="mb-4">
                 <img 
                   src="/niyamhr-logo.png" 
-                  alt="NiyamHR logo" 
-                  className="h-12 w-auto object-contain"
+                  alt="NiyamHR — AI that powers people" 
+                  className="h-20 w-auto object-contain"
                 />
-                <span className="text-xl font-black">NiyamHR</span>
               </div>
               <p className="text-white/30 text-sm leading-relaxed">The AI-powered alignment engine for founder-led organisations.</p>
             </div>
