@@ -14,9 +14,13 @@ export default function LandingPage() {
 
       {/* === NAV === */}
       <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-amber-500/20">N</div>
-          <span className="text-xl font-black tracking-tight">NiyamAI</span>
+      <div className="flex items-center gap-3">
+          <img 
+            src="/niyamhr-logo.png" 
+            alt="NiyamHR logo" 
+            className="h-12 md:h-14 w-auto object-contain"
+          />
+          <span className="text-xl font-black tracking-tight">NiyamHR</span>
         </div>
         <div className="hidden lg:flex gap-10 items-center">
           {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
@@ -325,10 +329,14 @@ export default function LandingPage() {
       <footer className="py-16 px-6 lg:px-16 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div>
+          <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-                <span className="text-xl font-black">NiyamAI</span>
+                <img 
+                  src="/niyamhr-logo.png" 
+                  alt="NiyamHR logo" 
+                  className="h-12 w-auto object-contain"
+                />
+                <span className="text-xl font-black">NiyamHR</span>
               </div>
               <p className="text-white/30 text-sm leading-relaxed">The AI-powered alignment engine for founder-led organisations.</p>
             </div>
@@ -359,7 +367,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/20 text-sm">© 2026 NiyamAI by SmartDNA Business Intelligence. All rights reserved.</p>
+          <p className="text-white/20 text-sm">© 2026 NiyamHR by SmartDNA Business Intelligence. All rights reserved.</p>
             <div className="flex gap-6 text-white/20">
               <a href="https://www.linkedin.com/in/onsury" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white/40 transition-colors">LinkedIn</a>
               <a href="mailto:onsury@gmail.com" className="text-sm hover:text-white/40 transition-colors">Email</a>
