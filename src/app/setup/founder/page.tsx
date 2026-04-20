@@ -23,10 +23,24 @@ export default function FounderSetupPage() {
       });
       await updateOrganization(orgId, { name: formData.orgName, industry: formData.industry });
       await updateUser(niyamUser.uid, { onboarded: true });
-      await refreshUser();
+
+      // Try to refresh auth state, but don't block navigation if it fails.
+      // Known issue: firebaseUser.reload() can throw if the user object has
+      // gone stale after the updateUser() re-render. Dashboard will re-fetch
+      // the profile on mount anyway, so a failed refresh here is cosmetic.
+      try {
+        await refreshUser();
+      } catch (refreshErr) {
+        console.warn('[founder-setup] refreshUser failed, continuing to dashboard:', refreshErr);
+      }
+
       router.push('/dashboard');
-    } catch (err: any) { console.error(err); alert('Error: ' + err.message); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      console.error(err);
+      alert('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canProceed = () => {
