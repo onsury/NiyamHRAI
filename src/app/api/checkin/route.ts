@@ -10,8 +10,12 @@ export async function POST(req: NextRequest) {
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
 
+    // DIAGNOSTIC: log whether key is present (not the value)
+    console.log('[checkin] CLAUDE_API_KEY present:', !!CLAUDE_KEY, 'length:', CLAUDE_KEY?.length || 0);
+
     // If no Claude key, return structured fallback
     if (!CLAUDE_KEY) {
+      console.warn('[checkin] No CLAUDE_API_KEY — returning no-key fallback');
       return NextResponse.json({
         mentorship: `Thank you for your reflection, ${userName || 'team member'}. Your awareness of this week's challenges shows growth. Focus on connecting your daily decisions to the founder's core principles. Next week, try to identify one specific moment where you applied the organisation's values in a tough situation.`,
         synergyDelta: 2,
@@ -65,8 +69,35 @@ Respond in this JSON format:
       }),
     });
 
+    // DIAGNOSTIC: check HTTP status BEFORE parsing
+    console.log('[checkin] anthropic HTTP status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error('[checkin] anthropic API error body:', errorBody);
+      throw new Error(`Anthropic API returned ${response.status}: ${errorBody.slice(0, 500)}`);
+    }
+
     const data = await response.json();
-    const text = data.content?.[0]?.text || '';
+
+    // DIAGNOSTIC: log the response structure
+    console.log('[checkin] anthropic response structure:', {
+      hasContent: !!data.content,
+      contentLength: data.content?.length || 0,
+      firstBlockType: data.content?.[0]?.type,
+      stopReason: data.stop_reason,
+      usage: data.usage,
+    });
+
+    const text = data.content?.[0]?.text ?? '';
+
+    // DIAGNOSTIC: log what we got from Claude
+    console.log('[checkin] claude text length:', text.length, 'first 200 chars:', text.slice(0, 200));
+
+    if (!text || text.trim().length === 0) {
+      console.error('[checkin] Claude returned empty text. Full data:', JSON.stringify(data).slice(0, 1000));
+      throw new Error('Claude returned empty response');
+    }
 
     // Robust JSON extraction: find first { and matching last }
     const firstBrace = text.indexOf('{');
@@ -79,8 +110,7 @@ Respond in this JSON format:
       const parsed = JSON.parse(jsonSlice);
       return NextResponse.json(parsed);
     } catch (parseErr) {
-      console.error('Checkin JSON parse failed, returning Claude text as mentorship:', parseErr);
-      // If parse fails but Claude returned prose, use that prose as the mentorship message
+      console.error('[checkin] JSON parse failed. Slice was:', jsonSlice.slice(0, 500));
       return NextResponse.json({
         mentorship: text && text.length > 40
           ? text.replace(/```json|```/g, '').trim()
@@ -91,7 +121,7 @@ Respond in this JSON format:
       });
     }
   } catch (err: any) {
-    console.error('Check-in API error:', err);
+    console.error('[checkin] Top-level error:', err.message, err.stack?.slice(0, 500));
     return NextResponse.json({
       mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable — your growth matters and we\'ll analyse this soon.',
       synergyDelta: 0,

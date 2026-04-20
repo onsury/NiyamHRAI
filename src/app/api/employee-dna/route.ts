@@ -6,7 +6,12 @@ export async function POST(req: NextRequest) {
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
 
+    // DIAGNOSTIC: log whether key is present (not the value)
+    console.log('[employee-dna] CLAUDE_API_KEY present:', !!CLAUDE_KEY, 'length:', CLAUDE_KEY?.length || 0);
+    console.log('[employee-dna] founderDNA present:', !!founderDNA);
+
     if (!CLAUDE_KEY || !founderDNA) {
+      console.warn('[employee-dna] Missing key or founderDNA — returning baseline fallback');
       // Generate baseline DNA without AI
       const baseTraits = (founderDNA?.signatureTraits || []).map((ft: any) => ({
         name: ft.name,
@@ -59,8 +64,35 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
       }),
     });
 
+    // DIAGNOSTIC: check HTTP status BEFORE parsing
+    console.log('[employee-dna] anthropic HTTP status:', res.status, res.statusText);
+
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error('[employee-dna] anthropic API error body:', errorBody);
+      throw new Error(`Anthropic API returned ${res.status}: ${errorBody.slice(0, 500)}`);
+    }
+
     const data = await res.json();
-    const text = data.content?.[0]?.text || '';
+
+    // DIAGNOSTIC: log the response structure
+    console.log('[employee-dna] anthropic response structure:', {
+      hasContent: !!data.content,
+      contentLength: data.content?.length || 0,
+      firstBlockType: data.content?.[0]?.type,
+      stopReason: data.stop_reason,
+      usage: data.usage,
+    });
+
+    const text = data.content?.[0]?.text ?? '';
+
+    // DIAGNOSTIC: log what we got from Claude
+    console.log('[employee-dna] claude text length:', text.length, 'first 200 chars:', text.slice(0, 200));
+
+    if (!text || text.trim().length === 0) {
+      console.error('[employee-dna] Claude returned empty text. Full data:', JSON.stringify(data).slice(0, 1000));
+      throw new Error('Claude returned empty response');
+    }
 
     // Robust JSON extraction: find first { and matching last }
     const firstBrace = text.indexOf('{');
@@ -76,7 +108,7 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
         lastUpdated: new Date().toISOString(),
       });
     } catch (parseErr) {
-      console.error('Employee DNA JSON parse failed, using derived fallback:', parseErr);
+      console.error('[employee-dna] JSON parse failed. Slice was:', jsonSlice.slice(0, 500));
       // Meaningful fallback: derive scores from founder traits with random variation
       const derivedTraits = (founderDNA?.signatureTraits || []).map((ft: any) => ({
         name: ft.name,
@@ -96,7 +128,7 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
       });
     }
   } catch (err: any) {
-    console.error('Employee DNA error:', err);
+    console.error('[employee-dna] Top-level error:', err.message, err.stack?.slice(0, 500));
     return NextResponse.json({ error: 'Failed to map employee DNA' }, { status: 500 });
   }
 }
