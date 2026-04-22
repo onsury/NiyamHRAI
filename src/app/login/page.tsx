@@ -108,12 +108,12 @@ function LoginPageInner() {
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3" />
 
       <div className="max-w-md w-full bg-white/[0.03] border border-white/[0.06] rounded-3xl sm:rounded-[40px] shadow-2xl p-6 sm:p-10 md:p-12 relative z-10">
-        <button onClick={() => router.push('/')} className="flex items-center gap-3 mb-8 sm:mb-10">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-black text-xl sm:text-2xl shadow-lg shadow-amber-500/20">N</div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">NIYAM</h1>
-            <p className="text-[10px] font-bold text-amber-500 tracking-widest">NEURAL CLOUD</p>
-          </div>
+        <button onClick={() => router.push('/')} className="flex items-center justify-center mb-8 sm:mb-10 w-full cursor-pointer">
+          <img 
+            src="/niyamhr-logo.png" 
+            alt="NiyamHR — AI that powers people" 
+            className="h-20 sm:h-24 w-auto object-contain"
+          />
         </button>
 
         {/* Invite banner */}

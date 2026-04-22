@@ -4,15 +4,18 @@ import Link from 'next/link';
 export default function ContactPage() {
   return (
     <div className="bg-[#0a0a0f] text-white min-h-screen">
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-          <span className="text-xl font-black tracking-tight">NiyamAI</span>
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 lg:px-16 py-3 md:py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center cursor-pointer flex-shrink-0">
+          <img 
+            src="/niyamhr-logo.png" 
+            alt="NiyamHR — AI that powers people" 
+            className="h-14 md:h-20 w-auto object-contain"
+          />
         </Link>
         <Link href="/" className="text-sm text-white/50 hover:text-white">← Back to Home</Link>
       </nav>
 
-      <section className="pt-40 pb-24 px-6 lg:px-16">
+      <section className="pt-32 md:pt-40 pb-24 px-4 md:px-6 lg:px-16">
         <div className="max-w-2xl mx-auto">
           <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">Get in Touch</span>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mt-4 mb-10 leading-tight">
@@ -21,7 +24,7 @@ export default function ContactPage() {
           </h1>
 
           <p className="text-lg text-white/60 leading-relaxed mb-10">
-            Whether you&apos;re exploring NiyamAI for your team, evaluating it for enterprise deployment, or just want to understand how the Persona DNA framework works — we&apos;re happy to talk.
+            Whether you&apos;re exploring NiyamHR for your team, evaluating it for enterprise deployment, or just want to understand how the Persona DNA framework works — we&apos;re happy to talk.
           </p>
 
           <div className="space-y-6 mb-10">

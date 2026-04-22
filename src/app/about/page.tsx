@@ -4,17 +4,20 @@ import Link from 'next/link';
 export default function AboutPage() {
   return (
     <div className="bg-[#0a0a0f] text-white min-h-screen">
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-          <span className="text-xl font-black tracking-tight">NiyamAI</span>
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 lg:px-16 py-3 md:py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center cursor-pointer flex-shrink-0">
+          <img 
+            src="/niyamhr-logo.png" 
+            alt="NiyamHR — AI that powers people" 
+            className="h-14 md:h-20 w-auto object-contain"
+          />
         </Link>
         <Link href="/" className="text-sm text-white/50 hover:text-white">← Back to Home</Link>
       </nav>
 
-      <section className="pt-40 pb-24 px-6 lg:px-16">
+      <section className="pt-32 md:pt-40 pb-24 px-4 md:px-6 lg:px-16">
         <div className="max-w-3xl mx-auto">
-          <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">About NiyamAI</span>
+          <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">About NiyamHR</span>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mt-4 mb-10 leading-tight">
             Built on 30+ years<br />
             <span className="text-white/30">of organisational wisdom.</span>
@@ -22,23 +25,23 @@ export default function AboutPage() {
 
           <div className="space-y-6 text-lg text-white/60 leading-relaxed">
             <p>
-              NiyamAI is the flagship product of <strong className="text-white">SmartDNA Business Intelligence & Advisory</strong>, a Chennai-based strategic consulting and AI product studio founded by O N Suryanarayanan.
+              NiyamHR is the flagship product of <strong className="text-white">SmartDNA Business Intelligence & Advisory</strong>, a Chennai-based strategic consulting and AI product studio founded by O N Suryanarayanan.
             </p>
 
             <p>
-              Over three decades working with founders across cybersecurity, healthcare, edtech, and media, we noticed a pattern that no HR tool addresses: the thinking patterns that built the company get diluted as the company grows. By the second management layer, the founder&apos;s strategic intent is barely recognisable at the frontline.
+              Over three decades working with founders across cybersecurity, healthcare, edtech, and media, we noticed a pattern that no HR tool addresses: the thinking patterns that built the company get diluted as the company grows. By the second management layer, the founder&apos;s strategic intent is barely recognisable at the frontline — and employees lose the compass that makes their daily work meaningful.
             </p>
 
             <p>
-              Most organisational tools measure output — attendance, tasks completed, goals hit. NiyamAI measures something more fundamental: <strong className="text-white">alignment of thinking</strong>. Using our proprietary three-layer Persona DNA framework — CorePersonaDNA, FunctionPersonaDNA, EmployeePersonaDNA — we map the founder&apos;s cognitive blueprint and benchmark every employee against it.
+              Most organisational tools measure output — attendance, tasks completed, goals hit. NiyamHR measures something more fundamental: <strong className="text-white">alignment of thinking</strong>. Using our proprietary three-layer Persona DNA framework — CorePersonaDNA, FunctionPersonaDNA, EmployeePersonaDNA — we map the organisation&apos;s cognitive blueprint and give every employee a personal AI mentor calibrated to it.
             </p>
 
             <p>
-              This isn&apos;t about cloning the founder. It&apos;s about giving every team member a living compass that reflects how the founder would think about the decisions in front of them — so that individual actions compound in the founder&apos;s direction rather than fighting it.
+              This isn&apos;t about cloning the founder. It&apos;s about giving every team member a living mentor that understands both where the organisation is going AND where they personally need to grow — so individual careers compound with organisational direction rather than fighting it.
             </p>
 
             <p>
-              We&apos;re in early access, partnering closely with a small set of founder-led organisations who care about depth of alignment, not just breadth of headcount. If that sounds like you, we&apos;d love to talk.
+              We&apos;re in early access, partnering closely with a small set of founder-led organisations who care about depth of alignment and employee growth, not just breadth of headcount. If that sounds like you, we&apos;d love to talk.
             </p>
           </div>
 

@@ -4,26 +4,27 @@ import Link from 'next/link';
 export default function SecurityPage() {
   return (
     <div className="bg-[#0a0a0f] text-white min-h-screen">
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-          <span className="text-xl font-black tracking-tight">NiyamAI</span>
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 lg:px-16 py-3 md:py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center cursor-pointer flex-shrink-0">
+          <img 
+            src="/niyamhr-logo.png" 
+            alt="NiyamHR — AI that powers people" 
+            className="h-14 md:h-20 w-auto object-contain"
+          />
         </Link>
         <Link href="/" className="text-sm text-white/50 hover:text-white">← Back to Home</Link>
       </nav>
 
-      <section className="pt-40 pb-24 px-6 lg:px-16">
+      <section className="pt-32 md:pt-40 pb-24 px-4 md:px-6 lg:px-16">
         <div className="max-w-3xl mx-auto">
           <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">Security</span>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mt-4 mb-8">How we protect your data.</h1>
 
           <div className="space-y-6 text-white/60 leading-relaxed">
-            <p className="text-lg">
-              <strong className="text-white">Last updated:</strong> April 2026
-            </p>
+            <p className="text-lg"><strong className="text-white">Last updated:</strong> April 2026</p>
 
             <p>
-              NiyamAI is built on enterprise-grade infrastructure with security as a foundational principle — not an afterthought. Here&apos;s how your data is protected today.
+              NiyamHR is built on enterprise-grade infrastructure with security as a foundational principle — not an afterthought. Here&apos;s how your data is protected today.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Encryption</h2>
@@ -35,7 +36,7 @@ export default function SecurityPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Infrastructure</h2>
             <p>
-              NiyamAI is hosted on <strong className="text-white">Google Cloud (Firebase App Hosting)</strong>, which maintains SOC 2 Type II, ISO 27001, ISO 27017, ISO 27018, and PCI-DSS certifications at the infrastructure layer. These certifications cover the physical data centres, network security, and platform services that NiyamAI runs on.
+              NiyamHR is hosted on <strong className="text-white">Google Cloud (Firebase App Hosting)</strong>, which maintains SOC 2 Type II, ISO 27001, ISO 27017, ISO 27018, and PCI-DSS certifications at the infrastructure layer. These certifications cover the physical data centres, network security, and platform services that NiyamHR runs on.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Authentication and access</h2>
@@ -48,7 +49,7 @@ export default function SecurityPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">AI service integration</h2>
             <p>
-              NiyamAI uses Anthropic&apos;s Claude API for mentorship and DNA analysis. Per Anthropic&apos;s policy, your data is <strong className="text-white">not used to train their models</strong>. API calls are encrypted in transit and data is not retained for model training.
+              NiyamHR uses Anthropic&apos;s Claude API for mentorship and DNA analysis. Per Anthropic&apos;s policy, your data is <strong className="text-white">not used to train their models</strong>. API calls are encrypted in transit and data is not retained for model training.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Data residency</h2>
@@ -58,7 +59,7 @@ export default function SecurityPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Our security roadmap</h2>
             <p>
-              NiyamAI is a startup in Early Access. We are transparent about where we are on our security journey and where we&apos;re headed:
+              NiyamHR is a startup in Early Access. We are transparent about where we are on our security journey and where we&apos;re headed:
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong className="text-white">Today:</strong> Google Cloud infrastructure certifications inherited; encryption at rest and in transit; role-based access control; secret management</li>
@@ -69,7 +70,7 @@ export default function SecurityPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Responsible disclosure</h2>
             <p>
-              If you believe you&apos;ve found a security vulnerability in NiyamAI, please report it responsibly to <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>. We take all reports seriously, respond within 48 hours, and work to address verified issues promptly.
+              If you believe you&apos;ve found a security vulnerability in NiyamHR, please report it responsibly to <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>. We take all reports seriously, respond within 48 hours, and work to address verified issues promptly.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Incident response</h2>

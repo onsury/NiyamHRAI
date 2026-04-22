@@ -58,24 +58,28 @@ export default function FounderSetupPage() {
         {loading ? (
           <div className="py-20 flex flex-col items-center text-center">
             <div className="w-20 h-20 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8" />
-            <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Mapping Neural Signature...</h3>
+            <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Mapping Your DNA...</h3>
             <p className="text-slate-500 mt-4 text-lg">Analyzing your cognitive blueprint across 67 behavioral traits.</p>
           </div>
         ) : (
           <>
             <div className="flex justify-between items-center mb-12">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl">N</div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tighter">Founder DNA Diagnostic</h2>
+                <img 
+                  src="/niyamhr-logo.png" 
+                  alt="NiyamHR" 
+                  className="h-12 w-auto object-contain"
+                />
+                <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">Organisation DNA Diagnostic</h2>
               </div>
               <div className="flex gap-2">{[1,2,3,4].map(i=>(<div key={i} className={`w-8 h-1.5 rounded-full transition-all ${step>=i?'bg-indigo-600':'bg-slate-100'}`} />))}</div>
             </div>
 
             {step===1 && (
               <div className="space-y-8 animate-fade-in-up">
-                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Organization.</h3><p className="text-slate-500 text-lg">We calibrate the 67-trait framework to your industry.</p></div>
+                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Organisation.</h3><p className="text-slate-500 text-lg">We calibrate the 67-trait framework to your industry.</p></div>
                 <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organization Name</label>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organisation Name</label>
                   <input type="text" value={formData.orgName} onChange={e=>setFormData({...formData,orgName:e.target.value})} placeholder="e.g. SmartDNA" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xl placeholder:text-slate-200 focus:border-indigo-500 transition-all" />
                 </div>
                 <div className="space-y-4">
@@ -91,7 +95,7 @@ export default function FounderSetupPage() {
 
             {step===2 && (
               <div className="space-y-8 animate-slide-in-right">
-                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Philosophy.</h3><p className="text-slate-500 text-lg">How do you think about building your organization?</p></div>
+                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Philosophy.</h3><p className="text-slate-500 text-lg">How do you think about building your organisation?</p></div>
                 <textarea value={formData.philosophy} onChange={e=>setFormData({...formData,philosophy:e.target.value})} placeholder="I believe in first principles thinking..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
               </div>
             )}
@@ -105,7 +109,7 @@ export default function FounderSetupPage() {
 
             {step===4 && (
               <div className="space-y-8 animate-slide-in-right">
-                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Non-Negotiables.</h3><p className="text-slate-500 text-lg">What behaviors are unacceptable?</p></div>
+                <div><h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Your Non-Negotiables.</h3><p className="text-slate-500 text-lg">What behaviours are unacceptable?</p></div>
                 <textarea value={formData.nonNegotiables} onChange={e=>setFormData({...formData,nonNegotiables:e.target.value})} placeholder="Dishonesty, passive-aggressive communication..." className="w-full h-56 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl text-lg placeholder:text-slate-200 focus:border-indigo-500 transition-all leading-relaxed" />
               </div>
             )}
