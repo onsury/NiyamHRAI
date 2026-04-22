@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody, dnaPassthroughSchema, stringArraySchema } from '@/lib/validation';
+import { parseBody, dnaPassthroughSchema, stringArraySchema, sanitizeResponse, EmployeeDNAResponseSchema } from '@/lib/validation';
 
 const EmployeeDNASchema = z.object({
   employeeData: z.object({
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         lastUpdated: new Date().toISOString(),
       };
       await saveDNAServerSide(uid, dna, 'onboarding');
-      return NextResponse.json(dna);
+      return NextResponse.json(sanitizeResponse<any>(dna, EmployeeDNAResponseSchema, dna));
     }
 
     // --- Branch 2: Call Claude ---
@@ -172,7 +172,7 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
         lastUpdated: new Date().toISOString(),
       };
       await saveDNAServerSide(uid, dna, 'onboarding');
-      return NextResponse.json(dna);
+      return NextResponse.json(sanitizeResponse<any>(dna, EmployeeDNAResponseSchema, dna));
     } catch (parseErr) {
       console.error('[employee-dna] JSON parse failed');
       // --- Branch 3: Parse failed, derive from founder traits ---
@@ -193,7 +193,7 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
         lastUpdated: new Date().toISOString(),
       };
       await saveDNAServerSide(uid, dna, 'onboarding');
-      return NextResponse.json(dna);
+      return NextResponse.json(sanitizeResponse<any>(dna, EmployeeDNAResponseSchema, dna));
     }
   } catch (err: any) {
     console.error('[employee-dna] Top-level error:', err.message, err.stack?.slice(0, 500));
