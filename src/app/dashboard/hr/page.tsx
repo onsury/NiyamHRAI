@@ -19,7 +19,7 @@ interface EmployeeRow {
 }
 
 export default function HRDashboardPage() {
-  const { niyamUser } = useAuth();
+  const { niyamUser, firebaseUser } = useAuth();
   const router = useRouter();
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,9 +65,13 @@ export default function HRDashboardPage() {
       const avgSynergy = employees.length > 0 ? Math.round(employees.reduce((s, e) => s + e.synergyScore, 0) / employees.length) : 50;
       const topPerformer = [...employees].sort((a, b) => b.synergyScore - a.synergyScore)[0];
 
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           reportType: 'founder_quarterly',
           data: {
@@ -91,7 +95,7 @@ export default function HRDashboardPage() {
   const criticalDrift = employees.filter(e => e.synergyScore < 40).length;
   const onboarded = employees.filter(e => e.onboarded).length;
 
-  // Variance alerts — where AI disagrees with HR or Manager by >25 points
+  // Variance alerts â€” where AI disagrees with HR or Manager by >25 points
   const varianceAlerts = employees
     .map(e => {
       const vHR = e.hrScore != null ? Math.abs(e.synergyScore - e.hrScore) : null;
@@ -116,7 +120,7 @@ export default function HRDashboardPage() {
           <p className="text-slate-500 text-sm mt-1">Organisation-wide alignment analytics.</p>
         </div>
         <button onClick={generateReport} disabled={generating} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 flex items-center gap-2 self-start">
-          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating…</> : '📊 Generate Report'}
+          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generatingâ€¦</> : 'ðŸ“Š Generate Report'}
         </button>
       </div>
 
@@ -140,17 +144,17 @@ export default function HRDashboardPage() {
         </div>
       </div>
 
-      {/* Variance alerts — the three-way differentiator */}
+      {/* Variance alerts â€” the three-way differentiator */}
       {varianceAlerts.length > 0 && (
         <div className="bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white mb-6 sm:mb-8 shadow-xl">
           <div className="flex items-start justify-between mb-4 gap-4">
             <div>
               <p className="text-[10px] sm:text-xs font-bold text-amber-300 uppercase tracking-widest mb-1">Three-way Variance Alert</p>
-              <h2 className="text-lg sm:text-xl font-black">{varianceAlerts.length} {varianceAlerts.length === 1 ? 'assessment disagrees' : 'assessments disagree'} — investigate</h2>
+              <h2 className="text-lg sm:text-xl font-black">{varianceAlerts.length} {varianceAlerts.length === 1 ? 'assessment disagrees' : 'assessments disagree'} â€” investigate</h2>
               <p className="text-white/70 text-sm mt-1">AI synergy differs from HR rating or Manager rating by more than 25 points.</p>
             </div>
             <button onClick={() => router.push('/dashboard/team')} className="px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-              Team page →
+              Team page â†’
             </button>
           </div>
           <div className="space-y-2">
@@ -158,7 +162,7 @@ export default function HRDashboardPage() {
               <div key={e.uid} className="bg-white/10 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold">{e.displayName}</p>
-                  <p className="text-[11px] text-white/60">{e.role.replace('_', ' ')} · {e.level}</p>
+                  <p className="text-[11px] text-white/60">{e.role.replace('_', ' ')} Â· {e.level}</p>
                 </div>
                 <div className="flex gap-3 text-center">
                   <Pill label="AI" value={e.synergyScore} />
@@ -196,7 +200,7 @@ export default function HRDashboardPage() {
         <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-base sm:text-lg font-black text-slate-900">Employee Grid</h2>
           <button onClick={() => router.push('/dashboard/team')} className="text-xs font-bold text-indigo-600 hover:text-indigo-800">
-            Manage team →
+            Manage team â†’
           </button>
         </div>
 
@@ -241,7 +245,7 @@ function Pill({ label, value }: { label: string; value?: number }) {
   return (
     <div className="min-w-[48px]">
       <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{label}</div>
-      <div className="text-base font-black">{value != null ? `${value}%` : '—'}</div>
+      <div className="text-base font-black">{value != null ? `${value}%` : 'â€”'}</div>
     </div>
   );
 }

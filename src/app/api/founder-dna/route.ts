@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const authResult = await requireAuth(req);
+    if (authResult.error) return authResult.error;
+    // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
+
     const { rawAnswers, voiceCaptures, orgName, industry } = await req.json();
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;

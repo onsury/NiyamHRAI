@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const authResult = await requireAuth(req);
+    if (authResult.error) return authResult.error;
+    // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
+
     const { scenario, response: userResponse, trait, founderDNA } = await req.json();
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
@@ -68,7 +73,7 @@ Respond ONLY with valid JSON:
       evaluation: 'Evaluation temporarily unavailable. Your response has been saved for later analysis.',
       alignmentScore: 50,
       founderWouldSay: '',
-      improvementTip: 'Keep practicing — consistency builds alignment.',
+      improvementTip: 'Keep practicing â€” consistency builds alignment.',
     });
   }
 }

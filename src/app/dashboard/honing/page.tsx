@@ -7,7 +7,7 @@ const TRAITS = ['Decision Architecture', 'People Philosophy', 'Risk & Innovation
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
 
 export default function HoningLabPage() {
-  const { niyamUser } = useAuth();
+  const { niyamUser, firebaseUser } = useAuth();
   const [phase, setPhase] = useState<'select'|'scenario'|'evaluate'|'result'>('select');
   const [selectedTrait, setSelectedTrait] = useState('');
   const [difficulty, setDifficulty] = useState('medium');
@@ -28,9 +28,13 @@ export default function HoningLabPage() {
       const orgId = niyamUser?.organizationId || niyamUser?.uid || '';
       const founderDNA = await getFounderDNA(orgId).catch(() => null);
 
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/honing/scenario', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ trait: selectedTrait, difficulty, founderDNA }),
       });
       const data = await res.json();
@@ -50,9 +54,13 @@ export default function HoningLabPage() {
       const orgId = niyamUser?.organizationId || niyamUser?.uid || '';
       const founderDNA = await getFounderDNA(orgId).catch(() => null);
 
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/honing/evaluate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ scenario: scenario?.scenario, response: userResponse, trait: selectedTrait, founderDNA }),
       });
       const data = await res.json();
@@ -84,7 +92,7 @@ export default function HoningLabPage() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-white text-center mb-6 sm:mb-8">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-4">⚡</div>
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-4">Ã¢Å¡Â¡</div>
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Neural Honing Lab</h1>
         <p className="text-white/50 text-sm sm:text-base mt-2">Bridge behavioral drift through founder-calibrated simulations.</p>
       </div>
@@ -134,7 +142,7 @@ export default function HoningLabPage() {
           <textarea value={userResponse} onChange={e => setUserResponse(e.target.value)} className="w-full h-28 sm:h-36 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-300 focus:border-amber-500 transition-all outline-none resize-none" placeholder="Or describe your approach in your own words..." />
 
           <div className="flex gap-3 mt-4">
-            <button onClick={reset} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">← Back</button>
+            <button onClick={reset} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">Ã¢â€ Â Back</button>
             <button onClick={submitResponse} disabled={!userResponse.trim() || loading} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-2">
               {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Evaluating...</> : 'Submit Response'}
             </button>
@@ -182,7 +190,7 @@ export default function HoningLabPage() {
                   <p className="text-xs sm:text-sm font-bold text-slate-700">{h.traitTargeted}</p>
                   <p className="text-[10px] sm:text-xs text-slate-400">{h.timestamp?.toDate?.()?.toLocaleDateString?.() || 'Recent'}</p>
                 </div>
-                <span className={`text-lg font-black ${(h.alignmentScore || 0) >= 70 ? 'text-emerald-500' : (h.alignmentScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{h.alignmentScore || '—'}%</span>
+                <span className={`text-lg font-black ${(h.alignmentScore || 0) >= 70 ? 'text-emerald-500' : (h.alignmentScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{h.alignmentScore || 'Ã¢â‚¬â€'}%</span>
               </div>
             ))}
           </div>

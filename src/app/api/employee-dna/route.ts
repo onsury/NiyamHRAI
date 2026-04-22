@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const authResult = await requireAuth(req);
+    if (authResult.error) return authResult.error;
+    // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
+
     const { employeeData, founderDNA } = await req.json();
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
@@ -11,7 +16,7 @@ export async function POST(req: NextRequest) {
     console.log('[employee-dna] founderDNA present:', !!founderDNA);
 
     if (!CLAUDE_KEY || !founderDNA) {
-      console.warn('[employee-dna] Missing key or founderDNA — returning baseline fallback');
+      console.warn('[employee-dna] Missing key or founderDNA â€” returning baseline fallback');
       // Generate baseline DNA without AI
       const baseTraits = (founderDNA?.signatureTraits || []).map((ft: any) => ({
         name: ft.name,

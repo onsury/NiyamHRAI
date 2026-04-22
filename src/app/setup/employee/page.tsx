@@ -13,7 +13,7 @@ const LEVELS = [
 
 export default function EmployeeSetupPage() {
   const router = useRouter();
-  const { niyamUser, refreshUser } = useAuth();
+  const { niyamUser, firebaseUser, refreshUser } = useAuth();
   const [step, setStep] = useState(0);
   const [level, setLevel] = useState('MIDDLE');
   const [skills, setSkills] = useState<string[]>([]);
@@ -34,9 +34,13 @@ export default function EmployeeSetupPage() {
       const founderDNA = orgId ? await getFounderDNA(orgId).catch(() => null) : null;
 
       // Call AI DNA mapping
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/employee-dna', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           employeeData: { role: niyamUser.role, level, skills, experience, goals },
           founderDNA,

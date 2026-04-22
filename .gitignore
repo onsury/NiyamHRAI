@@ -49,3 +49,6 @@ apply_niyam_patches.sh
 REVIEW.md
 *.bak
 firestore.rules.OLD-*
+
+# C-3 patch backups (local only)
+_c3-backup/

@@ -3,20 +3,20 @@ import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const POLICIES = [
-  { id: 'employee_handbook', label: 'Employee Handbook', icon: '📖', desc: 'Complete handbook covering all policies' },
-  { id: 'onboarding_checklist', label: '30-60-90 Onboarding', icon: '🎯', desc: 'Structured onboarding with milestones' },
-  { id: 'performance_framework', label: 'Performance Framework', icon: '📊', desc: 'KRA, appraisal, promotion criteria' },
-  { id: 'leave_policy', label: 'Leave Policy', icon: '📅', desc: 'All leave types, Indian law compliant' },
-  { id: 'posh_policy', label: 'POSH Policy', icon: '⚖️', desc: 'Sexual Harassment prevention (2013 Act)' },
-  { id: 'exit_process', label: 'Exit Process', icon: '🚪', desc: 'Resignation to F&F settlement' },
-  { id: 'code_of_conduct', label: 'Code of Conduct', icon: '🤝', desc: 'Ethics, behavior, discipline' },
-  { id: 'compensation_structure', label: 'Compensation Philosophy', icon: '💰', desc: 'Salary bands, benefits, increments' },
-  { id: 'learning_development', label: 'L&D Framework', icon: '📚', desc: 'Training, certifications, budget' },
-  { id: 'diversity_inclusion', label: 'D&I Policy', icon: '🌍', desc: 'Equal opportunity, accessibility' },
+  { id: 'employee_handbook', label: 'Employee Handbook', icon: 'ðŸ“–', desc: 'Complete handbook covering all policies' },
+  { id: 'onboarding_checklist', label: '30-60-90 Onboarding', icon: 'ðŸŽ¯', desc: 'Structured onboarding with milestones' },
+  { id: 'performance_framework', label: 'Performance Framework', icon: 'ðŸ“Š', desc: 'KRA, appraisal, promotion criteria' },
+  { id: 'leave_policy', label: 'Leave Policy', icon: 'ðŸ“…', desc: 'All leave types, Indian law compliant' },
+  { id: 'posh_policy', label: 'POSH Policy', icon: 'âš–ï¸', desc: 'Sexual Harassment prevention (2013 Act)' },
+  { id: 'exit_process', label: 'Exit Process', icon: 'ðŸšª', desc: 'Resignation to F&F settlement' },
+  { id: 'code_of_conduct', label: 'Code of Conduct', icon: 'ðŸ¤', desc: 'Ethics, behavior, discipline' },
+  { id: 'compensation_structure', label: 'Compensation Philosophy', icon: 'ðŸ’°', desc: 'Salary bands, benefits, increments' },
+  { id: 'learning_development', label: 'L&D Framework', icon: 'ðŸ“š', desc: 'Training, certifications, budget' },
+  { id: 'diversity_inclusion', label: 'D&I Policy', icon: 'ðŸŒ', desc: 'Equal opportunity, accessibility' },
 ];
 
 export default function PoliciesPage() {
-  const { niyamUser } = useAuth();
+  const { niyamUser, firebaseUser } = useAuth();
   const [generating, setGenerating] = useState('');
   const [policy, setPolicy] = useState<any>(null);
 
@@ -24,9 +24,13 @@ export default function PoliciesPage() {
     setGenerating(policyType);
     setPolicy(null);
     try {
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/practices/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           policyType,
           orgName: '',
@@ -85,7 +89,7 @@ export default function PoliciesPage() {
             onClick={() => setPolicy(null)}
             className="mb-4 px-4 py-2 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all"
           >
-            ← Back to All Policies
+            â† Back to All Policies
           </button>
 
           <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
@@ -94,7 +98,7 @@ export default function PoliciesPage() {
               <h2 className="text-xl sm:text-2xl font-black">{policy.title}</h2>
               {policy.version && (
                 <p className="text-white/40 text-xs mt-1">
-                  Version {policy.version} · Effective: {policy.effectiveDate || 'Immediate'}
+                  Version {policy.version} Â· Effective: {policy.effectiveDate || 'Immediate'}
                 </p>
               )}
             </div>
@@ -102,7 +106,7 @@ export default function PoliciesPage() {
             {policy.founderAlignmentNote && (
               <div className="mx-5 sm:mx-8 mt-5 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                 <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">
-                  🧬 Founder DNA Alignment
+                  ðŸ§¬ Founder DNA Alignment
                 </p>
                 <p className="text-xs sm:text-sm text-amber-800">{policy.founderAlignmentNote}</p>
               </div>
@@ -130,12 +134,12 @@ export default function PoliciesPage() {
             {policy.complianceNotes?.length > 0 && (
               <div className="mx-5 sm:mx-8 mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
                 <p className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">
-                  ⚖️ Indian Law Compliance Notes
+                  âš–ï¸ Indian Law Compliance Notes
                 </p>
                 <ul className="space-y-1.5">
                   {policy.complianceNotes.map((n: string, i: number) => (
                     <li key={i} className="text-xs text-emerald-700 flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">✓</span>{n}
+                      <span className="text-emerald-500 mt-0.5">âœ“</span>{n}
                     </li>
                   ))}
                 </ul>
@@ -143,7 +147,7 @@ export default function PoliciesPage() {
             )}
 
             <div className="px-5 sm:px-8 pb-6 text-xs text-slate-400">
-              Review Cycle: {policy.reviewCycle || 'Annual'} · Generated by NiyamAI People &amp; Culture Intelligence
+              Review Cycle: {policy.reviewCycle || 'Annual'} Â· Generated by NiyamAI People &amp; Culture Intelligence
             </div>
           </div>
         </div>

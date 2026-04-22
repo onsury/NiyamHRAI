@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const authResult = await requireAuth(req);
+    if (authResult.error) return authResult.error;
+    // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
+
     const { policyType, existingPractices, founderDNA, orgName, industry, orgSize } = await req.json();
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
@@ -10,7 +15,7 @@ export async function POST(req: NextRequest) {
       employee_handbook: 'Generate a comprehensive Employee Handbook covering company overview, code of conduct, work policies, leave policies, benefits, grievance procedure, and separation policy.',
       onboarding_checklist: 'Generate a detailed 30-60-90 day onboarding checklist with specific milestones, training modules, and evaluation criteria.',
       performance_framework: 'Generate a performance management framework including KRA setting, review cycles, rating methodology, PIP process, and promotion criteria.',
-      leave_policy: 'Generate a complete leave policy covering CL, SL, EL, maternity/paternity, bereavement, comp-off, LOP, and leave encashment — compliant with Indian law.',
+      leave_policy: 'Generate a complete leave policy covering CL, SL, EL, maternity/paternity, bereavement, comp-off, LOP, and leave encashment â€” compliant with Indian law.',
       posh_policy: 'Generate a POSH (Prevention of Sexual Harassment) policy compliant with the 2013 Act including ICC constitution, complaint procedure, timelines, and awareness requirements.',
       exit_process: 'Generate a complete exit/offboarding process including resignation acceptance, notice period, knowledge transfer, exit interview, full & final settlement, and experience letter.',
       code_of_conduct: 'Generate a Code of Conduct covering ethical behavior, conflict of interest, confidentiality, social media policy, dress code, and disciplinary procedures.',

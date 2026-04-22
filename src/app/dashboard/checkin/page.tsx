@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth-context';
 import { getFounderDNA, getEmployeeDNA, saveCheckIn, getCheckIns } from '@/lib/firestore-service';
 
 export default function CheckInPage() {
-  const { niyamUser } = useAuth();
+  const { niyamUser, firebaseUser } = useAuth();
   const [reflection, setReflection] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -35,9 +35,13 @@ export default function CheckInPage() {
         getEmployeeDNA(niyamUser.uid).catch(() => null),
       ]);
 
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/checkin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           reflection,
           founderDNA,
@@ -77,7 +81,7 @@ export default function CheckInPage() {
       {/* Submit Reflection */}
       <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm mb-6 sm:mb-8">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-xl">⚡</div>
+          <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-xl">âš¡</div>
           <div>
             <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest">Synergy Protocol</p>
             <p className="text-sm sm:text-base font-bold text-slate-900">Founder-Aligned Mentorship</p>
