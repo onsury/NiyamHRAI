@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+
+const HoningScenarioSchema = z.object({
+  trait: z.string().max(100),
+  difficulty: z.string().max(100).optional(),
+  founderDNA: dnaPassthroughSchema,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +15,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
 
-    const { trait, difficulty, founderDNA } = await req.json();
+    const parsed = await parseBody(req, HoningScenarioSchema);
+    if (parsed.error) return parsed.error;
+    const { trait, difficulty, founderDNA } = parsed.data;
 
     const founderContext = founderDNA ? `
 The founder values: ${(founderDNA.signatureTraits || []).slice(0, 5).map((t: any) => t.name).join(', ')}

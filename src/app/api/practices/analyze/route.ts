@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+
+const PracticesAnalyzeSchema = z.object({
+  practices: z.any().optional(),
+  industry: z.string().max(200).optional(),
+  orgSize: z.string().max(100).optional(),
+  founderDNA: dnaPassthroughSchema,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +16,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
 
-    const { practices, industry, orgSize, founderDNA } = await req.json();
+    const parsed = await parseBody(req, PracticesAnalyzeSchema);
+    if (parsed.error) return parsed.error;
+    const { practices, industry, orgSize, founderDNA } = parsed.data;
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
 

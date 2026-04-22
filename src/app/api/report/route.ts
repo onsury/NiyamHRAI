@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody } from '@/lib/validation';
+
+const ReportSchema = z.object({
+  reportType: z.string().max(100),
+  data: z.any().optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +14,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
 
-    const { reportType, data } = await req.json();
+    const parsed = await parseBody(req, ReportSchema);
+    if (parsed.error) return parsed.error;
+    const { reportType, data } = parsed.data;
     // reportType: 'employee_monthly' | 'manager_monthly' | 'founder_quarterly'
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;

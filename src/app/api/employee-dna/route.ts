@@ -1,5 +1,18 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody, dnaPassthroughSchema, stringArraySchema } from '@/lib/validation';
+
+const EmployeeDNASchema = z.object({
+  employeeData: z.object({
+    role: z.string().max(200).optional(),
+    level: z.string().max(100).optional(),
+    skills: stringArraySchema.optional(),
+    experience: z.string().max(2000).optional(),
+    goals: z.string().max(2000).optional(),
+  }),
+  founderDNA: dnaPassthroughSchema,
+});
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -54,7 +67,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     const { uid } = authResult;
 
-    const { employeeData, founderDNA } = await req.json();
+    const parsed = await parseBody(req, EmployeeDNASchema);
+    if (parsed.error) return parsed.error;
+    const { employeeData, founderDNA } = parsed.data;
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
     console.log('[employee-dna] CLAUDE_API_KEY present:', !!CLAUDE_KEY, 'length:', CLAUDE_KEY?.length || 0);

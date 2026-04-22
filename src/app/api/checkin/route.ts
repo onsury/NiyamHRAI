@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+
+const CheckinSchema = z.object({
+  reflection: z.string().max(4000),
+  userName: z.string().max(200).optional(),
+  founderDNA: dnaPassthroughSchema,
+  employeeDNA: dnaPassthroughSchema,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +16,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
 
-    const { reflection, founderDNA, employeeDNA, userName } = await req.json();
+    const parsed = await parseBody(req, CheckinSchema);
+    if (parsed.error) return parsed.error;
+    const { reflection, founderDNA, employeeDNA, userName } = parsed.data;
 
     if (!reflection) {
       return NextResponse.json({ error: 'Reflection required' }, { status: 400 });
@@ -20,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // If no Claude key, return structured fallback
     if (!CLAUDE_KEY) {
-      console.warn('[checkin] No CLAUDE_API_KEY â€” returning no-key fallback');
+      console.warn('[checkin] No CLAUDE_API_KEY Ã¢â‚¬â€ returning no-key fallback');
       return NextResponse.json({
         mentorship: `Thank you for your reflection, ${userName || 'team member'}. Your awareness of this week's challenges shows growth. Focus on connecting your daily decisions to the founder's core principles. Next week, try to identify one specific moment where you applied the organisation's values in a tough situation.`,
         synergyDelta: 2,
@@ -128,7 +139,7 @@ Respond in this JSON format:
   } catch (err: any) {
     console.error('[checkin] Top-level error:', err.message, err.stack?.slice(0, 500));
     return NextResponse.json({
-      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable â€” your growth matters and we\'ll analyse this soon.',
+      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable Ã¢â‚¬â€ your growth matters and we\'ll analyse this soon.',
       synergyDelta: 0,
       driftAreas: [],
       strengths: [],

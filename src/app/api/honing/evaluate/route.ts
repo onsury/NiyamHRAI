@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+
+const HoningEvaluateSchema = z.object({
+  scenario: z.string().max(4000),
+  response: z.string().max(4000),
+  trait: z.string().max(100),
+  founderDNA: dnaPassthroughSchema,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,7 +16,9 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return authResult.error;
     // const { uid } = authResult;  // available for per-user quota enforcement (M-level scope)
 
-    const { scenario, response: userResponse, trait, founderDNA } = await req.json();
+    const parsed = await parseBody(req, HoningEvaluateSchema);
+    if (parsed.error) return parsed.error;
+    const { scenario, response: userResponse, trait, founderDNA } = parsed.data;
 
     const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
 
@@ -73,7 +84,7 @@ Respond ONLY with valid JSON:
       evaluation: 'Evaluation temporarily unavailable. Your response has been saved for later analysis.',
       alignmentScore: 50,
       founderWouldSay: '',
-      improvementTip: 'Keep practicing â€” consistency builds alignment.',
+      improvementTip: 'Keep practicing Ã¢â‚¬â€ consistency builds alignment.',
     });
   }
 }
