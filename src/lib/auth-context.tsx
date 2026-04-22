@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
@@ -38,20 +38,21 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
   resendVerification: () => Promise<void>;
+  resumePendingInvite: () => Promise<void>;
+  hasPendingInvite: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+
+// sessionStorage keys for the invite-accept deferred flow (H-1)
+const PENDING_INVITE_TOKEN_KEY = 'niyamhr_pending_invite_token';
+const PENDING_INVITE_DISPLAY_NAME_KEY = 'niyamhr_pending_invite_display_name';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [niyamUser, setNiyamUser] = useState<NiyamUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Fetch the NiyamUser profile. Unlike before, this never auto-creates a
-   * FOUNDER profile — if no profile exists, we return null and let the caller
-   * decide what to do (typically: direct the user to sign up properly).
-   */
   const fetchProfile = async (user: FirebaseUser): Promise<NiyamUser | null> => {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists()) return { uid: user.uid, ...userDoc.data() } as NiyamUser;
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const orgName = opts?.orgName;
     const inviteToken = opts?.inviteToken;
 
-    // Founder signup — creates a new org with themselves as the root
+    // Founder signup -- creates a new org with themselves as the root
     if (role === 'FOUNDER' && !inviteToken) {
       if (!orgName?.trim()) throw new Error('Organisation name required for founder signup.');
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -115,24 +116,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Invite-based signup — profile is created server-side via /api/invite/accept
+    // Invite-based signup (H-1 hardening)
+    // Previously: created Auth account, called /api/invite/accept IMMEDIATELY, then sent verification email.
+    // That meant /api/invite/accept was always hit with email_verified=false, which opened an attack path
+    // where an attacker could claim a victim's invited email without owning the inbox.
+    //
+    // New flow:
+    //   1. Create Auth account
+    //   2. sendEmailVerification (fires the email)
+    //   3. Stash the invite token in sessionStorage
+    //   4. Return -- UI will route to /verify-email
+    //   5. On /verify-email, once the user has verified, resumePendingInvite() is called, which
+    //      refreshes the ID token (to pick up the new email_verified claim) and calls /api/invite/accept
     if (inviteToken) {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      const idToken = await cred.user.getIdToken();
-      const res = await fetch('/api/invite/accept', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ token: inviteToken, displayName: email.split('@')[0] }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        // Surface specific messages so the signup UI can react
-        throw new Error(data.error || 'INVITE_ACCEPT_FAILED');
-      }
       await sendEmailVerification(cred.user);
-      // Profile will be readable on next fetch
-      const profile = await fetchProfile(cred.user);
-      setNiyamUser(profile);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(PENDING_INVITE_TOKEN_KEY, inviteToken);
+        sessionStorage.setItem(PENDING_INVITE_DISPLAY_NAME_KEY, email.split('@')[0]);
+      }
+      // Do NOT setNiyamUser -- profile will be created after verification
       return;
     }
 
@@ -140,7 +143,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     throw new Error('INVITE_REQUIRED');
   };
 
-  const signOut = async () => { await firebaseSignOut(auth); setNiyamUser(null); };
+  const signOut = async () => {
+    await firebaseSignOut(auth);
+    setNiyamUser(null);
+    // Clear any stale pending-invite state so a different user signing up next isn't affected
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(PENDING_INVITE_TOKEN_KEY);
+      sessionStorage.removeItem(PENDING_INVITE_DISPLAY_NAME_KEY);
+    }
+  };
 
   const resendVerification = async () => {
     if (firebaseUser && !firebaseUser.emailVerified) {
@@ -157,8 +168,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Check if the current session has a pending invite that needs to be resumed
+   * after email verification.
+   */
+  const hasPendingInvite = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return !!sessionStorage.getItem(PENDING_INVITE_TOKEN_KEY);
+  };
+
+  /**
+   * Resume an invite that was deferred because email was not yet verified.
+   * Call this from /verify-email once firebaseUser.emailVerified === true.
+   *
+   * Steps:
+   *   1. Read the stashed invite token
+   *   2. Reload firebaseUser + force-refresh ID token so the email_verified claim is present
+   *   3. POST /api/invite/accept with the fresh token
+   *   4. On success: clear sessionStorage, load profile, set niyamUser
+   */
+  const resumePendingInvite = async () => {
+    if (typeof window === 'undefined') throw new Error('NO_WINDOW');
+    const pendingToken = sessionStorage.getItem(PENDING_INVITE_TOKEN_KEY);
+    const displayName = sessionStorage.getItem(PENDING_INVITE_DISPLAY_NAME_KEY) || '';
+    if (!pendingToken) throw new Error('NO_PENDING_INVITE');
+    if (!firebaseUser) throw new Error('NOT_SIGNED_IN');
+
+    // Sync the latest emailVerified state from Firebase
+    await firebaseUser.reload();
+    if (!firebaseUser.emailVerified) throw new Error('NOT_YET_VERIFIED');
+
+    // Force-refresh the ID token so it carries the updated email_verified claim
+    const idToken = await firebaseUser.getIdToken(true);
+
+    const res = await fetch('/api/invite/accept', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ token: pendingToken, displayName }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'INVITE_ACCEPT_FAILED');
+    }
+
+    // Success -- clear the pending state and load the profile that was just created
+    sessionStorage.removeItem(PENDING_INVITE_TOKEN_KEY);
+    sessionStorage.removeItem(PENDING_INVITE_DISPLAY_NAME_KEY);
+
+    setFirebaseUser({ ...firebaseUser });
+    const profile = await fetchProfile(firebaseUser);
+    setNiyamUser(profile);
+  };
+
   return (
-    <AuthContext.Provider value={{ firebaseUser, niyamUser, loading, signIn, signUp, signOut, refreshUser, resendVerification }}>
+    <AuthContext.Provider value={{
+      firebaseUser,
+      niyamUser,
+      loading,
+      signIn,
+      signUp,
+      signOut,
+      refreshUser,
+      resendVerification,
+      resumePendingInvite,
+      hasPendingInvite,
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
 
     const decoded = await adminAuth.verifyIdToken(idToken).catch(() => null);
     if (!decoded) return NextResponse.json({ error: 'INVALID_TOKEN' }, { status: 401 });
+    if (!decoded.email_verified) return NextResponse.json({ error: 'EMAIL_NOT_VERIFIED' }, { status: 403 });
 
     // Load caller's user doc
     const userSnap = await adminDb.doc(`users/${decoded.uid}`).get();

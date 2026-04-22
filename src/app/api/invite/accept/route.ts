@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
 
     const decoded = await adminAuth.verifyIdToken(idToken).catch(() => null);
     if (!decoded) return NextResponse.json({ error: 'INVALID_TOKEN' }, { status: 401 });
+    if (!decoded.email_verified) return NextResponse.json({ error: 'EMAIL_NOT_VERIFIED' }, { status: 403 });
 
     const { token, displayName } = await req.json();
     if (!token) return NextResponse.json({ error: 'MISSING_TOKEN' }, { status: 400 });
