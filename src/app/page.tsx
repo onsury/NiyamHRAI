@@ -18,7 +18,7 @@ export default function LandingPage() {
           <img 
             src="/niyamhr-logo.png" 
             alt="NiyamHR — AI that powers people" 
-            className="h-14 md:h-20 w-auto object-contain"
+            className="h-20 md:h-28 lg:h-32 w-auto object-contain"
           />
         </a>
         <div className="hidden lg:flex gap-10 items-center">
