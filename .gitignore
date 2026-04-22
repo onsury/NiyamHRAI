@@ -44,3 +44,8 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 apply_niyam_patches.sh
+
+# Security audit and Claude Code artifacts (local only)
+REVIEW.md
+*.bak
+firestore.rules.OLD-*
