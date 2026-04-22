@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { saveEmployeeDNA, addDNASnapshot, updateUser, getFounderDNA } from '@/lib/firestore-service';
+import { updateUser, getFounderDNA } from '@/lib/firestore-service';
 
 const SKILLS = ['Leadership', 'Communication', 'Technical', 'Strategy', 'Creativity', 'Analytics', 'Teamwork', 'Problem Solving', 'Time Management', 'Customer Focus'];
 const LEVELS = [
@@ -33,7 +33,8 @@ export default function EmployeeSetupPage() {
       const orgId = niyamUser.organizationId;
       const founderDNA = orgId ? await getFounderDNA(orgId).catch(() => null) : null;
 
-      // Call AI DNA mapping
+      // Call AI DNA mapping.
+      // H-2/H-3: server owns all Firestore writes (employeeDNA/current + dnaHistory).
       const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/employee-dna', {
         method: 'POST',
@@ -47,17 +48,8 @@ export default function EmployeeSetupPage() {
         }),
       });
 
-      const dna = await res.json();
-
-      // Save DNA profile
-      await saveEmployeeDNA(niyamUser.uid, dna);
-
-      // Save initial snapshot to history
-      await addDNASnapshot(niyamUser.uid, {
-        traits: dna.traits || [],
-        synergyScore: dna.synergyScore || 50,
-        trigger: 'onboarding',
-      });
+      // Consume body so the stream closes cleanly; server has already persisted the DNA.
+      await res.json().catch(() => null);
 
       // Mark user as onboarded
       await updateUser(niyamUser.uid, { onboarded: true, level });
@@ -68,11 +60,9 @@ export default function EmployeeSetupPage() {
       router.push('/dashboard');
     } catch (err) {
       console.error('Onboarding error:', err);
-      // Fallback: mark onboarded even if AI fails
+      // Fallback: mark onboarded even if the AI call failed.
+      // DNA may be missing on first load; subsequent check-ins can populate it server-side.
       try {
-        await saveEmployeeDNA(niyamUser.uid, {
-          traits: [], synergyScore: 50, driftAreas: ['Initial assessment'], strengths: ['Onboarded'],
-        });
         await updateUser(niyamUser.uid, { onboarded: true, level });
         await refreshUser();
         router.push('/dashboard');
