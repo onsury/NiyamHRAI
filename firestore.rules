@@ -15,6 +15,18 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
+    function getTargetUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function sameOrgAsTarget(userId) {
+      return isSignedIn() && getTargetUserData(userId).organizationId == getUserData().organizationId;
+    }
+
+    function isAdminInSameOrgAsTarget(userId) {
+      return sameOrgAsTarget(userId) && (getUserData().role == 'FOUNDER' || getUserData().role == 'HR_ADMIN');
+    }
+
     function belongsToOrg(orgId) {
       return isSignedIn() && getUserData().organizationId == orgId;
     }
@@ -38,8 +50,12 @@ service cloud.firestore {
         || (isSignedIn() && isAdminOfOrg(resource.data.organizationId))
         || (isSignedIn() && resource.data.managerId == request.auth.uid);
 
-      // Create: only during signup (own UID)
-      allow create: if isOwner(userId);
+      // Create: ONLY founders creating a fresh org (orgId == uid). 
+      // All other profile creation must go through /api/invite/accept (server-side, bypasses rules).
+      allow create: if isOwner(userId)
+        && request.resource.data.role == 'FOUNDER'
+        && request.resource.data.organizationId == userId
+        && request.resource.data.onboarded == false;
 
       // Update: own profile, but CANNOT change role or organizationId
       // OR admin updating non-role fields on an org member
@@ -56,7 +72,7 @@ service cloud.firestore {
       // === Employee DNA ===
       match /employeeDNA/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow write: if isOwner(userId);
       }
@@ -64,7 +80,7 @@ service cloud.firestore {
       // === DNA History (Immutable) ===
       match /dnaHistory/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
@@ -73,7 +89,7 @@ service cloud.firestore {
       // === Check-ins ===
       match /checkIns/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
@@ -82,7 +98,7 @@ service cloud.firestore {
       // === Honing Sessions ===
       match /honingSessions/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
@@ -91,7 +107,7 @@ service cloud.firestore {
       // === Reports ===
       match /reports/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow create: if isOwner(userId);
         allow update, delete: if false;
@@ -100,7 +116,7 @@ service cloud.firestore {
       // === Rating History (server-written, immutable; read by owner, admins, manager) ===
       match /ratingHistory/{docId} {
         allow read: if isOwner(userId)
-          || (isSignedIn() && isAdminOfOrg(getUserData().organizationId))
+          || isAdminInSameOrgAsTarget(userId)
           || (isSignedIn() && isManagerOf(userId));
         allow write: if false;
       }
