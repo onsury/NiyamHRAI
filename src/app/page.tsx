@@ -8,27 +8,70 @@ export default function LandingPage() {
   const { niyamUser } = useAuth();
   const handleLaunch = () => router.push(niyamUser ? '/dashboard' : '/login');
   const [billing, setBilling] = useState<'monthly'|'annual'>('annual');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="bg-[#0a0a0f] text-white selection:bg-amber-500/30 overflow-x-hidden">
 
+      {/* === NAV === */}
       {/* === NAV === */}
       <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 lg:px-16 py-3 md:py-4 flex justify-between items-center gap-2">
         <a href="/" className="flex items-center cursor-pointer flex-shrink-0">
           <img 
             src="/niyamhr-logo.png" 
             alt="NiyamHR — AI that powers people" 
-            className="h-20 md:h-28 lg:h-32 w-auto object-contain"
+            className="h-14 md:h-20 w-auto object-contain"
           />
         </a>
+        
+        {/* Desktop menu */}
         <div className="hidden lg:flex gap-10 items-center">
           {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
             <button key={l} onClick={() => document.getElementById(l.toLowerCase().replace(/ /g, '-'))?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-white/50 hover:text-white transition-all font-medium">{l}</button>
           ))}
           <button onClick={handleLaunch} className="px-6 py-2.5 bg-white text-black rounded-full font-bold text-sm hover:bg-amber-500 hover:text-black transition-all">Get Started Free</button>
         </div>
-        <button onClick={handleLaunch} className="lg:hidden px-4 py-2 bg-white text-black rounded-full font-bold text-xs md:text-sm whitespace-nowrap flex-shrink-0">Start Free</button>
+        
+        {/* Mobile controls */}
+        <div className="flex lg:hidden items-center gap-2 flex-shrink-0">
+          <button onClick={handleLaunch} className="px-4 py-2 bg-white text-black rounded-full font-bold text-xs md:text-sm whitespace-nowrap">Start Free</button>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+            className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile menu drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed top-[68px] md:top-[96px] left-0 w-full z-40 bg-[#0a0a0f]/95 backdrop-blur-2xl border-b border-white/10 lg:hidden">
+          <div className="px-6 py-6 space-y-1">
+            {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
+              <button 
+                key={l} 
+                onClick={() => {
+                  document.getElementById(l.toLowerCase().replace(/ /g, '-'))?.scrollIntoView({ behavior: 'smooth' });
+                  setMobileMenuOpen(false);
+                }} 
+                className="block w-full text-left px-4 py-3 text-base text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium"
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* === HERO === */}
       <section className="relative pt-32 md:pt-40 pb-20 md:pb-32 px-4 md:px-6 lg:px-16 min-h-screen flex flex-col justify-center">
