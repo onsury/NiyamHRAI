@@ -13,63 +13,63 @@ export default function LandingPage() {
     <div className="bg-[#0a0a0f] text-white selection:bg-amber-500/30 overflow-x-hidden">
 
       {/* === NAV === */}
-      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-6 lg:px-16 py-3 flex justify-between items-center">
-      <div className="flex items-center">
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0a0f]/80 backdrop-blur-2xl border-b border-white/5 px-4 md:px-6 lg:px-16 py-3 md:py-4 flex justify-between items-center gap-2">
+        <a href="/" className="flex items-center cursor-pointer flex-shrink-0">
           <img 
             src="/niyamhr-logo.png" 
             alt="NiyamHR — AI that powers people" 
-            className="h-16 md:h-20 w-auto object-contain"
+            className="h-14 md:h-20 w-auto object-contain"
           />
-        </div>
+        </a>
         <div className="hidden lg:flex gap-10 items-center">
           {['Problem', 'How It Works', 'Features', 'Pricing'].map(l => (
             <button key={l} onClick={() => document.getElementById(l.toLowerCase().replace(/ /g, '-'))?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-white/50 hover:text-white transition-all font-medium">{l}</button>
           ))}
           <button onClick={handleLaunch} className="px-6 py-2.5 bg-white text-black rounded-full font-bold text-sm hover:bg-amber-500 hover:text-black transition-all">Get Started Free</button>
         </div>
-        <button onClick={handleLaunch} className="lg:hidden px-5 py-2.5 bg-white text-black rounded-full font-bold text-sm">Start Free</button>
+        <button onClick={handleLaunch} className="lg:hidden px-4 py-2 bg-white text-black rounded-full font-bold text-xs md:text-sm whitespace-nowrap flex-shrink-0">Start Free</button>
       </nav>
 
       {/* === HERO === */}
-      <section className="relative pt-40 pb-32 px-6 lg:px-16 min-h-screen flex flex-col justify-center">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-8">
+      <section className="relative pt-32 md:pt-40 pb-20 md:pb-32 px-4 md:px-6 lg:px-16 min-h-screen flex flex-col justify-center">
+        <div className="max-w-6xl mx-auto relative z-10 w-full">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-6 md:mb-8">
             <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
             <span className="text-sm text-amber-500 font-semibold">Now in Early Access</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-[88px] font-black leading-[0.95] tracking-tight mb-8">
-            Your founder&apos;s vision.<br />
-            <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Every employee&apos;s compass.</span>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[88px] font-black leading-[1.05] md:leading-[0.95] tracking-tight mb-6 md:mb-8 break-words">
+            Every employee&apos;s<br />
+            <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">personal AI mentor.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/50 max-w-2xl leading-relaxed mb-12">
-            NiyamAI is the AI-powered alignment engine that maps your founder&apos;s thinking patterns and turns them into personalised growth paths for every employee — closing the invisible gap between vision and execution.
+          <p className="text-lg md:text-xl lg:text-2xl text-white/50 max-w-2xl leading-relaxed mb-10 md:mb-12">
+            NiyamHR gives every employee a personal AI mentor — calibrated to your organisation&apos;s DNA, focused on daily growth, and always in sync with where the company is going.
           </p>
 
-          <div className="flex flex-wrap gap-4 mb-20">
-            <button onClick={handleLaunch} className="px-10 py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-lg hover:shadow-2xl hover:shadow-amber-500/30 transition-all active:scale-95">Start Free Trial</button>
-            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all">See How It Works</button>
+          <div className="flex flex-wrap gap-3 md:gap-4 mb-16 md:mb-20">
+            <button onClick={handleLaunch} className="px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-black rounded-full font-black text-base md:text-lg hover:shadow-2xl hover:shadow-amber-500/30 transition-all active:scale-95">Start Free Trial</button>
+            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 md:px-10 py-4 md:py-5 bg-white/5 border border-white/10 text-white rounded-full font-bold text-base md:text-lg hover:bg-white/10 transition-all">See How It Works</button>
           </div>
 
           {/* Hero Visual */}
           <div className="relative">
             <div className="bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10 rounded-3xl p-2 shadow-2xl">
               <div className="bg-[#12121a] rounded-2xl overflow-hidden">
-                <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
+                <div className="flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 border-b border-white/5">
                   <div className="w-3 h-3 rounded-full bg-red-500/60" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                   <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                  <span className="ml-4 text-xs text-white/30 font-mono">app.niyamai.com/dashboard</span>
+                  <span className="ml-4 text-xs text-white/30 font-mono truncate">app.niyamhr.in/dashboard</span>
                 </div>
-                <div className="p-8 md:p-12">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/20 rounded-2xl p-8 text-center">
-                      <div className="text-6xl font-black text-amber-500 mb-2">87%</div>
-                      <div className="text-sm text-amber-500/70 font-bold uppercase tracking-widest">Org Synergy Score</div>
+                <div className="p-6 md:p-8 lg:p-12">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/20 rounded-2xl p-6 md:p-8 text-center">
+                      <div className="text-5xl md:text-6xl font-black text-amber-500 mb-2">87%</div>
+                      <div className="text-xs md:text-sm text-amber-500/70 font-bold uppercase tracking-widest">Org Synergy Score</div>
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-                      <div className="text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Top Drift Areas</div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+                      <div className="text-xs md:text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Top Drift Areas</div>
                       {['Strategic Thinking', 'Customer Empathy', 'Speed of Execution'].map((t, i) => (
                         <div key={i} className="flex items-center gap-3 mb-3">
                           <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden"><div className={`h-full rounded-full ${i === 0 ? 'bg-red-500' : i === 1 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: i === 0 ? '72%' : i === 1 ? '45%' : '23%' }} /></div>
@@ -77,8 +77,8 @@ export default function LandingPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-                      <div className="text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Team Alignment</div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+                      <div className="text-xs md:text-sm text-white/40 font-bold uppercase tracking-widest mb-4">Team Alignment</div>
                       {[{n:'Priya R.',s:92,c:'bg-emerald-500'},{n:'Arjun K.',s:78,c:'bg-amber-500'},{n:'Meera S.',s:61,c:'bg-orange-500'},{n:'Raj T.',s:44,c:'bg-red-500'}].map((e, i) => (
                         <div key={i} className="flex items-center gap-3 mb-3">
                           <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white/60">{e.n[0]}</div>
@@ -115,23 +115,23 @@ export default function LandingPage() {
       </section>
 
       {/* === PROBLEM === */}
-      <section id="problem" className="py-32 px-6 lg:px-16">
+      <section id="problem" className="py-20 md:py-32 px-4 md:px-6 lg:px-16">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-14 md:mb-20">
             <span className="text-sm font-bold text-red-400 uppercase tracking-widest">The Hidden Problem</span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Your employees are drifting<br /><span className="text-white/30">from your vision. Every day.</span></h2>
-            <p className="text-xl text-white/40 mt-6 max-w-2xl mx-auto leading-relaxed">As organisations scale, the founder&apos;s strategic intent gets diluted across layers. By the time it reaches the frontline, it&apos;s unrecognisable. This invisible &ldquo;neural drift&rdquo; costs enterprises crores in misaligned effort.</p>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mt-4 leading-tight">Employees are drifting<br /><span className="text-white/30">from your vision. Every day.</span></h2>
+            <p className="text-lg md:text-xl text-white/40 mt-6 max-w-2xl mx-auto leading-relaxed">As organisations scale, strategic intent gets diluted across layers. By the time it reaches the frontline, it&apos;s unrecognisable. This invisible &ldquo;alignment drift&rdquo; costs enterprises crores in misaligned effort.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: '📉', stat: '73%', title: 'of employees can\'t articulate their company\'s strategy', desc: 'Harvard Business Review found that alignment breaks down within the first two management layers.' },
               { icon: '💸', stat: '₹74L Cr', title: 'lost globally to disengaged workers', desc: 'Gallup estimates that disengagement — largely caused by misalignment — destroys more value than most recessions.' },
-              { icon: '🔄', stat: '6–18 mo', title: 'to recover from a misaligned hire', desc: 'When employees operate on different mental models than the founder, rework and attrition become inevitable.' },
+              { icon: '🔄', stat: '6–18 mo', title: 'to recover from a misaligned hire', desc: 'When employees operate on different mental models than the organisation, rework and attrition become inevitable.' },
             ].map((item, i) => (
-              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-10 hover:border-amber-500/20 hover:bg-amber-500/[0.02] transition-all group">
+              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 md:p-10 hover:border-amber-500/20 hover:bg-amber-500/[0.02] transition-all group">
                 <span className="text-4xl">{item.icon}</span>
-                <div className="text-4xl font-black text-white mt-6 mb-2">{item.stat}</div>
+                <div className="text-3xl md:text-4xl font-black text-white mt-6 mb-2">{item.stat}</div>
                 <h3 className="text-lg font-bold text-white/80 mb-3">{item.title}</h3>
                 <p className="text-white/40 leading-relaxed">{item.desc}</p>
               </div>
@@ -141,27 +141,27 @@ export default function LandingPage() {
       </section>
 
       {/* === HOW IT WORKS === */}
-      <section id="how-it-works" className="py-32 px-6 lg:px-16 bg-gradient-to-b from-transparent via-amber-500/[0.03] to-transparent">
+      <section id="how-it-works" className="py-20 md:py-32 px-4 md:px-6 lg:px-16 bg-gradient-to-b from-transparent via-amber-500/[0.03] to-transparent">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-14 md:mb-20">
             <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">How It Works</span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Three layers.<br /><span className="text-white/30">One aligned organisation.</span></h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mt-4 leading-tight">Three layers.<br /><span className="text-white/30">One aligned organisation.</span></h2>
           </div>
 
           <div className="space-y-8">
             {[
-              { step: '01', title: 'Map the Founder\'s Neural DNA', desc: 'Through a deep diagnostic conversation, NiyamAI extracts the founder\'s decision-making patterns, values, risk appetite, and non-negotiables — creating a living cognitive blueprint across 67 behavioral traits.', visual: '🧬', color: 'from-amber-500/20 to-orange-500/10', border: 'border-amber-500/20' },
-              { step: '02', title: 'Benchmark Every Employee', desc: 'Each team member goes through their own diagnostic. NiyamAI maps their behavioral patterns against the founder\'s benchmark — identifying exact drift areas, hidden strengths, and growth opportunities.', visual: '🔬', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/20' },
-              { step: '03', title: 'Close the Gap Continuously', desc: 'Weekly AI-powered mentorship sessions, scenario simulations, and personalised growth paths keep every employee moving closer to the founder\'s vision — with real-time drift tracking and burnout detection.', visual: '🚀', color: 'from-emerald-500/20 to-green-500/10', border: 'border-emerald-500/20' },
+              { step: '01', title: 'Map Your Organisation&apos;s DNA', desc: 'Through a deep diagnostic conversation, NiyamHR extracts decision-making patterns, values, risk appetite, and non-negotiables — creating a living cognitive blueprint across 67 behavioral traits.', visual: '🧬', color: 'from-amber-500/20 to-orange-500/10', border: 'border-amber-500/20' },
+              { step: '02', title: 'Benchmark Every Employee', desc: 'Each team member goes through their own diagnostic. NiyamHR maps their behavioral patterns against the organisation\'s benchmark — identifying exact drift areas, hidden strengths, and growth opportunities.', visual: '🔬', color: 'from-blue-500/20 to-indigo-500/10', border: 'border-blue-500/20' },
+              { step: '03', title: 'Grow Continuously', desc: 'Weekly AI-powered mentorship sessions, scenario simulations, and personalised growth paths keep every employee moving in the right direction — with real-time drift tracking and burnout detection.', visual: '🚀', color: 'from-emerald-500/20 to-green-500/10', border: 'border-emerald-500/20' },
             ].map((item, i) => (
-              <div key={i} className={`bg-gradient-to-r ${item.color} border ${item.border} rounded-3xl p-10 md:p-14 flex flex-col md:flex-row gap-8 items-start hover:scale-[1.01] transition-all`}>
+              <div key={i} className={`bg-gradient-to-r ${item.color} border ${item.border} rounded-3xl p-8 md:p-10 lg:p-14 flex flex-col md:flex-row gap-6 md:gap-8 items-start hover:scale-[1.01] transition-all`}>
                 <div className="flex-shrink-0">
-                  <div className="text-6xl mb-4">{item.visual}</div>
-                  <span className="text-7xl font-black text-white/5">{item.step}</span>
+                  <div className="text-5xl md:text-6xl mb-4">{item.visual}</div>
+                  <span className="text-6xl md:text-7xl font-black text-white/5">{item.step}</span>
                 </div>
                 <div>
-                  <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4">{item.title}</h3>
-                  <p className="text-lg text-white/50 leading-relaxed">{item.desc}</p>
+                  <h3 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tight mb-4" dangerouslySetInnerHTML={{__html: item.title}} />
+                  <p className="text-base md:text-lg text-white/50 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -170,23 +170,23 @@ export default function LandingPage() {
       </section>
 
       {/* === FEATURES === */}
-      <section id="features" className="py-32 px-6 lg:px-16">
+      <section id="features" className="py-20 md:py-32 px-4 md:px-6 lg:px-16">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-14 md:mb-20">
             <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest">Platform Features</span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4 leading-tight">Everything you need to<br /><span className="text-white/30">align at scale.</span></h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mt-4 leading-tight">Everything you need to<br /><span className="text-white/30">grow every employee.</span></h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: '🧬', title: 'Founder DNA Diagnostic', desc: 'A deep-probe conversation that maps the founder\'s cognitive blueprint across 67 behavioral traits — decision patterns, values, risk appetite, and non-negotiables.' },
-              { icon: '📈', title: 'Performance Timeline', desc: 'Daily, weekly, monthly, quarterly, half-yearly, and yearly views of every employee’s alignment trajectory — all in one dashboard. No more quarterly-review-week scramble.' },
-              { icon: '🧭', title: 'AI Mentorship Engine', desc: 'Every employee gets a weekly AI mentor that understands both the founder\'s DNA and their own — providing personalised guidance that no generic HR tool can match.' },
-              { icon: '⚡', title: 'Neural Honing Lab', desc: 'Scenario-based simulations calibrated to the founder\'s first principles. Employees practice real decisions, get evaluated against the founder\'s thinking patterns.' },
-              { icon: '⚖️', title: 'Three-Way Assessment', desc: 'AI synergy score, HR rating, and Manager rating — side by side. When the three disagree by more than 25 points, NiyamAI surfaces the variance. The disagreement itself is the signal worth acting on.' },
-              { icon: '📈', title: 'Org-Wide Intelligence', desc: 'HR dashboards showing team synergy scores, critical drift alerts, top performers, stagnation signals, and strategic recommendations — all in real time.' },
+              { icon: '🧬', title: 'Organisation DNA Diagnostic', desc: 'A deep-probe conversation that maps the cognitive blueprint across 67 behavioral traits — decision patterns, values, risk appetite, and non-negotiables.' },
+              { icon: '📈', title: 'Performance Timeline', desc: 'Daily, weekly, monthly, quarterly, half-yearly, and yearly views of every employee\'s alignment trajectory — all in one dashboard. No more quarterly-review-week scramble.' },
+              { icon: '🧭', title: 'AI Mentorship Engine', desc: 'Every employee gets a weekly AI mentor that understands both the organisation\'s DNA and their own — providing personalised guidance that no generic HR tool can match.' },
+              { icon: '⚡', title: 'Honing Lab', desc: 'Scenario-based simulations calibrated to your organisation\'s first principles. Employees practice real decisions and get evaluated against your thinking patterns.' },
+              { icon: '⚖️', title: 'Three-Way Assessment', desc: 'AI synergy score, HR rating, and Manager rating — side by side. When the three disagree by more than 25 points, NiyamHR surfaces the variance. The disagreement itself is the signal worth acting on.' },
+              { icon: '📊', title: 'Org-Wide Intelligence', desc: 'HR dashboards showing team synergy scores, critical drift alerts, top performers, stagnation signals, and strategic recommendations — all in real time.' },
             ].map((f, i) => (
-              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-8 hover:border-white/10 hover:bg-white/[0.05] transition-all group">
+              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-3xl p-6 md:p-8 hover:border-white/10 hover:bg-white/[0.05] transition-all group">
                 <span className="text-3xl block mb-5">{f.icon}</span>
                 <h3 className="text-xl font-black tracking-tight mb-3">{f.title}</h3>
                 <p className="text-white/40 leading-relaxed">{f.desc}</p>
@@ -197,26 +197,26 @@ export default function LandingPage() {
       </section>
 
       {/* === COMPARISON === */}
-      <section className="py-32 px-6 lg:px-16 bg-gradient-to-b from-transparent via-red-500/[0.02] to-transparent">
+      <section className="py-20 md:py-32 px-4 md:px-6 lg:px-16 bg-gradient-to-b from-transparent via-red-500/[0.02] to-transparent">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">Why NiyamAI</span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mt-4">This is not another HR tool.</h2>
+          <div className="text-center mb-12 md:mb-16">
+            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">Why NiyamHR</span>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mt-4">This is not another HR tool.</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-red-500/5 border border-red-500/10 rounded-3xl p-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="bg-red-500/5 border border-red-500/10 rounded-3xl p-8 md:p-10">
               <h3 className="text-lg font-black text-red-400 uppercase tracking-widest mb-6">Traditional HR Platforms</h3>
               <ul className="space-y-4">
-                {['Track attendance and activity', 'Generic engagement surveys', 'One-size-fits-all L&D content', 'Annual reviews nobody reads', 'Measure output, not alignment', 'No connection to founder\'s vision'].map((t, i) => (
+                {['Track attendance and activity', 'Generic engagement surveys', 'One-size-fits-all L&D content', 'Annual reviews nobody reads', 'Measure output, not alignment', 'No connection to organisation vision'].map((t, i) => (
                   <li key={i} className="flex items-start gap-3 text-white/40"><span className="text-red-400 mt-0.5">✕</span>{t}</li>
                 ))}
               </ul>
             </div>
-            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-10">
-              <h3 className="text-lg font-black text-emerald-400 uppercase tracking-widest mb-6">NiyamAI</h3>
+            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-8 md:p-10">
+              <h3 className="text-lg font-black text-emerald-400 uppercase tracking-widest mb-6">NiyamHR</h3>
               <ul className="space-y-4">
-                {['Maps founder\'s cognitive DNA as benchmark', 'Personalised behavioral alignment scoring', 'AI mentorship tailored to each person', 'Weekly growth conversations with drift tracking', 'Measures strategic thinking alignment', 'Every insight tied to founder\'s principles'].map((t, i) => (
+                {['Maps organisation\'s cognitive DNA as benchmark', 'Personalised behavioral alignment scoring', 'AI mentorship tailored to each person', 'Weekly growth conversations with drift tracking', 'Measures strategic thinking alignment', 'Every insight tied to organisation principles'].map((t, i) => (
                   <li key={i} className="flex items-start gap-3 text-white/70"><span className="text-emerald-400 mt-0.5">✓</span>{t}</li>
                 ))}
               </ul>
@@ -226,11 +226,11 @@ export default function LandingPage() {
       </section>
 
       {/* === PRICING === */}
-      <section id="pricing" className="py-32 px-6 lg:px-16">
+      <section id="pricing" className="py-20 md:py-32 px-4 md:px-6 lg:px-16">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 md:mb-16">
             <span className="text-sm font-bold text-amber-500 uppercase tracking-widest">Pricing</span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mt-4">Simple, transparent pricing.</h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mt-4">Simple, transparent pricing.</h2>
 
             <div className="flex items-center justify-center gap-4 mt-8">
               <span className={`text-sm font-bold ${billing === 'monthly' ? 'text-white' : 'text-white/40'}`}>Monthly</span>
@@ -250,10 +250,10 @@ export default function LandingPage() {
                 price: billing === 'monthly' ? '₹1,249' : '₹999', 
                 unit: 'per employee / month',
                 features: [
-                  'CorePersonaDNA Founder Diagnostic',
+                  'Organisation DNA Diagnostic',
                   'Employee DNA Mapping',
                   'Weekly AI Mentorship',
-                  'Neural Honing Lab',
+                  'Honing Lab',
                   'Synergy Dashboard',
                   'Monthly Reports',
                   'Email Support'
@@ -264,7 +264,7 @@ export default function LandingPage() {
               {
                 name: 'Growth', desc: 'For scaling teams that need deep alignment.',
                 price: billing === 'monthly' ? '₹2,499' : '₹1,999', unit: 'per employee / month',
-                features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Neural Honing Lab', 'HR intelligence dashboard', 'Priority support'],
+                features: ['Up to 100 employees', 'Full 67-trait mapping', 'AI Mentorship Engine', 'Honing Lab', 'HR intelligence dashboard', 'Priority support'],
                 cta: 'Start Free Trial', highlight: true,
               },
               {
@@ -274,7 +274,7 @@ export default function LandingPage() {
                 cta: 'Contact Sales', highlight: false,
               },
             ].map((plan, i) => (
-              <div key={i} className={`rounded-3xl p-10 flex flex-col ${plan.highlight ? 'bg-gradient-to-b from-amber-500/10 to-orange-500/5 border-2 border-amber-500/30 relative' : 'bg-white/[0.03] border border-white/[0.06]'}`}>
+              <div key={i} className={`rounded-3xl p-8 md:p-10 flex flex-col ${plan.highlight ? 'bg-gradient-to-b from-amber-500/10 to-orange-500/5 border-2 border-amber-500/30 relative' : 'bg-white/[0.03] border border-white/[0.06]'}`}>
                 {plan.highlight && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-500 text-black rounded-full text-xs font-black uppercase tracking-widest">Most Popular</div>}
                 <h3 className="text-2xl font-black mb-2">{plan.name}</h3>
                 <p className="text-white/40 text-sm mb-6">{plan.desc}</p>
@@ -299,24 +299,24 @@ export default function LandingPage() {
       </section>
 
       {/* === QUOTE === */}
-      <section className="py-32 px-6 lg:px-16">
+      <section className="py-20 md:py-32 px-4 md:px-6 lg:px-16">
         <div className="max-w-4xl mx-auto text-center">
           <div className="text-6xl mb-8">💡</div>
-          <blockquote className="text-3xl md:text-4xl font-black tracking-tight leading-tight text-white/80 italic">
+          <blockquote className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white/80 italic">
             &ldquo;The biggest risk in scaling isn&apos;t losing customers — it&apos;s losing the thinking patterns that won them in the first place.&rdquo;
           </blockquote>
-          <p className="text-white/30 mt-8 font-bold">— The NiyamAI Philosophy</p>
+          <p className="text-white/30 mt-8 font-bold">— The NiyamHR Philosophy</p>
         </div>
       </section>
 
       {/* === CTA === */}
-      <section className="py-32 px-6 lg:px-16">
+      <section className="py-20 md:py-32 px-4 md:px-6 lg:px-16">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-[40px] p-10 md:p-16 lg:p-20 text-center relative overflow-hidden">
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight leading-tight mb-6">Ready to align your<br />organisation?</h2>
-              <p className="text-black/60 text-xl mb-10 max-w-lg mx-auto">Start with the Founder DNA Diagnostic. It takes 10 minutes. The insights last forever.</p>
-              <button onClick={handleLaunch} className="px-12 py-5 bg-black text-white rounded-full font-black text-lg hover:bg-black/80 transition-all active:scale-95 shadow-2xl">Start Your Free Diagnostic</button>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-black tracking-tight leading-tight mb-6">Ready to grow<br />every employee?</h2>
+              <p className="text-black/60 text-lg md:text-xl mb-10 max-w-lg mx-auto">Start with the Organisation DNA Diagnostic. It takes 10 minutes. The insights last forever.</p>
+              <button onClick={handleLaunch} className="px-10 md:px-12 py-4 md:py-5 bg-black text-white rounded-full font-black text-base md:text-lg hover:bg-black/80 transition-all active:scale-95 shadow-2xl">Start Your Free Diagnostic</button>
             </div>
             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-60 h-60 bg-black/10 rounded-full -ml-10 -mb-10 blur-3xl" />
@@ -325,23 +325,23 @@ export default function LandingPage() {
       </section>
 
       {/* === FOOTER === */}
-      <footer className="py-16 px-6 lg:px-16 border-t border-white/5">
+      <footer className="py-16 px-4 md:px-6 lg:px-16 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div>
-              <div className="mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 mb-12">
+            <div>
+              <a href="/" className="inline-block mb-4 cursor-pointer">
                 <img 
                   src="/niyamhr-logo.png" 
                   alt="NiyamHR — AI that powers people" 
-                  className="h-20 w-auto object-contain"
+                  className="h-24 md:h-28 w-auto object-contain"
                 />
-              </div>
-              <p className="text-white/30 text-sm leading-relaxed">The AI-powered alignment engine for founder-led organisations.</p>
+              </a>
+              <p className="text-white/30 text-sm leading-relaxed">AI-powered employee mentorship. Every person, every day, aligned with your organisation&apos;s DNA.</p>
             </div>
             <div>
               <h4 className="text-sm font-bold text-white/60 uppercase tracking-widest mb-4">Product</h4>
               <ul className="space-y-2 text-white/30 text-sm">
-                <li><a href="#problem" className="hover:text-white/60 transition-colors">Founder Diagnostic</a></li>
+                <li><a href="#problem" className="hover:text-white/60 transition-colors">Organisation Diagnostic</a></li>
                 <li><a href="#how-it-works" className="hover:text-white/60 transition-colors">Employee Mapping</a></li>
                 <li><a href="#features" className="hover:text-white/60 transition-colors">AI Mentorship</a></li>
                 <li><a href="#features" className="hover:text-white/60 transition-colors">Honing Lab</a></li>
@@ -365,7 +365,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-white/20 text-sm">© 2026 NiyamHR by SmartDNA Business Intelligence. All rights reserved.</p>
+            <p className="text-white/20 text-sm text-center md:text-left">© 2026 NiyamHR by SmartDNA Business Intelligence. All rights reserved.</p>
             <div className="flex gap-6 text-white/20">
               <a href="https://www.linkedin.com/in/onsury" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white/40 transition-colors">LinkedIn</a>
               <a href="mailto:onsury@gmail.com" className="text-sm hover:text-white/40 transition-colors">Email</a>
