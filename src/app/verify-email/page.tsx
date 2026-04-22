@@ -64,8 +64,17 @@ export default function VerifyEmailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+
+      {/* NiyamHR Logo Header */}
+      <button onClick={() => router.push('/')} className="mb-10 sm:mb-12 relative z-10 cursor-pointer">
+        <img 
+          src="/niyamhr-logo.png" 
+          alt="NiyamHR — AI that powers people" 
+          className="h-20 sm:h-24 w-auto object-contain"
+        />
+      </button>
 
       <div className="max-w-lg w-full text-center relative z-10">
         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-8 sm:mb-10 shadow-2xl shadow-amber-500/20">
