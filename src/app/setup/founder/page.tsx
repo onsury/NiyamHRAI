@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { saveFounderDNA, updateUser, updateOrganization } from '@/lib/firestore-service';
+import { writeBatch, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function FounderSetupPage() {
   const router = useRouter();
@@ -16,13 +17,29 @@ export default function FounderSetupPage() {
     setLoading(true);
     try {
       const orgId = niyamUser.organizationId || niyamUser.uid;
-      await saveFounderDNA(orgId, {
+
+      // M-5: Atomic founder setup. Previously three sequential client writes
+      // (founderDNA, organization, user.onboarded) could partially succeed if
+      // the network dropped mid-flow, leaving a founder with completed DNA
+      // but onboarded:false - trapping them in the wizard on next login.
+      // writeBatch() ensures all three writes land together or none do.
+      const batch = writeBatch(db);
+
+      batch.set(doc(db, 'organizations', orgId, 'founderDNA', 'current'), {
         philosophy: formData.philosophy + '\n\nDecision Style: ' + formData.decisionStyle,
         signatureTraits: [],
         negativeConstraints: formData.nonNegotiables.split(',').map(s => s.trim()).filter(Boolean),
+        updatedAt: serverTimestamp(),
       });
-      await updateOrganization(orgId, { name: formData.orgName, industry: formData.industry });
-      await updateUser(niyamUser.uid, { onboarded: true });
+
+      batch.update(doc(db, 'organizations', orgId), {
+        name: formData.orgName,
+        industry: formData.industry,
+      });
+
+      batch.update(doc(db, 'users', niyamUser.uid), { onboarded: true });
+
+      await batch.commit();
 
       // Try to refresh auth state, but don't block navigation if it fails.
       // Known issue: firebaseUser.reload() can throw if the user object has
@@ -65,9 +82,9 @@ export default function FounderSetupPage() {
           <>
             <div className="flex justify-between items-center mb-12">
               <div className="flex items-center gap-3">
-                <img 
-                  src="/niyamhr-logo.png" 
-                  alt="NiyamHR" 
+                <img
+                  src="/niyamhr-logo.png"
+                  alt="NiyamHR"
                   className="h-12 w-auto object-contain"
                 />
                 <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">Organisation DNA Diagnostic</h2>
