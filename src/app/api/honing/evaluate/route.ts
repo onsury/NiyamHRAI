@@ -86,7 +86,7 @@ Respond ONLY with valid JSON:
       evaluation: 'Evaluation temporarily unavailable. Your response has been saved for later analysis.',
       alignmentScore: 50,
       founderWouldSay: '',
-      improvementTip: 'Keep practicing ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â consistency builds alignment.',
+      improvementTip: 'Keep practicing -- your next response is an opportunity to sharpen your alignment with the founder DNA.',
     });
   }
 }

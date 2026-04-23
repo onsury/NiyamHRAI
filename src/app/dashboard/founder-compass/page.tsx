@@ -5,12 +5,12 @@ import { getFounderDNA } from '@/lib/firestore-service';
 import type { TraitScore } from '@/types';
 
 const CLUSTER_LABELS: Record<string, { name: string; icon: string; color: string }> = {
-  decision: { name: 'Decision Architecture', icon: 'Ã°Å¸Â§Â ', color: 'bg-amber-500' },
-  people: { name: 'People Philosophy', icon: 'Ã°Å¸Â¤Â', color: 'bg-blue-500' },
-  risk: { name: 'Risk & Innovation', icon: 'Ã¢Å¡Â¡', color: 'bg-emerald-500' },
-  execution: { name: 'Execution DNA', icon: 'Ã°Å¸Å½Â¯', color: 'bg-red-500' },
-  culture: { name: 'Culture Code', icon: 'Ã°Å¸Ââ€ºÃ¯Â¸Â', color: 'bg-violet-500' },
-  growth: { name: 'Growth Orientation', icon: 'Ã°Å¸â€œË†', color: 'bg-cyan-500' },
+  decision: { name: 'Decision Architecture', icon: '🧠', color: 'bg-amber-500' },
+  people: { name: 'People Philosophy', icon: '🤝', color: 'bg-blue-500' },
+  risk: { name: 'Risk & Innovation', icon: '⚡', color: 'bg-emerald-500' },
+  execution: { name: 'Execution DNA', icon: '🎯', color: 'bg-red-500' },
+  culture: { name: 'Culture Code', icon: '🏛️', color: 'bg-violet-500' },
+  growth: { name: 'Growth Orientation', icon: '📈', color: 'bg-cyan-500' },
 };
 
 export default function FounderCompassPage() {
@@ -39,7 +39,7 @@ export default function FounderCompassPage() {
 
   if (!dna || !dna.diagnosticComplete) return (
     <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-      <span className="text-5xl sm:text-6xl mb-4">Ã°Å¸Â§Â¬</span>
+      <span className="text-5xl sm:text-6xl mb-4">🧬</span>
       <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">Founder DNA Not Mapped</h2>
       <p className="text-slate-500 text-sm sm:text-base">The founder needs to complete the CorePersonaDNA diagnostic first.</p>
     </div>
@@ -74,7 +74,7 @@ export default function FounderCompassPage() {
       {/* Trait Clusters */}
       <div className="space-y-4 sm:space-y-6">
         {Object.entries(clusters).map(([clusterId, traits]) => {
-          const cluster = CLUSTER_LABELS[clusterId] || { name: clusterId, icon: 'Ã°Å¸â€œÅ ', color: 'bg-slate-500' };
+          const cluster = CLUSTER_LABELS[clusterId] || { name: clusterId, icon: '📊', color: 'bg-slate-500' };
           const avgScore = Math.round(traits.reduce((s, t) => s + t.score, 0) / traits.length);
 
           return (
@@ -117,7 +117,7 @@ export default function FounderCompassPage() {
       {dna.negativeConstraints?.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 mt-6 sm:mt-8">
           <h3 className="text-base sm:text-lg font-black text-red-800 mb-4 flex items-center gap-2">
-            <span>Ã°Å¸Å¡Â«</span> Non-Negotiables
+            <span>🚫</span> Non-Negotiables
           </h3>
           <ul className="space-y-2">
             {dna.negativeConstraints.map((c: string, i: number) => (

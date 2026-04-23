@@ -6,16 +6,16 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const CATS = [
-  { id: 'hiring_onboarding', label: 'Hiring & Onboarding', icon: 'ðŸŽ¯', ph: 'Describe your hiring process, interview stages, offer process, onboarding...' },
-  { id: 'compensation_benefits', label: 'Compensation & Benefits', icon: 'ðŸ’°', ph: 'Describe salary structure, increments, bonuses, insurance, PF, gratuity...' },
-  { id: 'leave_attendance', label: 'Leave & Attendance', icon: 'ðŸ“…', ph: 'Describe leave types, work timings, WFH policy, attendance tracking...' },
-  { id: 'performance_management', label: 'Performance Management', icon: 'ðŸ“Š', ph: 'Describe KRA/KPI setting, appraisal cycle, rating system, promotion criteria...' },
-  { id: 'learning_development', label: 'Learning & Development', icon: 'ðŸ“š', ph: 'Describe training programs, budget, certifications, mentoring...' },
-  { id: 'compliance_legal', label: 'Compliance & Legal', icon: 'âš–ï¸', ph: 'Describe PF/ESI status, POSH committee, labour law compliance...' },
-  { id: 'exit_offboarding', label: 'Exit & Offboarding', icon: 'ðŸšª', ph: 'Describe resignation process, notice period, exit interview, F&F...' },
-  { id: 'culture_engagement', label: 'Culture & Engagement', icon: 'ðŸŽ‰', ph: 'Describe team events, town halls, pulse surveys, recognition...' },
-  { id: 'diversity_inclusion', label: 'Diversity & Inclusion', icon: 'ðŸŒ', ph: 'Describe D&I initiatives, equal opportunity, accessibility...' },
-  { id: 'grievance_discipline', label: 'Grievance & Discipline', icon: 'ðŸ”’', ph: 'Describe grievance mechanism, disciplinary process, whistle-blower...' },
+  { id: 'hiring_onboarding', label: 'Hiring & Onboarding', icon: '🎯', ph: 'Describe your hiring process, interview stages, offer process, onboarding...' },
+  { id: 'compensation_benefits', label: 'Compensation & Benefits', icon: '💰', ph: 'Describe salary structure, increments, bonuses, insurance, PF, gratuity...' },
+  { id: 'leave_attendance', label: 'Leave & Attendance', icon: '📅', ph: 'Describe leave types, work timings, WFH policy, attendance tracking...' },
+  { id: 'performance_management', label: 'Performance Management', icon: '📊', ph: 'Describe KRA/KPI setting, appraisal cycle, rating system, promotion criteria...' },
+  { id: 'learning_development', label: 'Learning & Development', icon: '📚', ph: 'Describe training programs, budget, certifications, mentoring...' },
+  { id: 'compliance_legal', label: 'Compliance & Legal', icon: '⚖️', ph: 'Describe PF/ESI status, POSH committee, labour law compliance...' },
+  { id: 'exit_offboarding', label: 'Exit & Offboarding', icon: '🚪', ph: 'Describe resignation process, notice period, exit interview, F&F...' },
+  { id: 'culture_engagement', label: 'Culture & Engagement', icon: '🎉', ph: 'Describe team events, town halls, pulse surveys, recognition...' },
+  { id: 'diversity_inclusion', label: 'Diversity & Inclusion', icon: '🌍', ph: 'Describe D&I initiatives, equal opportunity, accessibility...' },
+  { id: 'grievance_discipline', label: 'Grievance & Discipline', icon: '🔒', ph: 'Describe grievance mechanism, disciplinary process, whistle-blower...' },
 ];
 
 export default function PeopleCulturePage() {

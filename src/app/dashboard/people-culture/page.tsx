@@ -3,16 +3,16 @@ import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const POLICIES = [
-  { id: 'employee_handbook', label: 'Employee Handbook', icon: 'ðŸ“–', desc: 'Complete handbook covering all policies' },
-  { id: 'onboarding_checklist', label: '30-60-90 Onboarding', icon: 'ðŸŽ¯', desc: 'Structured onboarding with milestones' },
-  { id: 'performance_framework', label: 'Performance Framework', icon: 'ðŸ“Š', desc: 'KRA, appraisal, promotion criteria' },
-  { id: 'leave_policy', label: 'Leave Policy', icon: 'ðŸ“…', desc: 'All leave types, Indian law compliant' },
-  { id: 'posh_policy', label: 'POSH Policy', icon: 'âš–ï¸', desc: 'Sexual Harassment prevention (2013 Act)' },
-  { id: 'exit_process', label: 'Exit Process', icon: 'ðŸšª', desc: 'Resignation to F&F settlement' },
-  { id: 'code_of_conduct', label: 'Code of Conduct', icon: 'ðŸ¤', desc: 'Ethics, behavior, discipline' },
-  { id: 'compensation_structure', label: 'Compensation Philosophy', icon: 'ðŸ’°', desc: 'Salary bands, benefits, increments' },
-  { id: 'learning_development', label: 'L&D Framework', icon: 'ðŸ“š', desc: 'Training, certifications, budget' },
-  { id: 'diversity_inclusion', label: 'D&I Policy', icon: 'ðŸŒ', desc: 'Equal opportunity, accessibility' },
+  { id: 'employee_handbook', label: 'Employee Handbook', icon: '📖', desc: 'Complete handbook covering all policies' },
+  { id: 'onboarding_checklist', label: '30-60-90 Onboarding', icon: '🎯', desc: 'Structured onboarding with milestones' },
+  { id: 'performance_framework', label: 'Performance Framework', icon: '📊', desc: 'KRA, appraisal, promotion criteria' },
+  { id: 'leave_policy', label: 'Leave Policy', icon: '📅', desc: 'All leave types, Indian law compliant' },
+  { id: 'posh_policy', label: 'POSH Policy', icon: '⚖️', desc: 'Sexual Harassment prevention (2013 Act)' },
+  { id: 'exit_process', label: 'Exit Process', icon: '🚪', desc: 'Resignation to F&F settlement' },
+  { id: 'code_of_conduct', label: 'Code of Conduct', icon: '🤝', desc: 'Ethics, behavior, discipline' },
+  { id: 'compensation_structure', label: 'Compensation Philosophy', icon: '💰', desc: 'Salary bands, benefits, increments' },
+  { id: 'learning_development', label: 'L&D Framework', icon: '📚', desc: 'Training, certifications, budget' },
+  { id: 'diversity_inclusion', label: 'D&I Policy', icon: '🌍', desc: 'Equal opportunity, accessibility' },
 ];
 
 export default function PoliciesPage() {

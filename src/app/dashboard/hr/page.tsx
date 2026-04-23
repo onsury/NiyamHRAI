@@ -120,7 +120,7 @@ export default function HRDashboardPage() {
           <p className="text-slate-500 text-sm mt-1">Organisation-wide alignment analytics.</p>
         </div>
         <button onClick={generateReport} disabled={generating} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-30 flex items-center gap-2 self-start">
-          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generatingâ€¦</> : 'ðŸ“Š Generate Report'}
+          {generating ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating…</> : '📊 Generate Report'}
         </button>
       </div>
 
