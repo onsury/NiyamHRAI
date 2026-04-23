@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+import { parseBody, dnaPassthroughSchema, sanitizeResponse, PracticesAnalyzeResponseSchema } from '@/lib/validation';
 
 const PracticesAnalyzeSchema = z.object({
   practices: z.any().optional(),
@@ -104,7 +104,8 @@ Respond ONLY with valid JSON:
     const text = data.content?.[0]?.text || '';
 
     try {
-      return NextResponse.json(JSON.parse(text.replace(/```json|```/g, '').trim()));
+      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      return NextResponse.json(sanitizeResponse<any>(parsed, PracticesAnalyzeResponseSchema, parsed));
     } catch {
       return NextResponse.json({
         benchmarkScore: 50,

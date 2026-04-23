@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody } from '@/lib/validation';
+import { parseBody, sanitizeResponse, ReportResponseSchema } from '@/lib/validation';
 
 const ReportSchema = z.object({
   reportType: z.string().max(100),
@@ -110,7 +110,8 @@ Respond ONLY with valid JSON:
 
     try {
       const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-      return NextResponse.json({ ...parsed, reportType, generatedAt: new Date().toISOString() });
+      const out = { ...parsed, reportType, generatedAt: new Date().toISOString() };
+      return NextResponse.json(sanitizeResponse<any>(out, ReportResponseSchema, out));
     } catch {
       return NextResponse.json({
         title: `${reportType} Report`,

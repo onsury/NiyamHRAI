@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+import { parseBody, dnaPassthroughSchema, sanitizeResponse, HoningScenarioResponseSchema } from '@/lib/validation';
 
 const HoningScenarioSchema = z.object({
   trait: z.string().max(100),
@@ -66,7 +66,7 @@ Respond ONLY with valid JSON:
 
     try {
       const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-      return NextResponse.json(parsed);
+      return NextResponse.json(sanitizeResponse<any>(parsed, HoningScenarioResponseSchema, parsed));
     } catch {
       return NextResponse.json({
         scenario: text || 'A client asks for a major scope change two days before delivery. How do you handle it?',

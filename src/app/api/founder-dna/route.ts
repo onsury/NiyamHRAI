@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody } from '@/lib/validation';
+import { parseBody, sanitizeResponse, FounderDNAResponseSchema } from '@/lib/validation';
 
 const FounderDNASchema = z.object({
   rawAnswers: z.record(z.union([z.number(), z.string()])).optional(),
@@ -105,7 +105,7 @@ Analyse and respond with JSON only.` }],
           }
         });
 
-        return NextResponse.json({
+        const out0 = {
           signatureTraits,
           philosophy,
           voiceCaptures,
@@ -115,14 +115,15 @@ Analyse and respond with JSON only.` }],
           riskAppetite,
           innovationBias,
           diagnosticComplete: true,
-        });
+        };
+        return NextResponse.json(sanitizeResponse<any>(out0, FounderDNAResponseSchema, out0));
       } catch (aiErr) {
         console.error('Claude enrichment failed, using raw scores:', aiErr);
       }
     }
 
     // Fallback without AI enrichment
-    return NextResponse.json({
+    const out1 = {
       signatureTraits,
       philosophy,
       voiceCaptures,
@@ -132,7 +133,8 @@ Analyse and respond with JSON only.` }],
       riskAppetite,
       innovationBias,
       diagnosticComplete: true,
-    });
+    };
+    return NextResponse.json(sanitizeResponse<any>(out1, FounderDNAResponseSchema, out1));
 
   } catch (err: any) {
     console.error('Founder DNA API error:', err);

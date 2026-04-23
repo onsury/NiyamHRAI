@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
-import { parseBody, dnaPassthroughSchema } from '@/lib/validation';
+import { parseBody, dnaPassthroughSchema, sanitizeResponse, PracticesGenerateResponseSchema } from '@/lib/validation';
 
 const PracticesGenerateSchema = z.object({
   policyType: z.string().max(100),
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       employee_handbook: 'Generate a comprehensive Employee Handbook covering company overview, code of conduct, work policies, leave policies, benefits, grievance procedure, and separation policy.',
       onboarding_checklist: 'Generate a detailed 30-60-90 day onboarding checklist with specific milestones, training modules, and evaluation criteria.',
       performance_framework: 'Generate a performance management framework including KRA setting, review cycles, rating methodology, PIP process, and promotion criteria.',
-      leave_policy: 'Generate a complete leave policy covering CL, SL, EL, maternity/paternity, bereavement, comp-off, LOP, and leave encashment Ã¢â‚¬â€ compliant with Indian law.',
+      leave_policy: 'Generate a complete leave policy covering CL, SL, EL, maternity/paternity, bereavement, comp-off, LOP, and leave encashment ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â compliant with Indian law.',
       posh_policy: 'Generate a POSH (Prevention of Sexual Harassment) policy compliant with the 2013 Act including ICC constitution, complaint procedure, timelines, and awareness requirements.',
       exit_process: 'Generate a complete exit/offboarding process including resignation acceptance, notice period, knowledge transfer, exit interview, full & final settlement, and experience letter.',
       code_of_conduct: 'Generate a Code of Conduct covering ethical behavior, conflict of interest, confidentiality, social media policy, dress code, and disciplinary procedures.',
@@ -109,7 +109,9 @@ Respond ONLY with valid JSON:
     const text = data.content?.[0]?.text || '';
 
     try {
-      return NextResponse.json({ policyType, ...JSON.parse(text.replace(/```json|```/g, '').trim()) });
+      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const out = { policyType, ...parsed };
+      return NextResponse.json(sanitizeResponse<any>(out, PracticesGenerateResponseSchema, out));
     } catch {
       return NextResponse.json({ policyType, title: policyType, content: text, sections: [] });
     }
