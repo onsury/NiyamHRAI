@@ -60,7 +60,7 @@ export default function DashboardPage() {
           });
         } catch (err) { console.error(err); }
       } else {
-        // Employee/manager view â€” pull my own synergy
+        // Employee/manager view — pull my own synergy
         try {
           const ds = await getDoc(doc(db, 'users', niyamUser.uid, 'employeeDNA', 'current'));
           if (ds.exists()) {
@@ -105,7 +105,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/team')}
           title="Team Members"
           subtitle="Invite, assign managers, review assessments"
-          icon="ðŸ‘¥"
+          icon="👥"
           gradient="from-slate-800 to-slate-900"
           textMuted="text-white/50"
         />
@@ -113,7 +113,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/performance')}
           title="Performance Timeline"
           subtitle="Daily to yearly alignment trends"
-          icon="ðŸ“ˆ"
+          icon="📈"
           gradient="from-indigo-600 to-violet-700"
           textMuted="text-white/50"
         />
@@ -121,7 +121,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/hr')}
           title="Org Neural Insights"
           subtitle="AI-generated organisation-wide analysis"
-          icon="ðŸ“Š"
+          icon="📊"
           gradient="from-amber-500 to-orange-600"
           textMuted="text-black/50"
           textBase="text-black"
@@ -155,7 +155,7 @@ export default function DashboardPage() {
           )}
           <div className="flex flex-wrap gap-3 mt-5 sm:mt-6">
             <button onClick={() => router.push('/dashboard/honing')} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-amber-500 text-black rounded-full font-bold text-xs sm:text-sm hover:bg-amber-400 transition-all active:scale-95 flex items-center gap-2">
-              <span>âš¡</span> Enter Honing Lab
+              <span>⚡</span> Enter Honing Lab
             </button>
             <button onClick={() => router.push('/dashboard/checkin')} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 text-white rounded-full font-bold text-xs sm:text-sm hover:bg-white/15 transition-all">
               Weekly Check-in

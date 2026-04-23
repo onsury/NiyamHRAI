@@ -136,13 +136,13 @@ export default function PeopleCulturePage() {
             </div>
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 mt-4">
-            <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2">ðŸ’¡ Why Document Existing Practices?</p>
+            <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2">💡 Why Document Existing Practices?</p>
             <ul className="text-xs text-amber-800 space-y-1.5 leading-relaxed">
-              <li>â€¢ NiyamAI builds ON your practices, not against them</li>
-              <li>â€¢ Your team sees familiar processes reflected in assessments</li>
-              <li>â€¢ Compliance gaps are identified against Indian labour law</li>
-              <li>â€¢ Founder DNA alignment reveals cultural mismatches</li>
-              <li>â€¢ AI generates improved policies from your baseline</li>
+              <li>• NiyamAI builds ON your practices, not against them</li>
+              <li>• Your team sees familiar processes reflected in assessments</li>
+              <li>• Compliance gaps are identified against Indian labour law</li>
+              <li>• Founder DNA alignment reveals cultural mismatches</li>
+              <li>• AI generates improved policies from your baseline</li>
             </ul>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function PeopleCulturePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {analysis.quickWins?.length > 0 && <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5"><h3 className="text-sm font-black text-emerald-800 mb-3">âš¡ Quick Wins</h3>{analysis.quickWins.map((w: string, i: number) => <p key={i} className="text-xs text-emerald-700 mb-1">â†’ {w}</p>)}</div>}
-            {analysis.gaps?.length > 0 && <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5"><h3 className="text-sm font-black text-amber-800 mb-3">âš ï¸ Key Gaps</h3>{analysis.gaps.map((g: string, i: number) => <p key={i} className="text-xs text-amber-700 mb-1">â€¢ {g}</p>)}</div>}
+            {analysis.gaps?.length > 0 && <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5"><h3 className="text-sm font-black text-amber-800 mb-3">âš ï¸ Key Gaps</h3>{analysis.gaps.map((g: string, i: number) => <p key={i} className="text-xs text-amber-700 mb-1">• {g}</p>)}</div>}
             {analysis.complianceFlags?.length > 0 && <div className="bg-red-50 border border-red-200 rounded-2xl p-5"><h3 className="text-sm font-black text-red-800 mb-3">ðŸš¨ Compliance</h3>{analysis.complianceFlags.map((f: string, i: number) => <p key={i} className="text-xs text-red-700 mb-1">! {f}</p>)}</div>}
           </div>
           {analysis.recommendations?.length > 0 && (
