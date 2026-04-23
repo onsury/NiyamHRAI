@@ -37,7 +37,7 @@ export interface TraitScore {
   cluster: string;
   score: number;
   description?: string;
-  founderBenchmark: number;
+  founderBenchmark?: number;
 }
 
 export interface FounderDNA {

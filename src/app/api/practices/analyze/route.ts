@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
 import { parseBody, dnaPassthroughSchema, sanitizeResponse, PracticesAnalyzeResponseSchema } from '@/lib/validation';
+import type { TraitScore } from '@/types';
 
 const PracticesAnalyzeSchema = z.object({
   practices: z.any().optional(),
@@ -36,9 +37,9 @@ export async function POST(req: NextRequest) {
     const founderContext = founderDNA ? `
 FOUNDER DNA CONTEXT:
 Philosophy: ${founderDNA.philosophy || 'Not mapped'}
-Key Traits: ${(founderDNA.signatureTraits || []).slice(0, 8).map((t: any) => `${t.name}: ${t.score}/100`).join(', ')}
+Key Traits: ${(founderDNA.signatureTraits || []).slice(0, 8).map((t: TraitScore) => `${t.name}: ${t.score}/100`).join(', ')}
 Non-Negotiables: ${(founderDNA.negativeConstraints || []).join(', ')}
-Culture traits: ${(founderDNA.signatureTraits || []).filter((t: any) => t.cluster === 'culture' || t.cluster === 'people').map((t: any) => `${t.name}: ${t.score}`).join(', ')}
+Culture traits: ${(founderDNA.signatureTraits || []).filter((t: TraitScore) => t.cluster === 'culture' || t.cluster === 'people').map((t: TraitScore) => `${t.name}: ${t.score}`).join(', ')}
 ` : '';
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
 import { parseBody, dnaPassthroughSchema, sanitizeResponse, CheckinResponseSchema } from '@/lib/validation';
+import type { TraitScore } from '@/types';
 
 const CheckinSchema = z.object({
   reflection: z.string().max(4000),
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
     const founderContext = founderDNA ? `
 FOUNDER DNA BENCHMARK:
 Philosophy: ${founderDNA.philosophy || 'Not yet mapped'}
-Key Traits: ${(founderDNA.signatureTraits || []).slice(0, 10).map((t: any) => `${t.name}: ${t.score}/100`).join(', ')}
+Key Traits: ${(founderDNA.signatureTraits || []).slice(0, 10).map((t: TraitScore) => `${t.name}: ${t.score}/100`).join(', ')}
 Non-Negotiables: ${(founderDNA.negativeConstraints || []).join(', ')}
 Voice Captures: ${Object.entries(founderDNA.voiceCaptures || {}).map(([k, v]) => `[${k}]: "${v}"`).join(' | ')}
 ` : '';
@@ -145,7 +146,7 @@ Respond in this JSON format:
   } catch (err: any) {
     console.error('[checkin] Top-level error:', err.message, err.stack?.slice(0, 500));
     return NextResponse.json({
-      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â your growth matters and we\'ll analyse this soon.',
+      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â your growth matters and we\'ll analyse this soon.',
       synergyDelta: 0,
       driftAreas: [],
       strengths: [],

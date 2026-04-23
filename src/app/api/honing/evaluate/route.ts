@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
 import { parseBody, dnaPassthroughSchema, sanitizeResponse, HoningEvaluateResponseSchema } from '@/lib/validation';
+import type { TraitScore } from '@/types';
 
 const HoningEvaluateSchema = z.object({
   scenario: z.string().max(4000),
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     const founderContext = founderDNA ? `
-Founder's approach: ${(founderDNA.signatureTraits || []).filter((t: any) => t.cluster === trait?.toLowerCase()).map((t: any) => `${t.name}: ${t.score}/100`).join(', ')}
+Founder's approach: ${(founderDNA.signatureTraits || []).filter((t: TraitScore) => t.cluster === trait?.toLowerCase()).map((t: TraitScore) => `${t.name}: ${t.score}/100`).join(', ')}
 Non-negotiables: ${(founderDNA.negativeConstraints || []).join(', ')}
 Founder's voice: ${Object.values(founderDNA.voiceCaptures || {}).slice(0, 2).join(' | ')}
 ` : '';
@@ -85,7 +86,7 @@ Respond ONLY with valid JSON:
       evaluation: 'Evaluation temporarily unavailable. Your response has been saved for later analysis.',
       alignmentScore: 50,
       founderWouldSay: '',
-      improvementTip: 'Keep practicing ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â consistency builds alignment.',
+      improvementTip: 'Keep practicing ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â consistency builds alignment.',
     });
   }
 }

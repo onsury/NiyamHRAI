@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getEmployeeDNA, getDNAHistory } from '@/lib/firestore-service';
+import type { TraitScore } from '@/types';
 
 export default function MyDNAPage() {
   const { niyamUser } = useAuth();
@@ -60,7 +61,7 @@ export default function MyDNAPage() {
       {/* Status Badge */}
       <div className="flex items-center gap-2 mb-6 sm:mb-8">
         <span className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border ${!dna ? 'bg-amber-50 border-amber-200 text-amber-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
-          {!dna ? '⚠ Awaiting First Assessment' : '✓ DNA Mapped'}
+          {!dna ? 'Ã¢Å¡Â  Awaiting First Assessment' : 'Ã¢Å“â€œ DNA Mapped'}
         </span>
       </div>
 
@@ -69,7 +70,7 @@ export default function MyDNAPage() {
         <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm mb-6 sm:mb-8">
           <h2 className="text-base sm:text-lg font-black text-slate-900 mb-4">Trait Scores</h2>
           <div className="space-y-3">
-            {traits.map((t: any, i: number) => (
+            {traits.map((t: TraitScore, i: number) => (
               <div key={i}>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs sm:text-sm font-semibold text-slate-600">{t.name}</span>

@@ -15,6 +15,7 @@ const EmployeeDNASchema = z.object({
 });
 import { adminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import type { TraitScore } from '@/types';
 
 /**
  * POST /api/employee-dna
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
     // --- Branch 1: No key or no founderDNA -> return baseline, still persist ---
     if (!CLAUDE_KEY || !founderDNA) {
       console.warn('[employee-dna] Missing key or founderDNA -- returning baseline');
-      const baseTraits = (founderDNA?.signatureTraits || []).map((ft: any) => ({
+      const baseTraits = (founderDNA?.signatureTraits || []).map((ft: TraitScore) => ({
         name: ft.name,
         cluster: ft.cluster,
         score: Math.max(20, Math.min(80, ft.score + Math.floor(Math.random() * 30 - 15))),
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
         system: `You are NiyamAI's Employee DNA Mapper. Given an employee's profile and the founder's DNA benchmark, generate an initial DNA profile predicting alignment.
 
 FOUNDER DNA BENCHMARK:
-${(founderDNA.signatureTraits || []).map((t: any) => `${t.name} (${t.cluster}): ${t.score}/100`).join('\n')}
+${(founderDNA.signatureTraits || []).map((t: TraitScore) => `${t.name} (${t.cluster}): ${t.score}/100`).join('\n')}
 Philosophy: ${founderDNA.philosophy || 'Not captured'}
 Non-negotiables: ${(founderDNA.negativeConstraints || []).join(', ')}
 
@@ -176,14 +177,14 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
     } catch (parseErr) {
       console.error('[employee-dna] JSON parse failed');
       // --- Branch 3: Parse failed, derive from founder traits ---
-      const derivedTraits = (founderDNA?.signatureTraits || []).map((ft: any) => ({
+      const derivedTraits = (founderDNA?.signatureTraits || []).map((ft: TraitScore) => ({
         name: ft.name,
         cluster: ft.cluster,
         score: Math.max(20, Math.min(80, ft.score + Math.floor(Math.random() * 30 - 15))),
         description: '',
       }));
       const avgScore = derivedTraits.length > 0
-        ? Math.round(derivedTraits.reduce((s: number, t: any) => s + t.score, 0) / derivedTraits.length)
+        ? Math.round(derivedTraits.reduce((s: number, t: TraitScore) => s + t.score, 0) / derivedTraits.length)
         : 50;
       const dna: EmployeeDNA = {
         traits: derivedTraits,

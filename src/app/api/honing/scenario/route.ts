@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
 import { parseBody, dnaPassthroughSchema, sanitizeResponse, HoningScenarioResponseSchema } from '@/lib/validation';
+import type { TraitScore } from '@/types';
 
 const HoningScenarioSchema = z.object({
   trait: z.string().max(100),
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     const { trait, difficulty, founderDNA } = parsed.data;
 
     const founderContext = founderDNA ? `
-The founder values: ${(founderDNA.signatureTraits || []).slice(0, 5).map((t: any) => t.name).join(', ')}
+The founder values: ${(founderDNA.signatureTraits || []).slice(0, 5).map((t: TraitScore) => t.name).join(', ')}
 Non-negotiables: ${(founderDNA.negativeConstraints || []).slice(0, 3).join(', ')}
 ` : '';
 
