@@ -38,19 +38,16 @@ export default function DashboardPage() {
           let critical = 0;
           let onboarded = 0;
 
-          await Promise.all(userDocs.map(async (u) => {
+          // M-4: synergyScore is denormalized onto the user doc.
+          // No per-user subcollection fetch needed (was N+1 at admin scale).
+          for (const u of userDocs) {
             if (u.data().onboarded) onboarded += 1;
-            try {
-              const ds = await getDoc(doc(db, 'users', u.id, 'employeeDNA', 'current'));
-              if (ds.exists()) {
-                const s = ds.data().synergyScore;
-                if (typeof s === 'number') {
-                  synergies.push(s);
-                  if (s < 40) critical += 1;
-                }
-              }
-            } catch {}
-          }));
+            const s = u.data().synergyScore;
+            if (typeof s === 'number') {
+              synergies.push(s);
+              if (s < 40) critical += 1;
+            }
+          }
 
           const avg = synergies.length ? Math.round(synergies.reduce((a, x) => a + x, 0) / synergies.length) : 0;
 
@@ -63,7 +60,7 @@ export default function DashboardPage() {
           });
         } catch (err) { console.error(err); }
       } else {
-        // Employee/manager view — pull my own synergy
+        // Employee/manager view â€” pull my own synergy
         try {
           const ds = await getDoc(doc(db, 'users', niyamUser.uid, 'employeeDNA', 'current'));
           if (ds.exists()) {
@@ -92,7 +89,7 @@ export default function DashboardPage() {
   if (isFounder) return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">{niyamUser.role} · {niyamUser.level}</p>
+        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">{niyamUser.role} Â· {niyamUser.level}</p>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Welcome back, {niyamUser.displayName}.</h1>
       </div>
 
@@ -108,7 +105,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/team')}
           title="Team Members"
           subtitle="Invite, assign managers, review assessments"
-          icon="👥"
+          icon="ðŸ‘¥"
           gradient="from-slate-800 to-slate-900"
           textMuted="text-white/50"
         />
@@ -116,7 +113,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/performance')}
           title="Performance Timeline"
           subtitle="Daily to yearly alignment trends"
-          icon="📈"
+          icon="ðŸ“ˆ"
           gradient="from-indigo-600 to-violet-700"
           textMuted="text-white/50"
         />
@@ -124,7 +121,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/dashboard/hr')}
           title="Org Neural Insights"
           subtitle="AI-generated organisation-wide analysis"
-          icon="📊"
+          icon="ðŸ“Š"
           gradient="from-amber-500 to-orange-600"
           textMuted="text-black/50"
           textBase="text-black"
@@ -144,7 +141,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
             <span className="px-3 py-1 bg-amber-500 text-black rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest">Active Session</span>
             <span className={`text-xs sm:text-sm font-bold ${synergyColor}`}>
-              · Synergy: {mySynergy != null ? `${synergyPct}%` : 'Not yet assessed'}
+              Â· Synergy: {mySynergy != null ? `${synergyPct}%` : 'Not yet assessed'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3">Welcome back, {niyamUser.displayName}.</h1>
@@ -158,7 +155,7 @@ export default function DashboardPage() {
           )}
           <div className="flex flex-wrap gap-3 mt-5 sm:mt-6">
             <button onClick={() => router.push('/dashboard/honing')} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-amber-500 text-black rounded-full font-bold text-xs sm:text-sm hover:bg-amber-400 transition-all active:scale-95 flex items-center gap-2">
-              <span>⚡</span> Enter Honing Lab
+              <span>âš¡</span> Enter Honing Lab
             </button>
             <button onClick={() => router.push('/dashboard/checkin')} className="px-5 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 text-white rounded-full font-bold text-xs sm:text-sm hover:bg-white/15 transition-all">
               Weekly Check-in

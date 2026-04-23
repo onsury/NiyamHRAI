@@ -37,13 +37,13 @@ export default function ManagerTeamPage() {
       }));
       setReports(rows);
 
+      // M-4: synergyScore is denormalized onto the user doc.
+      // No per-user subcollection fetch needed (was N+1 at manager scale).
       const dnaMap: Record<string, { synergyScore?: number }> = {};
-      await Promise.all(rows.map(async (r) => {
-        try {
-          const ds = await getDoc(doc(db, 'users', r.uid, 'employeeDNA', 'current'));
-          if (ds.exists()) dnaMap[r.uid] = { synergyScore: ds.data().synergyScore };
-        } catch {}
-      }));
+      for (const d of snap.docs) {
+        const s = d.data().synergyScore;
+        if (typeof s === 'number') dnaMap[d.id] = { synergyScore: s };
+      }
       setDnaByUid(dnaMap);
       setLoading(false);
     });
@@ -80,7 +80,7 @@ export default function ManagerTeamPage() {
 
       <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-400 text-sm">Loading…</div>
+          <div className="p-8 text-center text-slate-400 text-sm">Loadingâ€¦</div>
         ) : reports.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">No direct reports yet. A founder or HR admin assigns people to you.</div>
         ) : (
@@ -120,7 +120,7 @@ export default function ManagerTeamPage() {
                         className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl text-sm resize-none h-20 outline-none focus:border-amber-500" />
                       <button onClick={() => submit(r.uid)} disabled={saving}
                         className="mt-3 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-40">
-                        {saving ? 'Saving…' : 'Save rating'}
+                        {saving ? 'Savingâ€¦' : 'Save rating'}
                       </button>
                     </div>
                   )}
@@ -142,7 +142,7 @@ function Cell({ score, label }: { score?: number; label: string }) {
       : 'text-red-500';
   return (
     <div>
-      <div className={`text-lg font-black ${color}`}>{score != null ? `${score}%` : '—'}</div>
+      <div className={`text-lg font-black ${color}`}>{score != null ? `${score}%` : 'â€”'}</div>
       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
     </div>
   );

@@ -60,10 +60,10 @@ service cloud.firestore {
       // Update: own profile, but CANNOT change role or organizationId
       // OR admin updating non-role fields on an org member
       allow update: if (isOwner(userId)
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'organizationId'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'organizationId', 'synergyScore', 'synergyUpdatedAt'])
           && (!('managerId' in request.resource.data) || request.resource.data.managerId != userId))
         || (isSignedIn() && isAdminOfOrg(resource.data.organizationId)
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'synergyScore', 'synergyUpdatedAt']));
 
       // Delete: own profile or admin
       allow delete: if isOwner(userId) || (isSignedIn() && isAdminOfOrg(resource.data.organizationId));

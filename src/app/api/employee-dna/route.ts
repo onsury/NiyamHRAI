@@ -59,6 +59,14 @@ async function saveDNAServerSide(uid: string, dna: EmployeeDNA, trigger: string)
     timestamp: FieldValue.serverTimestamp(),
   });
 
+  // M-4: denormalize synergyScore onto user doc so HR/Team/Manager
+  // dashboards can read it with a single users query instead of N+1 fetches
+  // of the per-user employeeDNA/current subcollection.
+  batch.update(adminDb.doc(`users/${uid}`), {
+    synergyScore: dna.synergyScore || 50,
+    synergyUpdatedAt: FieldValue.serverTimestamp(),
+  });
+
   await batch.commit();
 }
 

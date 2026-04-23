@@ -74,14 +74,13 @@ export default function TeamPage() {
       }));
       setMembers(rows);
 
-      // Load DNA (synergy) for each in parallel
+      // M-4: synergyScore is denormalized onto the user doc.
+      // No per-user subcollection fetch needed (was N+1 at admin scale).
       const dnaMap: Record<string, { synergyScore?: number }> = {};
-      await Promise.all(rows.map(async (r) => {
-        try {
-          const ds = await getDoc(doc(db, 'users', r.uid, 'employeeDNA', 'current'));
-          if (ds.exists()) dnaMap[r.uid] = { synergyScore: ds.data().synergyScore };
-        } catch {}
-      }));
+      for (const d of snap.docs) {
+        const s = d.data().synergyScore;
+        if (typeof s === 'number') dnaMap[d.id] = { synergyScore: s };
+      }
       setDnaByUid(dnaMap);
       setLoading(false);
     });
@@ -218,7 +217,7 @@ export default function TeamPage() {
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Reports to (optional)</label>
             <select value={inviteManagerId} onChange={(e) => setInviteManagerId(e.target.value)}
               className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-semibold outline-none">
-              <option value="">ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â None ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</option>
+              <option value="">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â None ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â</option>
               {managers.map((m) => <option key={m.uid} value={m.uid}>{m.displayName} ({m.role})</option>)}
             </select>
           </div>
@@ -226,12 +225,12 @@ export default function TeamPage() {
         {inviteError && <p className="mt-3 text-sm font-bold text-red-500">{inviteError}</p>}
         <button onClick={createInvite} disabled={inviting || !inviteEmail.trim()}
           className="mt-4 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 disabled:opacity-40">
-          {inviting ? 'Creating inviteÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦' : 'Generate invite link'}
+          {inviting ? 'Creating inviteÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' : 'Generate invite link'}
         </button>
 
         {lastInviteUrl && (
           <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Invite link ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â send this to your team member</p>
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Invite link ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â send this to your team member</p>
             <div className="flex gap-2 items-center">
               <input readOnly value={lastInviteUrl}
                 className="flex-1 p-2 bg-white border border-emerald-200 rounded text-xs font-mono" />
@@ -251,7 +250,7 @@ export default function TeamPage() {
           </div>
         </div>
         {loading ? (
-          <div className="p-8 text-center text-slate-400 text-sm">LoadingÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦</div>
+          <div className="p-8 text-center text-slate-400 text-sm">LoadingÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦</div>
         ) : members.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm">No members yet. Invite your first person above.</div>
         ) : (
@@ -297,7 +296,7 @@ export default function TeamPage() {
                         className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl text-sm resize-none h-20 outline-none focus:border-amber-500" />
                       <button onClick={() => submitHrRating(m.uid)} disabled={ratingSaving}
                         className="mt-3 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest disabled:opacity-40">
-                        {ratingSaving ? 'SavingÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦' : 'Save rating'}
+                        {ratingSaving ? 'SavingÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' : 'Save rating'}
                       </button>
                     </div>
                   )}
@@ -328,7 +327,7 @@ export default function TeamPage() {
                 <div key={i.id} className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-slate-800">{i.email}</p>
-                    <p className="text-xs text-slate-400">{i.role.replace('_', ' ')} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {i.level}</p>
+                    <p className="text-xs text-slate-400">{i.role.replace('_', ' ')} ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {i.level}</p>
                   </div>
                   <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
                     i.acceptedAt ? 'bg-emerald-100 text-emerald-700'
@@ -355,7 +354,7 @@ function Cell({ score, label }: { score?: number; label: string }) {
       : 'text-red-500';
   return (
     <div>
-      <div className={`text-lg font-black ${color}`}>{score != null ? `${score}%` : 'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'}</div>
+      <div className={`text-lg font-black ${color}`}>{score != null ? `${score}%` : 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</div>
       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</div>
     </div>
   );
