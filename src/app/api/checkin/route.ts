@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // If no Claude key, return structured fallback
     if (!CLAUDE_KEY) {
-      console.warn('[checkin] No CLAUDE_API_KEY ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â returning no-key fallback');
+      console.warn('[checkin] No CLAUDE_API_KEY -- returning no-key fallback');
       return NextResponse.json({
         mentorship: `Thank you for your reflection, ${userName || 'team member'}. Your awareness of this week's challenges shows growth. Focus on connecting your daily decisions to the founder's core principles. Next week, try to identify one specific moment where you applied the organisation's values in a tough situation.`,
         synergyDelta: 2,
@@ -90,7 +90,7 @@ Respond in this JSON format:
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('[checkin] anthropic API error body:', errorBody);
+      console.error('[checkin] anthropic API error, body length:', errorBody.length);
       throw new Error(`Anthropic API returned ${response.status}: ${errorBody.slice(0, 500)}`);
     }
 
@@ -108,10 +108,10 @@ Respond in this JSON format:
     const text = data.content?.[0]?.text ?? '';
 
     // DIAGNOSTIC: log what we got from Claude
-    console.log('[checkin] claude text length:', text.length, 'first 200 chars:', text.slice(0, 200));
+    console.log('[checkin] claude text length:', text.length);
 
     if (!text || text.trim().length === 0) {
-      console.error('[checkin] Claude returned empty text. Full data:', JSON.stringify(data).slice(0, 1000));
+      console.error('[checkin] Claude returned empty text');
       throw new Error('Claude returned empty response');
     }
 
@@ -132,7 +132,7 @@ Respond in this JSON format:
       });
       return NextResponse.json(safe);
     } catch (parseErr) {
-      console.error('[checkin] JSON parse failed. Slice was:', jsonSlice.slice(0, 500));
+      console.error('[checkin] JSON parse failed');
       return NextResponse.json({
         mentorship: text && text.length > 40
           ? text.replace(/```json|```/g, '').trim()
@@ -145,7 +145,7 @@ Respond in this JSON format:
   } catch (err: any) {
     console.error('[checkin] Top-level error:', err.message, err.stack?.slice(0, 500));
     return NextResponse.json({
-      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â your growth matters and we\'ll analyse this soon.',
+      mentorship: 'Your reflection has been recorded. AI mentorship is temporarily unavailable ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â your growth matters and we\'ll analyse this soon.',
       synergyDelta: 0,
       driftAreas: [],
       strengths: [],

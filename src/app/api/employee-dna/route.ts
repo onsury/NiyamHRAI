@@ -135,7 +135,7 @@ Map their initial DNA against founder benchmark. Respond with JSON only.` }],
 
     if (!res.ok) {
       const errorBody = await res.text();
-      console.error('[employee-dna] anthropic API error body:', errorBody);
+      console.error('[employee-dna] anthropic API error, body length:', errorBody.length);
       throw new Error(`Anthropic API returned ${res.status}: ${errorBody.slice(0, 500)}`);
     }
 
