@@ -1,0 +1,15 @@
+﻿# Normalize all text files to LF in the repository.
+# Windows checkouts will still get CRLF in working tree thanks to
+# core.autocrlf=true, but Git stores LF, which makes multi-platform
+# editing consistent and fixes the mixed CRLF/LF issue from earlier
+# Firebase Studio / VS Code / Claude Code sessions.
+* text=auto eol=lf
+
+# Binary files — never touch these
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
