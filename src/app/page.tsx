@@ -19,7 +19,7 @@ export default function LandingPage() {
         <a href="/" className="flex items-center cursor-pointer flex-shrink-0">
           <img 
             src="/niyamhr-logo.png" 
-            alt="NiyamHR — AI that powers people" 
+            alt="NiyamHR — Map Founder | Mentor Employee" 
             className="h-14 md:h-20 w-auto object-contain"
           />
         </a>
@@ -375,7 +375,7 @@ export default function LandingPage() {
               <a href="/" className="inline-block mb-4 cursor-pointer">
                 <img 
                   src="/niyamhr-logo.png" 
-                  alt="NiyamHR — AI that powers people" 
+                  alt="NiyamHR — Map Founder | Mentor Employee" 
                   className="h-24 md:h-28 w-auto object-contain"
                 />
               </a>
