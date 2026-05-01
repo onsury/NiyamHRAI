@@ -408,10 +408,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/20 text-sm text-center md:text-left">© 2026 NiyamHR by SmartDNA Business Intelligence. All rights reserved.</p>
+            <p className="text-white/20 text-sm text-center md:text-left">© 2026 NiyamHR AI Mentor by Madraz Buzz Media. All rights reserved.</p>
             <div className="flex gap-6 text-white/20">
-              <a href="https://www.linkedin.com/in/onsury" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white/40 transition-colors">LinkedIn</a>
-              <a href="mailto:onsury@gmail.com" className="text-sm hover:text-white/40 transition-colors">Email</a>
+              <a href="https://niyamhr.in" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white/40 transition-colors">Website</a>
+              <a href="mailto:support@niyamhr.in" className="text-sm hover:text-white/40 transition-colors">Email</a>
             </div>
           </div>
         </div>

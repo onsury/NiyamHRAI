@@ -24,7 +24,7 @@ export default function TermsPage() {
             <p className="text-lg"><strong className="text-white">Last updated:</strong> April 2026</p>
 
             <p>
-              These Terms of Service (&ldquo;Terms&rdquo;) govern your use of NiyamHR (&ldquo;the Service&rdquo;), operated by SmartDNA Business Intelligence & Advisory (&ldquo;we&rdquo;, &ldquo;us&rdquo;). By accessing or using the Service, you agree to these Terms.
+              These Terms of Service (&ldquo;Terms&rdquo;) govern your use of NiyamHR AI Mentor (&ldquo;the Service&rdquo;), operated by Madraz Buzz Media (&ldquo;we&rdquo;, &ldquo;us&rdquo;). By accessing or using the Service, you agree to these Terms.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">1. Early Access</h2>
@@ -65,7 +65,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">5. Intellectual property</h2>
             <p>
-              NiyamHR&apos;s platform, including the SmartDNA framework, algorithms, branding, and content, is owned by SmartDNA Business Intelligence & Advisory. You retain ownership of data you submit. You grant us a limited licence to process your data solely to provide the Service.
+              The NiyamHR AI Mentor platform — including the SmartDNA methodology framework, algorithms, branding, and content — is owned by Madraz Buzz Media. You retain ownership of data you submit. You grant us a limited licence to process your data solely to provide the Service.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">6. Payments and billing</h2>
@@ -75,17 +75,17 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">7. Termination</h2>
             <p>
-              You may stop using NiyamHR at any time by contacting us at <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>. We may suspend or terminate accounts that violate these Terms, pose security risks, or engage in fraudulent behaviour.
+              You may stop using NiyamHR AI Mentor at any time by contacting us at <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>. We may suspend or terminate accounts that violate these Terms, pose security risks, or engage in fraudulent behaviour.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">8. Limitation of liability</h2>
             <p>
-              To the maximum extent permitted by Indian law, NiyamHR and SmartDNA Business Intelligence & Advisory shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service. Our total liability for any claim is limited to the amount you paid us in the twelve months prior to the claim, or ₹10,000, whichever is greater.
+              To the maximum extent permitted by Indian law, NiyamHR AI Mentor and Madraz Buzz Media shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service. Our total liability for any claim is limited to the amount you paid us in the twelve months prior to the claim, or ₹10,000, whichever is greater.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">9. Indemnification</h2>
             <p>
-              You agree to indemnify and hold harmless SmartDNA Business Intelligence & Advisory from any claims arising from your misuse of the Service, violation of these Terms, or infringement of third-party rights.
+              You agree to indemnify and hold harmless Madraz Buzz Media from any claims arising from your misuse of the Service, violation of these Terms, or infringement of third-party rights.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">10. A note on our stage</h2>
@@ -105,11 +105,11 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">13. Contact</h2>
             <p>
-              Questions about these Terms? Contact us at <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>.
+              Questions about these Terms? Contact us at <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>.
             </p>
 
             <p className="text-sm text-white/40 mt-10 pt-6 border-t border-white/10">
-              SmartDNA Business Intelligence & Advisory · Chennai, Tamil Nadu, India
+              Madraz Buzz Media · Chennai, Tamil Nadu, India
             </p>
           </div>
         </div>

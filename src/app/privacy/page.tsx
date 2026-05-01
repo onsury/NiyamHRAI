@@ -24,7 +24,7 @@ export default function PrivacyPage() {
             <p className="text-lg"><strong className="text-white">Last updated:</strong> April 2026</p>
 
             <p>
-              NiyamHR is a product of SmartDNA Business Intelligence & Advisory (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;). This Privacy Policy explains how we collect, use, and protect personal data when you use NiyamHR (&ldquo;the Service&rdquo;).
+              NiyamHR AI Mentor is a product of Madraz Buzz Media (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), built on the SmartDNA methodology framework. This Privacy Policy explains how we collect, use, and protect personal data when you use NiyamHR AI Mentor (&ldquo;the Service&rdquo;).
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">1. Information we collect</h2>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
               <li>Lodge a grievance with the Data Protection Board of India</li>
             </ul>
             <p>
-              To exercise any of these rights, email us at <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>. We respond within 7 business days.
+              To exercise any of these rights, email us at <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>. We respond within 7 business days.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">6. International users</h2>
@@ -99,11 +99,11 @@ export default function PrivacyPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">11. Contact us</h2>
             <p>
-              Questions, concerns, or requests regarding this Privacy Policy? Contact our grievance officer at <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>.
+              Questions, concerns, or requests regarding this Privacy Policy? Contact our grievance officer at <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>.
             </p>
 
             <p className="text-sm text-white/40 mt-10 pt-6 border-t border-white/10">
-              SmartDNA Business Intelligence & Advisory · Chennai, Tamil Nadu, India
+              Madraz Buzz Media · Chennai, Tamil Nadu, India
             </p>
           </div>
         </div>

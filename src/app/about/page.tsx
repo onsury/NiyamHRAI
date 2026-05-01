@@ -25,7 +25,7 @@ export default function AboutPage() {
 
           <div className="space-y-6 text-lg text-white/60 leading-relaxed">
             <p>
-              NiyamHR is the flagship product of <strong className="text-white">SmartDNA Business Intelligence & Advisory</strong>, a Chennai-based strategic consulting and AI product studio founded by O N Suryanarayanan.
+              NiyamHR is a product of <strong className="text-white">Madraz Buzz Media</strong>, a Chennai-based AI product studio. It is built on the <strong className="text-white">SmartDNA methodology</strong> — a three-layer Persona DNA framework refined over three decades of organisational consulting.
             </p>
 
             <p>

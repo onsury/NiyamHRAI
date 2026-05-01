@@ -70,7 +70,7 @@ export default function SecurityPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Responsible disclosure</h2>
             <p>
-              If you believe you&apos;ve found a security vulnerability in NiyamHR, please report it responsibly to <a href="mailto:onsury@gmail.com" className="text-amber-500 hover:text-amber-400">onsury@gmail.com</a>. We take all reports seriously, respond within 48 hours, and work to address verified issues promptly.
+              If you believe you&apos;ve found a security vulnerability in NiyamHR AI Mentor, please report it responsibly to <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>. We take all reports seriously, respond within 48 hours, and work to address verified issues promptly.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">Incident response</h2>
@@ -79,7 +79,11 @@ export default function SecurityPage() {
             </p>
 
             <p className="text-sm text-white/40 mt-10 pt-6 border-t border-white/10">
-              Have specific security or compliance questions for your organisation? We&apos;re happy to discuss your requirements directly. Contact <a href="mailto:onsury@gmail.com" className="text-amber-500">onsury@gmail.com</a>.
+              Have specific security or compliance questions for your organisation? We&apos;re happy to discuss your requirements directly. Contact <a href="mailto:support@niyamhr.in" className="text-amber-500">support@niyamhr.in</a>.
+            </p>
+
+            <p className="text-sm text-white/40 mt-4">
+              Madraz Buzz Media · Chennai, Tamil Nadu, India
             </p>
           </div>
         </div>

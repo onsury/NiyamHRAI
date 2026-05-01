@@ -30,12 +30,12 @@ export default function ContactPage() {
           <div className="space-y-6 mb-10">
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
               <div className="text-sm font-bold text-white/40 uppercase tracking-widest mb-2">Email</div>
-              <a href="mailto:onsury@gmail.com" className="text-xl font-black text-amber-500 hover:text-amber-400 transition-colors">onsury@gmail.com</a>
+              <a href="mailto:support@niyamhr.in" className="text-xl font-black text-amber-500 hover:text-amber-400 transition-colors">support@niyamhr.in</a>
             </div>
 
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
               <div className="text-sm font-bold text-white/40 uppercase tracking-widest mb-2">Company</div>
-              <div className="text-white/80 font-bold">SmartDNA Business Intelligence & Advisory</div>
+              <div className="text-white/80 font-bold">Madraz Buzz Media</div>
               <div className="text-white/40 text-sm mt-1">Chennai, Tamil Nadu, India</div>
             </div>
 
