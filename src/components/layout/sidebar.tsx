@@ -54,13 +54,13 @@ export default function Sidebar() {
     <>
       <div className="p-5 sm:p-6 border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/dashboard')} aria-label="Go to dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-base sm:text-lg">N</div>
-            <div>
+            <div className="text-left">
               <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">NIYAM</h1>
               <p className="text-[9px] sm:text-[10px] font-bold text-amber-600 tracking-widest">NEURAL CLOUD · V1.0</p>
             </div>
-          </div>
+          </button>
           <button onClick={() => setMobileOpen(false)} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
