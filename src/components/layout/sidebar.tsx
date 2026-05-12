@@ -40,6 +40,7 @@ export default function Sidebar() {
     { href: '/dashboard/performance', label: 'Performance Timeline', icon: '📈' },
     { href: '/dashboard/people-culture', label: 'People & Culture', icon: '🏛️' },
     { href: '/dashboard/people-culture/policies', label: 'Policy Generator', icon: '📋' },
+    { href: '/dashboard/billing', label: 'Billing', icon: '💳' },
   ];
 
   const links = isFounderOrHR ? founderLinks : isManager ? managerLinks : employeeLinks;
