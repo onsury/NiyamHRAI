@@ -26,3 +26,13 @@ env:
     secret: GEMINI_API_KEY
     availability:
       - RUNTIME
+  - variable: RAZORPAY_KEY_ID
+    secret: RAZORPAY_KEY_ID
+  - variable: RAZORPAY_KEY_SECRET
+    secret: RAZORPAY_KEY_SECRET
+
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: RAZORPAY_WEBHOOK_SECRET
+    secret: RAZORPAY_WEBHOOK_SECRET

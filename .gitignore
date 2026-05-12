@@ -58,3 +58,6 @@ _h4-backup/
 _h5-backup/
 _h6-backup/
 _h6-backup/
+
+# Firebase Admin service account (NEVER commit)
+service-account.json

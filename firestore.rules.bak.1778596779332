@@ -125,12 +125,7 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if belongsToOrg(orgId);
       allow create: if isSignedIn() && request.auth.uid == orgId;
-      allow update: if isAdminOfOrg(orgId)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'plan', 'billingCycle', 'paidEmployeeSlots',
-          'subscriptionStatus', 'currentPeriodStart', 'currentPeriodEnd',
-          'lastPaymentId', 'lastPaymentAt'
-        ]);
+      allow update: if isAdminOfOrg(orgId);
       allow delete: if isFounderOfOrg(orgId);
 
       // Founder DNA
@@ -164,25 +159,6 @@ service cloud.firestore {
       allow read: if isSignedIn() && isAdminOfOrg(resource.data.organizationId);
       // Creation, acceptance, and deletion all go through the server (Admin SDK bypasses rules)
       allow write: if false;
-    }
-
-    // === Razorpay Payments (server writes only; org admins + payer can read) ===
-    match /payments/{paymentId} {
-      allow read: if isSignedIn() && (
-        resource.data.uid == request.auth.uid ||
-        isAdminOfOrg(resource.data.organizationId)
-      );
-      allow write: if false;
-    }
-
-    // === Razorpay Pending Orders (server-only; transient) ===
-    match /pending_orders/{orderId} {
-      allow read, write: if false;
-    }
-
-    // === Razorpay Webhook Audit Log (server-only) ===
-    match /razorpay_webhook_log/{logId} {
-      allow read, write: if false;
     }
 
     // Deny everything else
