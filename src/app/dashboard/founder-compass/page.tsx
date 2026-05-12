@@ -122,7 +122,7 @@ export default function FounderCompassPage() {
           <ul className="space-y-2">
             {dna.negativeConstraints.map((c: string, i: number) => (
               <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-red-700">
-                <span className="text-red-500 mt-0.5 font-bold">Ã¢Å“â€¢</span>
+                <span className="text-red-500 mt-0.5 font-bold">&bull;</span>
                 {c}
               </li>
             ))}
