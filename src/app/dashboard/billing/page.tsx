@@ -23,7 +23,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, getDoc, onSnapshot, type Timestamp } from 'firebase/firestore';
-import { app } from '@/lib/firebase';
+import app from '@/lib/firebase';
 import {
   loadRazorpayCheckout,
   openCheckout,
