@@ -29,6 +29,7 @@ export default function FounderSetupPage() {
         philosophy: formData.philosophy + '\n\nDecision Style: ' + formData.decisionStyle,
         signatureTraits: [],
         negativeConstraints: formData.nonNegotiables.split(',').map(s => s.trim()).filter(Boolean),
+        diagnosticComplete: true,
         updatedAt: serverTimestamp(),
       });
 
