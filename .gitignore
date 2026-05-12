@@ -61,3 +61,8 @@ _h6-backup/
 
 # Firebase Admin service account (NEVER commit)
 service-account.json
+
+# patch scripts and rules backups (never commit)
+razorpay-phase-*.js
+firestore.rules.bak.*
+
