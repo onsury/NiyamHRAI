@@ -52,6 +52,20 @@ export default function FounderCompassPage() {
     clusters[t.cluster].push(t);
   });
 
+  // Detect if non-negotiables are fragmented (legacy free-text wizard split paragraph on commas)
+  // vs cleanly-listed items (future MCQ wizard output).
+  // Render fragmented data as a flowing paragraph; render clean items as bullets.
+  const constraints: string[] = dna.negativeConstraints || [];
+  const isFragmentedNonNegotiables = constraints.length > 0 && (() => {
+    const first = (constraints[0] || '').trim();
+    if (/^["\u201C\u201D]/.test(first)) return true;
+    const fragmentish = constraints.filter(c => {
+      const t = (c || '').trim();
+      return /^[a-z]/.test(t) || /^(and|or|but)\s/i.test(t);
+    }).length;
+    return fragmentish / constraints.length > 0.3;
+  })();
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6 sm:mb-8">
@@ -114,19 +128,25 @@ export default function FounderCompassPage() {
       </div>
 
       {/* Non-Negotiables */}
-      {dna.negativeConstraints?.length > 0 && (
+      {constraints.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 mt-6 sm:mt-8">
           <h3 className="text-base sm:text-lg font-black text-red-800 mb-4 flex items-center gap-2">
             <span>🚫</span> Non-Negotiables
           </h3>
-          <ul className="space-y-2">
-            {dna.negativeConstraints.map((c: string, i: number) => (
-              <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-red-700">
-                <span className="text-red-500 mt-0.5 font-bold">&bull;</span>
-                {c}
-              </li>
-            ))}
-          </ul>
+          {isFragmentedNonNegotiables ? (
+            <p className="text-xs sm:text-sm text-red-700 italic leading-relaxed">
+              &ldquo;{constraints.join(', ').replace(/^["\u201C\u201D]+/, '').replace(/["\u201C\u201D]+$/, '').trim()}&rdquo;
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {constraints.map((c: string, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-red-700">
+                  <span className="text-red-500 mt-0.5 font-bold">&bull;</span>
+                  {c}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>
