@@ -109,7 +109,7 @@ export const dnaPassthroughSchema = z.any().optional();
 
 
 // ============================================================================
-// H-6: Output validation schemas — sanitize Claude/Gemini responses
+// H-6: Output validation schemas â€” sanitize Claude/Gemini responses
 // ============================================================================
 //
 // Goal: an employee who prompt-injects through a reflection cannot smuggle
@@ -129,7 +129,7 @@ export const CheckinResponseSchema = z.object({
   strengths: boundedStringArray(5, 200),
 }).passthrough();
 
-// /api/employee-dna — traits are [{ name, cluster, score, description }]
+// /api/employee-dna â€” traits are [{ name, cluster, score, description }]
 export const EmployeeDNAResponseSchema = z.object({
   traits: z.array(z.object({
     name: boundedString(200),

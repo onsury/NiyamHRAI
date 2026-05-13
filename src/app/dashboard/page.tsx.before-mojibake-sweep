@@ -89,7 +89,7 @@ export default function DashboardPage() {
   if (isFounder) return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">{niyamUser.role} · {niyamUser.level}</p>
+        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">{niyamUser.role} Â· {niyamUser.level}</p>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Welcome back, {niyamUser.displayName}.</h1>
       </div>
 
@@ -141,7 +141,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
             <span className="px-3 py-1 bg-amber-500 text-black rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest">Active Session</span>
             <span className={`text-xs sm:text-sm font-bold ${synergyColor}`}>
-              · Synergy: {mySynergy != null ? `${synergyPct}%` : 'Not yet assessed'}
+              Â· Synergy: {mySynergy != null ? `${synergyPct}%` : 'Not yet assessed'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-2 sm:mb-3">Welcome back, {niyamUser.displayName}.</h1>
