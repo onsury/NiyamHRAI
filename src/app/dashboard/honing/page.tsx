@@ -92,7 +92,7 @@ export default function HoningLabPage() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-white text-center mb-6 sm:mb-8">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-4">Ã¢Å¡Â¡</div>
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-4">⚡</div>
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Neural Honing Lab</h1>
         <p className="text-white/50 text-sm sm:text-base mt-2">Bridge behavioral drift through founder-calibrated simulations.</p>
       </div>
