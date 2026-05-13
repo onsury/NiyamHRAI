@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
@@ -154,16 +154,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendVerification = async () => {
-    if (firebaseUser && !firebaseUser.emailVerified) {
-      await sendEmailVerification(firebaseUser);
+    // FIX (M-13): use auth.currentUser instead of state firebaseUser, which may have lost its
+    // prototype methods from a prior `setFirebaseUser({...firebaseUser})` call.
+    const currentUser = auth.currentUser;
+    if (currentUser && !currentUser.emailVerified) {
+      await sendEmailVerification(currentUser);
     }
   };
 
   const refreshUser = async () => {
-    if (firebaseUser) {
-      await firebaseUser.reload();
-      setFirebaseUser({ ...firebaseUser });
-      const profile = await fetchProfile(firebaseUser);
+    // FIX (M-13): use auth.currentUser to get the live Firebase User object with all
+    // prototype methods (reload, getIdToken, etc) intact. The previous code used the
+    // spread pattern `setFirebaseUser({...firebaseUser})` which copies own enumerable
+    // properties but strips prototype methods, leaving downstream code that called
+    // firebaseUser.getIdToken() or firebaseUser.reload() with TypeError.
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await currentUser.reload();
+      setFirebaseUser(auth.currentUser);
+      const profile = await fetchProfile(currentUser);
       setNiyamUser(profile);
     }
   };
@@ -192,14 +201,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const pendingToken = sessionStorage.getItem(PENDING_INVITE_TOKEN_KEY);
     const displayName = sessionStorage.getItem(PENDING_INVITE_DISPLAY_NAME_KEY) || '';
     if (!pendingToken) throw new Error('NO_PENDING_INVITE');
-    if (!firebaseUser) throw new Error('NOT_SIGNED_IN');
+
+    // FIX (M-13): always operate on auth.currentUser (the live Firebase User object)
+    // rather than the state firebaseUser, which may be a plain spread copy without
+    // prototype methods. This is the root cause of the `a.getIdToken is not a function`
+    // and `a.reload is not a function` errors observed on /setup/employee after
+    // resumePendingInvite previously did setFirebaseUser({...firebaseUser}).
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('NOT_SIGNED_IN');
 
     // Sync the latest emailVerified state from Firebase
-    await firebaseUser.reload();
-    if (!firebaseUser.emailVerified) throw new Error('NOT_YET_VERIFIED');
+    await currentUser.reload();
+    if (!currentUser.emailVerified) throw new Error('NOT_YET_VERIFIED');
 
     // Force-refresh the ID token so it carries the updated email_verified claim
-    const idToken = await firebaseUser.getIdToken(true);
+    const idToken = await currentUser.getIdToken(true);
 
     const res = await fetch('/api/invite/accept', {
       method: 'POST',
@@ -216,8 +232,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.removeItem(PENDING_INVITE_TOKEN_KEY);
     sessionStorage.removeItem(PENDING_INVITE_DISPLAY_NAME_KEY);
 
-    setFirebaseUser({ ...firebaseUser });
-    const profile = await fetchProfile(firebaseUser);
+    // FIX (M-13): set state to the live Firebase User object, not a plain spread.
+    setFirebaseUser(auth.currentUser);
+    const profile = await fetchProfile(currentUser);
     setNiyamUser(profile);
   };
 
