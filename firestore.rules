@@ -156,6 +156,12 @@ service cloud.firestore {
         allow read: if belongsToOrg(orgId);
         allow write: if isFounderOfOrg(orgId);
       }
+
+      // Generated Policies (server-only write via admin SDK; org members can read for cache)
+      match /policies/{policyId} {
+        allow read: if belongsToOrg(orgId);
+        allow write: if false;
+      }
     }
 
     // === Invites (server-managed via Admin SDK; clients can only list their own sent invites) ===
