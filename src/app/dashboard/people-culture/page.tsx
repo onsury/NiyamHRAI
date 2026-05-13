@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { getFounderDNA } from '@/lib/firestore-service';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const POLICIES = [
@@ -24,6 +24,7 @@ export default function PoliciesPage() {
   const [policy, setPolicy] = useState<any>(null);
   const [founderDNA, setFounderDNA] = useState<any>(null);
   const [orgInfo, setOrgInfo] = useState<{ name: string; industry: string } | null>(null);
+  const [cachedPolicies, setCachedPolicies] = useState<Record<string, any>>({});
 
   // Load founder DNA + org metadata on mount so the generator has context
   useEffect(() => {
@@ -35,6 +36,20 @@ export default function PoliciesPage() {
           getFounderDNA(orgId),
           getDoc(doc(db, 'organizations', orgId)),
         ]);
+
+        // CACHE_LOAD_v1 — fetch any previously generated policies for this org
+        try {
+          const policiesSnap = await getDocs(collection(db, 'organizations', orgId, 'policies'));
+          const cacheMap: Record<string, any> = {};
+          policiesSnap.forEach(d => {
+            const docData: any = d.data();
+            if (docData?.data) cacheMap[d.id] = docData.data;
+          });
+          setCachedPolicies(cacheMap);
+          console.log('[policy-cache] loaded', Object.keys(cacheMap).length, 'cached policies');
+        } catch (e) {
+          console.error('[policy-cache] load failed:', e);
+        }
         setFounderDNA(dna);
         if (orgSnap.exists()) {
           const o: any = orgSnap.data();
@@ -54,8 +69,16 @@ export default function PoliciesPage() {
       alert('Loading your founder DNA — please wait a moment and try again.');
       return;
     }
+    // CACHE_HIT_v1 — short-circuit if we already generated this policy
+    if (cachedPolicies[policyType]) {
+      console.log('[policy-cache] client HIT for', policyType);
+      setPolicy(cachedPolicies[policyType]);
+      return;
+    }
     setGenerating(policyType);
     setPolicy(null);
+      // CACHE_STORE_v1 — remember this for instant subsequent clicks
+      setCachedPolicies(prev => ({ ...prev, [policyType]: null }));
     try {
       const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/practices/generate', {

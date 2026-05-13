@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/api-auth';
 import { assertPaidAccess } from '@/lib/subscription-check';
 import { parseBody, dnaPassthroughSchema, sanitizeResponse, PracticesGenerateResponseSchema } from '@/lib/validation';
 import type { TraitScore } from '@/types';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 const PracticesGenerateSchema = z.object({
   policyType: z.string().max(100),
@@ -22,6 +23,51 @@ export async function POST(req: NextRequest) {
 
     // Paid-tier guardrail: blocks Claude API consumption for free / expired users
     const paymentBlock = await assertPaidAccess(uid);
+
+    // ============================================================
+    // POLICY_CACHE_BLOCK_v1 — Server-side cache check
+    // Reads orgId from user doc, looks up cached policy, returns if hit
+    // ============================================================
+    const __adminDb = getFirestore();
+    let __orgId: string | null = null;
+    try {
+      const __userSnap = await __adminDb.collection('users').doc(uid).get();
+      __orgId = __userSnap.exists ? (__userSnap.data()?.organizationId || null) : null;
+      if (!__orgId) __orgId = uid; // fallback: solo founder uses uid as orgId
+    } catch (e) {
+      console.error('[policy-cache] user lookup failed:', e);
+    }
+
+    // We need the policyType from the request body to look up cache.
+    // Parse body early (idempotent — code below re-uses it).
+    let __body: any = {};
+    try {
+      __body = await req.clone().json();
+    } catch (_) {}
+    const __policyType = __body?.policyType;
+
+    if (__orgId && __policyType) {
+      try {
+        const __cacheSnap = await __adminDb
+          .collection('organizations').doc(__orgId)
+          .collection('policies').doc(__policyType)
+          .get();
+        if (__cacheSnap.exists) {
+          const __cached = __cacheSnap.data();
+          if (__cached && __cached.data) {
+            console.log('[policy-cache] HIT for', __orgId, __policyType);
+            return NextResponse.json({ ...__cached.data, __cached: true });
+          }
+        }
+        console.log('[policy-cache] MISS for', __orgId, __policyType);
+      } catch (e) {
+        console.error('[policy-cache] cache lookup failed:', e);
+        // fall through to fresh generation
+      }
+    }
+    // ============================================================
+    // END POLICY_CACHE_BLOCK_v1
+    // ============================================================
     if (paymentBlock) return paymentBlock;
 
     const parsed = await parseBody(req, PracticesGenerateSchema);
@@ -132,6 +178,23 @@ Respond ONLY with valid JSON:
     const parsedJson = tolerantParse(text);
     if (parsedJson) {
       const out = { policyType, ...parsedJson };
+            // POLICY_CACHE_SAVE_v1 — persist for future free reads
+      if (__orgId && __policyType) {
+        try {
+          await __adminDb
+            .collection('organizations').doc(__orgId)
+            .collection('policies').doc(__policyType)
+            .set({
+              policyType: __policyType,
+              data: out,
+              generatedAt: FieldValue.serverTimestamp(),
+              generatedByUid: uid,
+            });
+          console.log('[policy-cache] SAVED', __orgId, __policyType);
+        } catch (e) {
+          console.error('[policy-cache] save failed (returning data anyway):', e);
+        }
+      }
       return NextResponse.json(sanitizeResponse<any>(out, PracticesGenerateResponseSchema, out));
     }
     return NextResponse.json({ policyType, title: policyType, content: text, sections: [] });
