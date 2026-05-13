@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     // Build URL from request origin
     const origin = req.headers.get('origin') || req.nextUrl.origin;
-    const url = `${origin}/login?invite=${token}`;
+    const url = `${origin}/invite/${token}`;
 
     return NextResponse.json({ token, url, expiresAt, orgName });
   } catch (err: any) {
