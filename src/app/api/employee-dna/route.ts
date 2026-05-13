@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api-auth';
+import { assertPaidAccess } from '@/lib/subscription-check';
 import { parseBody, dnaPassthroughSchema, stringArraySchema, sanitizeResponse, EmployeeDNAResponseSchema } from '@/lib/validation';
 
 const EmployeeDNASchema = z.object({
@@ -75,6 +76,10 @@ export async function POST(req: NextRequest) {
     const authResult = await requireAuth(req);
     if (authResult.error) return authResult.error;
     const { uid } = authResult;
+
+    // Paid-tier guardrail: blocks Claude API consumption for free / expired users
+    const paymentBlock = await assertPaidAccess(uid);
+    if (paymentBlock) return paymentBlock;
 
     const parsed = await parseBody(req, EmployeeDNASchema);
     if (parsed.error) return parsed.error;
