@@ -15,8 +15,31 @@ const POLICIES = [
   { id: 'code_of_conduct', label: 'Code of Conduct', icon: '🤝', desc: 'Ethics, behavior, discipline' },
   { id: 'compensation_structure', label: 'Compensation Philosophy', icon: '💰', desc: 'Salary bands, benefits, increments' },
   { id: 'learning_development', label: 'L&D Framework', icon: '📚', desc: 'Training, certifications, budget' },
-  { id: 'diversity_inclusion', label: 'D&I Policy', icon: '🌍', desc: 'Equal opportunity, accessibility' },
+  { id: 'diversity_inclusion', label: 'D&I Policy', icon: '🌐', desc: 'Equal opportunity, accessibility' },
 ];
+
+// Renders policy content; if the text contains 3+ inline " - " separators,
+// converts to a proper bulleted list. Otherwise renders as a paragraph.
+function renderPolicyContent(text: string, baseClasses: string) {
+  if (!text || typeof text !== 'string') return null;
+  const dashCount = (text.match(/\s-\s/g) || []).length;
+  if (dashCount >= 3) {
+    const parts = text.split(/\s-\s/);
+    const intro = parts[0].trim();
+    const items = parts.slice(1).map(s => s.trim()).filter(Boolean);
+    return (
+      <>
+        {intro && <p className={baseClasses + ' whitespace-pre-line'}>{intro}</p>}
+        <ul className="mt-2 ml-5 space-y-1 list-disc">
+          {items.map((item, idx) => (
+            <li key={idx} className={baseClasses}>{item}</li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+  return <p className={baseClasses + ' whitespace-pre-line'}>{text}</p>;
+}
 
 export default function PoliciesPage() {
   const { niyamUser, firebaseUser } = useAuth();
@@ -77,8 +100,6 @@ export default function PoliciesPage() {
     }
     setGenerating(policyType);
     setPolicy(null);
-      // CACHE_STORE_v1 — remember this for instant subsequent clicks
-      setCachedPolicies(prev => ({ ...prev, [policyType]: null }));
     try {
       const idToken = await firebaseUser?.getIdToken();
       const res = await fetch('/api/practices/generate', {
@@ -98,6 +119,8 @@ export default function PoliciesPage() {
       });
       const data = await res.json();
       setPolicy(data);
+      // CACHE_STORE_v1 — remember this for instant subsequent clicks
+      setCachedPolicies(prev => ({ ...prev, [policyType]: data }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -147,7 +170,7 @@ export default function PoliciesPage() {
             onClick={() => setPolicy(null)}
             className="mb-4 px-4 py-2 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all"
           >
-            â† Back to All Policies
+            ← Back to All Policies
           </button>
 
           <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden">
@@ -156,7 +179,7 @@ export default function PoliciesPage() {
               <h2 className="text-xl sm:text-2xl font-black">{policy.title}</h2>
               {policy.version && (
                 <p className="text-white/40 text-xs mt-1">
-                  Version {policy.version} Â· Effective: {policy.effectiveDate || 'Immediate'}
+                  Version {policy.version} · Effective: {policy.effectiveDate || 'Immediate'}
                 </p>
               )}
             </div>
@@ -164,7 +187,7 @@ export default function PoliciesPage() {
             {policy.founderAlignmentNote && (
               <div className="mx-5 sm:mx-8 mt-5 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                 <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">
-                  ðŸ§¬ Founder DNA Alignment
+                  🧬 Founder DNA Alignment
                 </p>
                 <p className="text-xs sm:text-sm text-amber-800">{policy.founderAlignmentNote}</p>
               </div>
@@ -174,15 +197,13 @@ export default function PoliciesPage() {
               {(policy.sections || []).map((section: any, i: number) => (
                 <div key={i}>
                   <h3 className="text-sm sm:text-base font-black text-slate-900 mb-2">
-                    {i + 1}. {section.heading}
+                    {i + 1}. {section.heading?.replace(/^\d+\.\s+/, '')}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
-                    {section.content}
-                  </p>
+                  {renderPolicyContent(section.content, "text-xs sm:text-sm text-slate-600 leading-relaxed")}
                   {section.subSections?.map((sub: any, j: number) => (
                     <div key={j} className="ml-4 mt-3">
                       <h4 className="text-xs sm:text-sm font-bold text-slate-700">{sub.heading}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1">{sub.content}</p>
+                      {renderPolicyContent(sub.content, "text-xs text-slate-500 leading-relaxed mt-1")}
                     </div>
                   ))}
                 </div>
@@ -192,12 +213,12 @@ export default function PoliciesPage() {
             {policy.complianceNotes?.length > 0 && (
               <div className="mx-5 sm:mx-8 mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
                 <p className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">
-                  âš–ï¸ Indian Law Compliance Notes
+                  ⚖️ Indian Law Compliance Notes
                 </p>
                 <ul className="space-y-1.5">
                   {policy.complianceNotes.map((n: string, i: number) => (
                     <li key={i} className="text-xs text-emerald-700 flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">âœ“</span>{n}
+                      <span className="text-emerald-500 mt-0.5">✓</span>{n}
                     </li>
                   ))}
                 </ul>
@@ -205,7 +226,7 @@ export default function PoliciesPage() {
             )}
 
             <div className="px-5 sm:px-8 pb-6 text-xs text-slate-400">
-              Review Cycle: {policy.reviewCycle || 'Annual'} Â· Generated by NiyamAI People &amp; Culture Intelligence
+              Review Cycle: {policy.reviewCycle || 'Annual'} · Generated by NiyamAI People &amp; Culture Intelligence
             </div>
           </div>
         </div>
