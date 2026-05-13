@@ -75,7 +75,7 @@ IMPORTANT: Build upon and improve existing practices. Do not discard what works.
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
+        max_tokens: 16000,
         system: `You are NiyamAI\'s HR Policy Generator for Indian organisations. Generate professional, legally compliant HR policies that align with the founder\'s DNA and build upon existing practices.
 
 Organisation: ${orgName || 'Company'}
@@ -114,13 +114,27 @@ Respond ONLY with valid JSON:
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
 
-    try {
-      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-      const out = { policyType, ...parsed };
+    // Tolerant parse: handles markdown fences, preambles, trailing commas
+    const tolerantParse = (t: string): any | null => {
+      let cleaned = t.replace(/```json|```/g, '').trim();
+      try { return JSON.parse(cleaned); } catch (_) {}
+      const fb = cleaned.indexOf('{');
+      const lb = cleaned.lastIndexOf('}');
+      if (fb >= 0 && lb > fb) {
+        const ex = cleaned.substring(fb, lb + 1);
+        try { return JSON.parse(ex); } catch (_) {}
+        const noTrailing = ex.replace(/,(\s*[}\]])/g, '$1');
+        try { return JSON.parse(noTrailing); } catch (_) {}
+      }
+      return null;
+    };
+
+    const parsedJson = tolerantParse(text);
+    if (parsedJson) {
+      const out = { policyType, ...parsedJson };
       return NextResponse.json(sanitizeResponse<any>(out, PracticesGenerateResponseSchema, out));
-    } catch {
-      return NextResponse.json({ policyType, title: policyType, content: text, sections: [] });
     }
+    return NextResponse.json({ policyType, title: policyType, content: text, sections: [] });
   } catch (err: any) {
     console.error('Policy generation error:', err);
     return NextResponse.json({ error: 'Generation failed' }, { status: 500 });

@@ -1,6 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { getFounderDNA } from '@/lib/firestore-service';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const POLICIES = [
   { id: 'employee_handbook', label: 'Employee Handbook', icon: '📖', desc: 'Complete handbook covering all policies' },
@@ -19,8 +22,38 @@ export default function PoliciesPage() {
   const { niyamUser, firebaseUser } = useAuth();
   const [generating, setGenerating] = useState('');
   const [policy, setPolicy] = useState<any>(null);
+  const [founderDNA, setFounderDNA] = useState<any>(null);
+  const [orgInfo, setOrgInfo] = useState<{ name: string; industry: string } | null>(null);
+
+  // Load founder DNA + org metadata on mount so the generator has context
+  useEffect(() => {
+    if (!niyamUser) return;
+    const orgId = niyamUser.organizationId || niyamUser.uid;
+    (async () => {
+      try {
+        const [dna, orgSnap] = await Promise.all([
+          getFounderDNA(orgId),
+          getDoc(doc(db, 'organizations', orgId)),
+        ]);
+        setFounderDNA(dna);
+        if (orgSnap.exists()) {
+          const o: any = orgSnap.data();
+          setOrgInfo({
+            name: o.name || 'Organisation',
+            industry: o.industry || 'Technology',
+          });
+        }
+      } catch (err) {
+        console.error('[policy-gen] failed to load DNA/org:', err);
+      }
+    })();
+  }, [niyamUser]);
 
   const generate = async (policyType: string) => {
+    if (!founderDNA) {
+      alert('Loading your founder DNA — please wait a moment and try again.');
+      return;
+    }
     setGenerating(policyType);
     setPolicy(null);
     try {
@@ -33,8 +66,10 @@ export default function PoliciesPage() {
         },
         body: JSON.stringify({
           policyType,
-          orgName: '',
-          industry: '',
+          founderDNA,
+          existingPractices: null,
+          orgName: orgInfo?.name || 'Organisation',
+          industry: orgInfo?.industry || 'Technology',
           orgSize: '10-50',
         }),
       });
