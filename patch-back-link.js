@@ -1,4 +1,23 @@
-'use client';
+// patch-back-link.js
+// Adds "<- Back to Dashboard" link to every dashboard sub-page.
+// Targets: src/app/dashboard/layout.tsx
+// Backup:  src/app/dashboard/layout.tsx.before-back-link
+//
+// Run from project root (D:\projects\NiyamHRAI):
+//   node patch-back-link.js
+
+const fs = require('fs');
+const path = require('path');
+
+const FILE = path.join('src', 'app', 'dashboard', 'layout.tsx');
+const BACKUP = FILE + '.before-back-link';
+
+if (!fs.existsSync(FILE)) {
+  console.error('X Cannot find ' + FILE + ' - run this from the project root.');
+  process.exit(1);
+}
+
+const NEW_CONTENT = `'use client';
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -48,3 +67,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+`;
+
+fs.copyFileSync(FILE, BACKUP);
+fs.writeFileSync(FILE, NEW_CONTENT, 'utf8');
+console.log('OK  Patched ' + FILE);
+console.log('OK  Backup at ' + BACKUP);
+console.log('');
+console.log('Next: git add . ; git commit -m "feat: back-to-dashboard link on sub-pages" ; git push');
