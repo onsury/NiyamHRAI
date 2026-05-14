@@ -142,7 +142,7 @@ export default function HoningLabPage() {
           <textarea value={userResponse} onChange={e => setUserResponse(e.target.value)} className="w-full h-28 sm:h-36 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-300 focus:border-amber-500 transition-all outline-none resize-none" placeholder="Or describe your approach in your own words..." />
 
           <div className="flex gap-3 mt-4">
-            <button onClick={reset} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">Ã¢â€ Â Back</button>
+            <button onClick={reset} className="px-6 py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-all">← Back</button>
             <button onClick={submitResponse} disabled={!userResponse.trim() || loading} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-2">
               {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Evaluating...</> : 'Submit Response'}
             </button>
@@ -190,7 +190,7 @@ export default function HoningLabPage() {
                   <p className="text-xs sm:text-sm font-bold text-slate-700">{h.traitTargeted}</p>
                   <p className="text-[10px] sm:text-xs text-slate-400">{h.timestamp?.toDate?.()?.toLocaleDateString?.() || 'Recent'}</p>
                 </div>
-                <span className={`text-lg font-black ${(h.alignmentScore || 0) >= 70 ? 'text-emerald-500' : (h.alignmentScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{h.alignmentScore || 'Ã¢â‚¬â€'}%</span>
+                <span className={`text-lg font-black ${(h.alignmentScore || 0) >= 70 ? 'text-emerald-500' : (h.alignmentScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{h.alignmentScore || '—'}%</span>
               </div>
             ))}
           </div>
