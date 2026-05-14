@@ -69,3 +69,6 @@ firestore.rules.bak.*
 
 # patch script backups
 *.before-*
+
+# patch script backups
+*.before-*
