@@ -86,7 +86,7 @@ export default function PeopleCulturePage() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">People &amp; Culture Hub</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">AI-Generated People &amp; Culture Policies</h1>
         <p className="text-slate-500 text-sm sm:text-base mt-1">Share your existing HR practices. NiyamAI will benchmark them, identify gaps, and align them with the founder&apos;s DNA.</p>
       </div>
 
