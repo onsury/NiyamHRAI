@@ -3,6 +3,17 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+};
+
+type NavGroup = {
+  parent?: NavItem;
+  items?: NavItem[];
+};
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -13,41 +24,90 @@ export default function Sidebar() {
   const isFounderOrHR = role === 'FOUNDER' || role === 'HR_ADMIN';
   const isManager = role === 'MANAGER';
 
-  const employeeLinks = [
-    { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
-    { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
-    { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
-    { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
-    { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
-    { href: '/dashboard/performance', label: 'My Timeline', icon: '📈' },
+  // Founder / HR Admin nav -- Neural Pulse with sub-items, then People Ops, then identity/account
+  const founderGroups: NavGroup[] = [
+    {
+      parent: { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
+      items: [
+        { href: '/dashboard/team', label: 'Team Members', icon: '👥' },
+        { href: '/dashboard/performance', label: 'Performance Timeline', icon: '📈' },
+        { href: '/dashboard/hr', label: 'Org Neural Insights', icon: '📊' },
+      ],
+    },
+    {
+      items: [
+        { href: '/dashboard/people-culture', label: 'People & Culture', icon: '🏛️' },
+        { href: '/dashboard/people-culture/policies', label: 'Policy Generator', icon: '📋' },
+      ],
+    },
+    {
+      items: [
+        { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
+        { href: '/dashboard/billing', label: 'Billing', icon: '💳' },
+      ],
+    },
   ];
 
-  const managerLinks = [
-    { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
-    { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
-    { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
-    { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
-    { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
-    { href: '/dashboard/manager/team', label: 'My Team', icon: '👥' },
-    { href: '/dashboard/performance', label: 'Timeline', icon: '📈' },
+  // Manager nav -- Neural Pulse with team-and-rhythm sub-items, then identity
+  const managerGroups: NavGroup[] = [
+    {
+      parent: { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
+      items: [
+        { href: '/dashboard/manager/team', label: 'My Team', icon: '👥' },
+        { href: '/dashboard/performance', label: 'Timeline', icon: '📈' },
+        { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
+        { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
+      ],
+    },
+    {
+      items: [
+        { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
+        { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
+      ],
+    },
   ];
 
-  const founderLinks = [
-    { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
-    { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
-    { href: '/dashboard/hr', label: 'Org Neural Insights', icon: '📊' },
-    { href: '/dashboard/team', label: 'Team Members', icon: '👥' },
-    { href: '/dashboard/performance', label: 'Performance Timeline', icon: '📈' },
-    { href: '/dashboard/people-culture', label: 'People & Culture', icon: '🏛️' },
-    { href: '/dashboard/people-culture/policies', label: 'Policy Generator', icon: '📋' },
-    { href: '/dashboard/billing', label: 'Billing', icon: '💳' },
+  // Employee nav -- Neural Pulse with personal-workflow sub-items, then identity
+  const employeeGroups: NavGroup[] = [
+    {
+      parent: { href: '/dashboard', label: 'Neural Pulse', icon: '🏠' },
+      items: [
+        { href: '/dashboard/checkin', label: 'Weekly Rhythm', icon: '📅' },
+        { href: '/dashboard/honing', label: 'Honing Lab', icon: '⚡' },
+        { href: '/dashboard/performance', label: 'My Timeline', icon: '📈' },
+      ],
+    },
+    {
+      items: [
+        { href: '/dashboard/founder-compass', label: 'Founder Compass', icon: '🧭' },
+        { href: '/dashboard/dna', label: 'My Neural DNA', icon: '🧬' },
+      ],
+    },
   ];
 
-  const links = isFounderOrHR ? founderLinks : isManager ? managerLinks : employeeLinks;
+  const groups = isFounderOrHR ? founderGroups : isManager ? managerGroups : employeeGroups;
 
   const navigate = (href: string) => {
     router.push(href);
     setMobileOpen(false);
+  };
+
+  const renderItem = (item: NavItem, indented = false) => {
+    const active = pathname === item.href;
+    return (
+      <button
+        key={item.href}
+        onClick={() => navigate(item.href)}
+        className={`w-full flex items-center gap-3 ${indented ? 'pl-9 sm:pl-10 pr-3 sm:pr-4' : 'px-3 sm:px-4'} py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+          active
+            ? 'bg-slate-900 text-white shadow-lg'
+            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+        }`}
+      >
+        <span className="text-base sm:text-lg">{item.icon}</span>
+        {item.label}
+      </button>
+    );
   };
 
   const sidebarContent = (
@@ -67,16 +127,13 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 p-3 sm:p-4 space-y-1 overflow-y-auto">
-        {links.map(link => {
-          const active = pathname === link.href;
-          return (
-            <button key={link.href} onClick={() => navigate(link.href)} className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${active ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
-              <span className="text-base sm:text-lg">{link.icon}</span>
-              {link.label}
-            </button>
-          );
-        })}
+      <nav className="flex-1 p-3 sm:p-4 overflow-y-auto">
+        {groups.map((group, idx) => (
+          <div key={idx} className={`space-y-1 ${idx > 0 ? 'mt-4 pt-4 border-t border-slate-100' : ''}`}>
+            {group.parent && renderItem(group.parent)}
+            {group.items?.map((item) => renderItem(item, !!group.parent))}
+          </div>
+        ))}
       </nav>
 
       <div className="p-3 sm:p-4 border-t border-slate-100">
