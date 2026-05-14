@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { randomBytes } from 'crypto';
+import { sendInviteEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,7 +62,27 @@ export async function POST(req: NextRequest) {
     const origin = req.headers.get('origin') || req.nextUrl.origin;
     const url = `${origin}/invite/${token}`;
 
-    return NextResponse.json({ token, url, expiresAt, orgName });
+    // Send invite email (non-blocking - log failure but always return success)
+    const emailResult = await sendInviteEmail({
+      to: String(email).toLowerCase().trim(),
+      orgName,
+      invitedByName: user.displayName || user.email || 'Your team',
+      role,
+      level,
+      inviteUrl: url,
+    });
+    if (!emailResult.ok) {
+      console.warn('Invite email send failed:', emailResult.error);
+    }
+
+    return NextResponse.json({
+      token,
+      url,
+      expiresAt,
+      orgName,
+      emailSent: emailResult.ok,
+      emailError: emailResult.ok ? undefined : emailResult.error,
+    });
   } catch (err: any) {
     console.error('Invite create error:', err);
     return NextResponse.json({ error: 'SERVER_ERROR', detail: err.message }, { status: 500 });

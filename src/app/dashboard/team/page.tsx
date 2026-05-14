@@ -44,6 +44,8 @@ export default function TeamPage() {
   const [inviteManagerId, setInviteManagerId] = useState('');
   const [inviting, setInviting] = useState(false);
   const [lastInviteUrl, setLastInviteUrl] = useState('');
+  const [lastInviteEmailSent, setLastInviteEmailSent] = useState(false);
+  const [lastInviteEmail, setLastInviteEmail] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [invitesListError, setInvitesListError] = useState<string | null>(null);
 
@@ -136,6 +138,8 @@ export default function TeamPage() {
       const data = await res.json();
       if (!res.ok) { setInviteError(data.error || 'Failed'); return; }
       setLastInviteUrl(data.url);
+      setLastInviteEmailSent(data.emailSent === true);
+      setLastInviteEmail(inviteEmail.trim());
       setInviteEmail('');
     } catch (err: any) {
       setInviteError(err.message);
@@ -230,7 +234,7 @@ export default function TeamPage() {
 
         {lastInviteUrl && (
           <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">Invite link ready</p>
+            <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2">{lastInviteEmailSent ? `Email sent to ${lastInviteEmail}` : "Invite link ready (email not sent -- share manually)"}</p>
             <div className="flex gap-2 items-center">
               <input readOnly value={lastInviteUrl}
                 className="flex-1 p-2 bg-white border border-emerald-200 rounded text-xs font-mono" />

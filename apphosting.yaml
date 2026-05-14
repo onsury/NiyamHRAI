@@ -36,3 +36,11 @@ env:
       - RUNTIME
   - variable: RAZORPAY_WEBHOOK_SECRET
     secret: RAZORPAY_WEBHOOK_SECRET
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+  - variable: EMAIL_FROM
+    value: NiyamHR <onboarding@resend.dev>
+    availability:
+      - RUNTIME
