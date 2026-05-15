@@ -41,6 +41,6 @@ env:
     availability:
       - RUNTIME
   - variable: EMAIL_FROM
-    value: NiyamHR <onboarding@resend.dev>
+    value: NiyamHR <support@niyamhr.in>
     availability:
       - RUNTIME
