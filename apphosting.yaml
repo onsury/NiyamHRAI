@@ -30,17 +30,20 @@ env:
   - variable: RAZORPAY_KEY_ID
     secret: RAZORPAY_KEY_ID
     availability:
+      - BUILD
       - RUNTIME
 
   - variable: RAZORPAY_KEY_SECRET
     secret: RAZORPAY_KEY_SECRET
     availability:
+      - BUILD
       - RUNTIME
 
   
   - variable: RAZORPAY_WEBHOOK_SECRET
     secret: RAZORPAY_WEBHOOK_SECRET
     availability:
+      - BUILD
       - RUNTIME
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY
