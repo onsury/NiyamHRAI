@@ -246,27 +246,19 @@ export default function RefundCancellationPage() {
           </Section>
 
           <Section title="10. Contact">
-            <p>For any questions regarding refunds, cancellations, or data handling:</p>
-            <div className="mt-4 space-y-2 pl-4 border-l-2 border-amber-500/40">
-              <p>
-                <strong className="text-white">Email:</strong>{' '}
-                <a
-                  href="mailto:support@niyamhr.in"
-                  className="text-amber-400 hover:text-amber-300 underline underline-offset-2"
-                >
-                  support@niyamhr.in
-                </a>
-              </p>
-              <p>
-                <strong className="text-white">Address:</strong> SmartDNA Business Intelligence
-                &amp; Advisory, Flat-G Balaji Shree Apart, 40-41 6th Main Road, RA, Chennai,
-                Tamil Nadu 600028, India
-              </p>
-              <p>
-                <strong className="text-white">Business Hours:</strong> Monday–Friday, 10:00 AM
-                – 6:00 PM IST
-              </p>
+            <p>For any questions regarding refunds, cancellations, or data handling, please email us:</p>
+            <div className="mt-6 pl-4 border-l-2 border-amber-500/40">
+              <a
+                href="mailto:support@niyamhr.in"
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 text-lg font-medium"
+              >
+                support@niyamhr.in
+              </a>
             </div>
+            <p className="mt-4 text-stone-500 text-sm">
+              We aim to respond to all inquiries within 2 business days. Our registered business
+              address and full contact details are available on request to verified customers.
+            </p>
           </Section>
         </div>
 
