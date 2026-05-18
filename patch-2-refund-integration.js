@@ -1,4 +1,128 @@
-"use client";
+// patch-2-refund-integration.js
+// Three changes:
+//   1. Fix company name on refund-cancellation page (SmartDNA -> Madraz Buzz Media)
+//   2. Update /terms page: add refund policy cross-reference + bottom footer with policy links
+//   3. Rewrite /dashboard/billing page: add Cancel Subscription button + modal + flow
+//
+// Usage:
+//   1. Save to D:\projects\NiyamHRAI\
+//   2. node patch-2-refund-integration.js
+//   3. git add -A && git commit -m "feat: integrate refund-cancellation policy + cancel button"
+//   4. git push
+
+const fs = require('fs');
+const path = require('path');
+
+let summary = [];
+
+// ====================================================================
+// CHANGE 1: Fix company name on refund-cancellation page
+// ====================================================================
+{
+  const filePath = path.join('src', 'app', 'refund-cancellation', 'page.tsx');
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ Refund page not found:', filePath);
+    process.exit(1);
+  }
+  let content = fs.readFileSync(filePath, 'utf8');
+  const oldStr = 'operated by SmartDNA Business Intelligence & Advisory';
+  const newStr = 'operated by Madraz Buzz Media';
+
+  if (content.includes(oldStr)) {
+    content = content.replace(oldStr, newStr);
+    fs.writeFileSync(filePath, content);
+    summary.push('✓ Refund page: company name fixed (SmartDNA → Madraz Buzz Media)');
+  } else if (content.includes(newStr)) {
+    summary.push('• Refund page: company name already correct');
+  } else {
+    summary.push('⚠ Refund page: could not find operator phrase to update');
+  }
+}
+
+// ====================================================================
+// CHANGE 2: Update /terms page
+// ====================================================================
+{
+  const filePath = path.join('src', 'app', 'terms', 'page.tsx');
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ Terms page not found:', filePath);
+    process.exit(1);
+  }
+  let content = fs.readFileSync(filePath, 'utf8');
+  let termsChangeCount = 0;
+
+  // 2a. Update section 6 (Payments and billing) to reference refund policy
+  const oldSection6 = `            <h2 className="text-2xl font-black text-white mt-10 mb-4">6. Payments and billing</h2>
+            <p>
+              During Early Access, NiyamHR may be offered free or at introductory pricing. Once formal paid plans are activated, you will be notified in advance of any billing changes. Pricing and billing terms will be governed by a separate subscription agreement at that time.
+            </p>`;
+
+  const newSection6 = `            <h2 className="text-2xl font-black text-white mt-10 mb-4">6. Payments and billing</h2>
+            <p>
+              Paid plans (Starter and Growth) are billed monthly or annually as selected by the customer. Current pricing is displayed on our pricing page and within your dashboard at the time of purchase. All payments are processed through Razorpay.
+            </p>
+            <p>
+              Refund and cancellation of subscriptions are governed by our <Link href="/refund-cancellation" className="text-amber-500 hover:text-amber-400">Refund &amp; Cancellation Policy</Link>, which forms part of these Terms by reference.
+            </p>`;
+
+  if (content.includes(oldSection6)) {
+    content = content.replace(oldSection6, newSection6);
+    summary.push('✓ Terms page: Section 6 updated with refund policy reference');
+    termsChangeCount++;
+  } else {
+    summary.push('⚠ Terms page: Section 6 not found in expected format - skipped');
+  }
+
+  // 2b. Replace bottom attribution with a proper footer
+  const oldFooter = `            <p className="text-sm text-white/40 mt-10 pt-6 border-t border-white/10">
+              Madraz Buzz Media · Chennai, Tamil Nadu, India
+            </p>`;
+
+  const newFooter = `            <div className="mt-10 pt-6 border-t border-white/10">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/50">
+                <Link href="/" className="hover:text-amber-500 transition-colors">Home</Link>
+                <Link href="/privacy" className="hover:text-amber-500 transition-colors">Privacy Policy</Link>
+                <Link href="/refund-cancellation" className="hover:text-amber-500 transition-colors">Refund &amp; Cancellation</Link>
+                <Link href="/security" className="hover:text-amber-500 transition-colors">Security</Link>
+                <Link href="/contact" className="hover:text-amber-500 transition-colors">Contact</Link>
+              </div>
+              <p className="text-xs text-white/30 mt-4">
+                Madraz Buzz Media
+              </p>
+            </div>`;
+
+  if (content.includes(oldFooter)) {
+    content = content.replace(oldFooter, newFooter);
+    summary.push('✓ Terms page: Footer updated with policy links');
+    termsChangeCount++;
+  } else {
+    // Try a fallback match in case the original encoded the centered dot differently
+    const oldFooterAlt = /<p className="text-sm text-white\/40 mt-10 pt-6 border-t border-white\/10">\s*Madraz Buzz Media[^<]*<\/p>/;
+    if (oldFooterAlt.test(content)) {
+      content = content.replace(oldFooterAlt, newFooter);
+      summary.push('✓ Terms page: Footer updated (fallback regex)');
+      termsChangeCount++;
+    } else {
+      summary.push('⚠ Terms page: Footer block not found - skipped');
+    }
+  }
+
+  if (termsChangeCount > 0) {
+    fs.writeFileSync(filePath, content);
+  }
+}
+
+// ====================================================================
+// CHANGE 3: Rewrite /dashboard/billing/page.tsx with Cancel flow
+// ====================================================================
+{
+  const filePath = path.join('src', 'app', 'dashboard', 'billing', 'page.tsx');
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ Billing page not found:', filePath);
+    process.exit(1);
+  }
+
+  const newBillingContent = `"use client";
 
 /**
  * NiyamHR billing page - Razorpay Checkout flow + Cancel Subscription.
@@ -624,3 +748,42 @@ export default function BillingPage() {
     </main>
   );
 }
+`;
+
+  fs.writeFileSync(filePath, newBillingContent);
+  summary.push('✓ Billing page: rewritten with Cancel Subscription button + modal + flow');
+  summary.push('  - Added Cancel Subscription section (visible when active)');
+  summary.push('  - Added confirmation modal');
+  summary.push('  - Added handleCancelSubscription function calling POST /api/subscription/cancel');
+  summary.push('  - Updated status banner to handle cancelled state');
+  summary.push('  - Added cross-references to /refund-cancellation in checkout disclaimer');
+}
+
+// ====================================================================
+// CLEANUP: Remove old patch scripts from working dir if still present
+// ====================================================================
+['patch-refund-cancellation.js', 'patch-fix-build-availability.js', 'patch-remove-address-from-refund.js'].forEach((f) => {
+  if (fs.existsSync(f)) {
+    fs.unlinkSync(f);
+    summary.push('✓ Cleaned up: removed ' + f + ' from working directory');
+  }
+});
+
+// ====================================================================
+// DONE
+// ====================================================================
+console.log('');
+console.log('=== Patch 2 Summary ===');
+summary.forEach((line) => console.log('  ' + line));
+console.log('');
+console.log('NEXT STEPS:');
+console.log('  1. git add -A');
+console.log('  2. git commit -m "feat: integrate refund-cancellation policy + cancel subscription button"');
+console.log('  3. git push                    (auto-deploys via Firebase App Hosting)');
+console.log('  4. Watch deploy at:');
+console.log('     https://console.firebase.google.com/project/studio-731784467-aba01/apphosting');
+console.log('  5. Once green, verify:');
+console.log('     - https://niyamhr.in/terms              (footer with refund link)');
+console.log('     - https://niyamhr.in/refund-cancellation (company name = Madraz Buzz Media)');
+console.log('     - https://niyamhr.in/dashboard/billing   (Cancel button when active)');
+console.log('  6. Clean up: Remove-Item patch-2-refund-integration.js');

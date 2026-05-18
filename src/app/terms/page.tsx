@@ -70,7 +70,10 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">6. Payments and billing</h2>
             <p>
-              During Early Access, NiyamHR may be offered free or at introductory pricing. Once formal paid plans are activated, you will be notified in advance of any billing changes. Pricing and billing terms will be governed by a separate subscription agreement at that time.
+              Paid plans (Starter and Growth) are billed monthly or annually as selected by the customer. Current pricing is displayed on our pricing page and within your dashboard at the time of purchase. All payments are processed through Razorpay.
+            </p>
+            <p>
+              Refund and cancellation of subscriptions are governed by our <Link href="/refund-cancellation" className="text-amber-500 hover:text-amber-400">Refund &amp; Cancellation Policy</Link>, which forms part of these Terms by reference.
             </p>
 
             <h2 className="text-2xl font-black text-white mt-10 mb-4">7. Termination</h2>
@@ -108,9 +111,18 @@ export default function TermsPage() {
               Questions about these Terms? Contact us at <a href="mailto:support@niyamhr.in" className="text-amber-500 hover:text-amber-400">support@niyamhr.in</a>.
             </p>
 
-            <p className="text-sm text-white/40 mt-10 pt-6 border-t border-white/10">
-              Madraz Buzz Media · Chennai, Tamil Nadu, India
-            </p>
+            <div className="mt-10 pt-6 border-t border-white/10">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/50">
+                <Link href="/" className="hover:text-amber-500 transition-colors">Home</Link>
+                <Link href="/privacy" className="hover:text-amber-500 transition-colors">Privacy Policy</Link>
+                <Link href="/refund-cancellation" className="hover:text-amber-500 transition-colors">Refund &amp; Cancellation</Link>
+                <Link href="/security" className="hover:text-amber-500 transition-colors">Security</Link>
+                <Link href="/contact" className="hover:text-amber-500 transition-colors">Contact</Link>
+              </div>
+              <p className="text-xs text-white/30 mt-4">
+                Madraz Buzz Media
+              </p>
+            </div>
           </div>
         </div>
       </section>
